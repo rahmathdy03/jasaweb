@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preparing Surprise...</title>
+  <link rel="stylesheet" href="css/loading.css" />
+</head>
+<body>
+  <div class="code-rain" id="codeRain" aria-hidden="true"></div>
+  <div class="pink-sky" id="pinkSky" aria-hidden="true"></div>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <main class="loading-page" id="loadingPage">
+    <section class="terminal-card" id="terminalCard">
+      <div class="terminal-header">
+        <span></span><span></span><span></span>
+        <p>academic-surprise.exe</p>
+      </div>
+
+      <div class="terminal-body">
+        <h1>Academic Result System</h1>
+        <p class="hint">Secure romantic connection initialized...</p>
+
+        <div class="progress-area">
+          <div class="progress-info">
+            <span>Progress</span>
+            <strong id="progressNumber">0%</strong>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <ul class="loading-steps" id="loadingSteps"></ul>
+      </div>
+    </section>
+
+    <section class="truth-screen" id="truthScreen">
+      <p class="typing-line" id="truthTyping"></p>
+    </section>
+  </main>
+
+  <script src="js/loading.js"></script>
+</body>
+</html>

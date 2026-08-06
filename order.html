@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Isi Data Kado - KadoDigital</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/form.css" />
+</head>
+<body class="bg-form">
+
+  <!-- Navbar Simple (Tanpa Menu) -->
+  <nav class="navbar">
+    <div class="container nav-container" style="justify-content: center;">
+      <a href="index.html" class="logo">Kado<span>Digital</span></a>
+    </div>
+  </nav>
+
+  <!-- Form Section -->
+  <main class="order-section">
+    <div class="container form-container">
+      
+      <div class="form-header">
+        <h2>Lengkapi Kado Spesialmu ✨</h2>
+        <p>Isi data di bawah ini untuk template <strong id="templateNameDisplay" style="color: var(--primary-hover);">Semester Celebration</strong></p>
+      </div>
+
+    <form id="orderForm" class="kado-form">
+        
+        <!-- BAGIAN STATIS (UMUM): Selalu muncul untuk semua template -->
+        <div class="form-card">
+          <div class="step-badge">Langkah 1</div>
+          <h3>Informasi Dasar</h3>
+          
+          <div class="input-group">
+            <label for="orderId">URL Kado / Link Unik <span>*</span></label>
+            <div class="url-input-wrapper">
+              <span class="url-prefix">kadodigital.com/</span>
+              <input type="text" id="orderId" placeholder="contoh: angga-dinda" required pattern="[a-z0-9-]+" title="Hanya huruf kecil, angka, dan strip (-)">
+            </div>
+            <small>Link ini yang akan kamu berikan ke si dia.</small>
+          </div>
+
+          <div class="input-row">
+            <div class="input-group">
+              <label for="namaPengirim">Nama Kamu <span>*</span></label>
+              <input type="text" id="namaPengirim" placeholder="Misal: Angga" required>
+            </div>
+            <div class="input-group">
+              <label for="namaPenerima">Nama Penerima/Pasangan <span>*</span></label>
+              <input type="text" id="namaPenerima" placeholder="Misal: Dinda" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- WADAH DINAMIS: Langkah 2 & 3 akan disuntikkan oleh JavaScript ke dalam kotak ini -->
+        <div id="wadahFormDinamis"></div>
+
+        <!-- Tombol Submit -->
+        <div class="form-actions">
+          <button type="submit" class="btn-primary btn-submit" id="btnSubmit">
+            Simpan & Lanjut Pembayaran 💌
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- Script untuk baca nama template dari URL -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const templateName = urlParams.get('template');
+    if(templateName) {
+      document.getElementById('templateNameDisplay').innerText = templateName.replace('-', ' ').toUpperCase();
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/order.js"></script>
+</body>
+</html>

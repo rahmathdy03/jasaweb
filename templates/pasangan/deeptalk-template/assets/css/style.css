@@ -1,0 +1,503 @@
+:root {
+  --color-text: #f8fafc;
+  --color-accent: #fbbf24; /* Emas lembut */
+  --glass-bg: rgba(15, 23, 42, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--color-text);
+  background: radial-gradient(circle at bottom, #1e1b4b, #020617);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-serif {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 24px;
+}
+
+/* --- SYSTEM SCREEN --- */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+  padding: 20px;
+}
+.screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+/* --- GLASSMORPHISM PANEL --- */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 40px 30px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+.glass-panel-dark {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+/* --- CARD FLIP (Game) --- */
+.card-container {
+  width: 320px;
+  height: 400px;
+  perspective: 1000px;
+  margin: 20px auto;
+  cursor: pointer;
+}
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+.card.is-flipped {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+}
+.card-face.back {
+  transform: rotateY(180deg);
+}
+.question-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* --- BUTTONS --- */
+button {
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #000;
+  border: none;
+  padding: 14px 32px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 25px rgba(245, 158, 11, 0.4);
+}
+.btn-outline {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 10px 24px;
+}
+.w-100 { width: 100%; }
+.mt-2 { margin-top: 20px; }
+
+/* --- FORM & INPUT --- */
+.input-group { margin-bottom: 15px; text-align: left; }
+.input-group label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; display: block;}
+textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: white;
+  padding: 12px;
+  resize: none;
+  font-family: 'Poppins', sans-serif;
+  height: 80px;
+}
+textarea:focus { outline: none; border-color: var(--color-accent); }
+
+/* --- CAMERA & RESULT --- */
+video, .result-img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* --- OTHERS --- */
+.text-center { text-align: center; }
+.clock { position: fixed; bottom: 20px; right: 20px; font-family: monospace; opacity: 0.5; }
+.action-message { color: var(--color-accent); font-size: 0.9rem; min-height: 24px; margin-top: 10px;}
+
+/* ==========================================================
+   EFEK ANIMASI ROMANTIS (TAMBAHAN)
+   ========================================================== */
+
+/* 1. Cinematic Fade-In untuk Teks Utama */
+.title-serif {
+  animation: fadeInUp 1.5s ease-out forwards;
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 2. Efek Detak Jantung (Pulse Glow) untuk Tombol */
+.btn-primary {
+  animation: pulseGlow 2s infinite;
+}
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+
+/* 3. Efek Kunang-Kunang / Bintang Melayang */
+.particles {
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%;
+  pointer-events: none; /* Agar tidak menghalangi tombol saat diklik */
+  z-index: 0; /* Tetap di belakang layar kaca */
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+  animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.4; }
+  100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}
+
+/* Memastikan seluruh layar ada di depan efek partikel tanpa merusak kartu */
+.screen {
+  z-index: 10;
+}
+
+/* ==========================================================
+   MICRO-INTERACTIONS: MENGETIK & SENTUHAN
+   ========================================================== */
+
+/* 1. Efek Sentuhan Hati / Bintang saat di-klik */
+.click-particle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 24px;
+  transform: translate(-50%, -50%);
+  animation: floatHeart 1s ease-out forwards;
+  z-index: 9999; /* Berada di lapisan paling depan */
+}
+@keyframes floatHeart {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+  100% { transform: translate(-50%, -100px) scale(1.5); opacity: 0; }
+}
+
+/* 2. Efek Kursor Berkedip (Typewriter) */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 0.7s infinite;
+  color: #fbbf24; /* Warna emas */
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ==========================================================
+   POP-UP MODAL ROMANTIS
+   ========================================================== */
+#actionModal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* Selalu di atas segalanya */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+#actionModal.show-modal {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #1e1b4b, #312e81);
+  padding: 30px;
+  border-radius: 24px;
+  text-align: center;
+  color: white;
+  width: 85%;
+  max-width: 350px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateY(30px) scale(0.9);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#actionModal.show-modal .modal-content {
+  transform: translateY(0) scale(1);
+}
+
+/* ==========================================================
+   PREMIUM HERO SECTION (RAPUNZEL GOLDEN HOUR THEME)
+   ========================================================== */
+
+/* Vignette Effect (Fokus ke tengah) */
+.vignette-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle, transparent 40%, rgba(15, 5, 25, 0.8) 120%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Tombol Musik Pojok Kanan */
+.audio-toggle {
+  position: absolute;
+  top: 25px; right: 25px;
+  background: rgba(34, 22, 34, 0.5);
+  border: 1px solid rgba(255, 214, 120, 0.3);
+  backdrop-filter: blur(10px);
+  color: #ffd678;
+  width: 45px; height: 45px;
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.3s ease;
+}
+.audio-toggle:hover {
+  background: rgba(255, 214, 120, 0.2);
+  transform: scale(1.1);
+}
+
+/* Kontainer Utama & Animasi Masuk */
+.premium-hero-container {
+  position: relative;
+  z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100vh;
+  padding: 20px;
+  animation: slowFadeIn 1.5s ease-out forwards;
+}
+
+@keyframes slowFadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Kartu Glassmorphism Premium */
+.premium-glass-card {
+  background: rgba(34, 22, 34, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 214, 120, 0.25);
+  border-radius: 28px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 2px 20px rgba(255, 214, 120, 0.1);
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Tipografi Elegan */
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  color: #ffd678; /* Emas Hangat */
+  line-height: 1.2;
+  margin-bottom: 15px;
+  font-style: italic;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(255, 214, 120, 0.3);
+}
+
+.hero-subtitle {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  font-weight: 300;
+  margin-bottom: 30px;
+}
+
+/* Identitas Pasangan */
+.couple-identity {
+  border-top: 1px solid rgba(255, 214, 120, 0.2);
+  border-bottom: 1px solid rgba(255, 214, 120, 0.2);
+  padding: 15px 0;
+  margin-bottom: 30px;
+}
+.couple-identity .names {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.couple-identity .heart-icon { font-size: 1rem; margin: 0 10px; color: #ffd678; }
+.couple-identity .special-date {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-top: 5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.couple-identity .duration {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  color: #ffd678;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* Tombol Premium dengan Ripple */
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #d4af37, #f3e5ab, #d4af37);
+  background-size: 200% 200%;
+  color: #2a1625;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
+}
+.btn-premium:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+  animation: goldShimmer 3s infinite linear;
+}
+@keyframes goldShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Teks Footer Viral */
+.hero-footer-text {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 30px;
+  max-width: 300px;
+  text-align: center;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+
+/* Layar Transisi Bab 1 */
+#screen-transition {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #0f0519; /* Ungu sangat gelap */
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+#screen-transition.active { opacity: 1; }
+.transition-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  color: #ffd678;
+  font-style: italic;
+  letter-spacing: 2px;
+  animation: focusIn 2s forwards;
+}
+@keyframes focusIn {
+  0% { filter: blur(10px); opacity: 0; transform: scale(0.9); }
+  100% { filter: blur(0); opacity: 1; transform: scale(1); }
+}
+
+/* Efek Bunga Jatuh & Debu Cahaya */
+.hero-particle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 50%;
+}
+.petal {
+  background: rgba(255, 214, 120, 0.4);
+  filter: blur(1px);
+  border-radius: 50% 0 50% 0; /* Bentuk kelopak */
+  animation: fallDown linear infinite;
+}
+.dust {
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  animation: floatDust linear infinite;
+}
+@keyframes fallDown {
+  0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(110vh) rotate(360deg) translateX(50px); opacity: 0; }
+}
+@keyframes floatDust {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+}

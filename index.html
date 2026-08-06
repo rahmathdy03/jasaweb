@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KadoDigital - Jasa Website Kejutan & Portofolio</title>
+  
+  <!-- Font Modern: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo">Kado<span>Digital</span></a>
+      <ul class="nav-links">
+        <li><a href="#hero">Beranda</a></li>
+        <li><a href="#katalog">Katalog</a></li>
+        <li><a href="#cara-pesan">Cara Pesan</a></li>
+      </ul>
+      <a href="#katalog" class="btn-primary-outline">Buat Web Sekarang</a>
+    </div>
+  </nav>
+
+<!-- Hero Section (Model Centered & Pastel) -->
+  <header id="hero" class="hero centered-hero">
+    <div class="container hero-content-center">
+      <div class="hero-text-center">
+        <span class="badge pastel-badge">✨ Selesai dalam 3 Menit</span>
+        <h1>Bikin Website Kejutan & Portofolio <br/> <span class="highlight-text">Tanpa Ribet</span></h1>
+        <p>Kirimkan kado digital estetik berupa surat cinta, galeri foto, atau buat web portofolio profesionalmu sendiri secara instan.</p>
+        <div class="hero-buttons-center">
+          <a href="#katalog" class="btn-pastel-primary">Pilih Template</a>
+          <a href="#fitur" class="btn-pastel-secondary">Pelajari Lebih Lanjut</a>
+        </div>
+      </div>
+      
+      <!-- Mockup Berada di Bawah Teks -->
+      <div class="hero-image-bottom">
+        <div class="mockup-window">
+          <div class="mockup-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+<div class="mockup-body" style="padding: 0;">
+  <img src="assets/images/mockup.png" alt="Contoh Kado Digital" style="width: 100%; height: 100%; object-fit: cover;">
+</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Fitur Utama -->
+  <section id="fitur" class="fitur">
+    <div class="container">
+      <div class="fitur-grid">
+        <div class="fitur-card">
+          <div class="icon">🚀</div>
+          <h3>Aktif Instan</h3>
+          <p>Selesai pembayaran, link website unikmu langsung bisa digunakan dan dibagikan.</p>
+        </div>
+        <div class="fitur-card">
+          <div class="icon">🎵</div>
+          <h3>Bebas Pilih Lagu</h3>
+          <p>Tambahkan latar musik favorit untuk membangun suasana yang lebih emosional.</p>
+        </div>
+        <div class="fitur-card">
+          <div class="icon">📸</div>
+          <h3>Galeri Estetik</h3>
+          <p>Tersedia tata letak memukau untuk memajang foto-foto terbaik kalian atau karyamu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Katalog Template dengan Tab Filter -->
+  <section id="katalog" class="katalog">
+    <div class="container">
+      <div class="section-header">
+        <h2>Jelajahi Koleksi Template Kami</h2>
+        <p>Temukan desain yang sempurna untuk setiap momen spesial atau kebutuhan profesionalmu.</p>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="tab-container">
+        <button class="tab-btn active" data-filter="all">Semua</button>
+        <button class="tab-btn" data-filter="pasangan">Pasangan</button>
+        <button class="tab-btn" data-filter="portofolio">Portofolio</button>
+        <button class="tab-btn" data-filter="custom">Custom (WA)</button>
+      </div>
+
+      <!-- Template Grid -->
+      <div class="template-grid" id="templateGrid">
+        
+        <!-- Item: Pasangan 1 -->
+        <div class="template-card pasangan">
+          <div class="card-img" style="background-image: url('assets/images/preview-semester.png'); background-size: cover; background-position: center;"></div>
+          <div class="card-body">
+            <span class="category-tag tag-pink">Score Semester</span>
+            <h3>Semester Celebration</h3>
+            <p>Desain manis dengan fitur pencapaian untuk merayakan kelulusan/semester.</p>
+            <div class="card-actions">
+              <!-- Ubah link pada tombol Preview -->
+              <a href="templates/pasangan/semester-celebration/index.html?id=preview-semester" class="btn-preview">Preview</a>
+              <a href="order.html?template=semester-celebration" class="btn-order">Gunakan</a>
+            </div>
+            <p class="demo-hint">Demo 👉 User: <strong>123</strong> | Pass: <strong>123</strong></p>
+          </div>
+        </div>
+
+       <!-- KARTU 2: DEEPTALK NIGHT -->
+        <div class="template-card pasangan">
+          <div class="card-img" style="background-image: url('assets/images/preview-deeptalk.png'); background-size: cover; background-position: center;"></div>
+            <div class="card-body">
+            <span class="category-tag tag-blue">interaktif</span>
+            <h3>DeepTalk Night ✨ 🌙</h3>
+            <p>Kartu pertanyaan interaktif untuk sesi ngobrol dari hati ke hati bersama pasangan.</p>
+            
+            <div class="card-actions">
+              <a href="templates/pasangan/deeptalk-template/index.html?id=demo-deeptalk" target="_blank" class="btn-preview">Preview</a>
+              <a href="order.html?template=deeptalk" class="btn-order">Gunakan</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item: Portofolio 1 -->
+        <div class="template-card portofolio">
+          <div class="card-img" style="background-color: #546de5;"></div>
+          <div class="card-body">
+            <span class="category-tag tag-blue">Profesional</span>
+            <h3>Modern Resume</h3>
+            <p>Tampilan bersih dan minimalis untuk menonjolkan keahlian dan karyamu.</p>
+            <div class="card-actions">
+              <a href="#" class="btn-preview">Preview</a>
+              <a href="order.html?template=modern-resume" class="btn-order">Gunakan</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item: Custom (WA) -->
+        <div class="template-card custom">
+          <div class="card-img" style="background-color: #e15f41;"></div>
+          <div class="card-body">
+            <span class="category-tag tag-orange">Premium</span>
+            <h3>Custom Design</h3>
+            <p>Punya ide spesifik? Tim kami siap membuatkan website eksklusif hanya untukmu.</p>
+            <div class="card-actions">
+              <a href="https://wa.me/+6282385827645?text=Halo%20saya%20mau%20pesan%20desain%20custom" target="_blank" class="btn-order wa-btn">Konsultasi via WhatsApp</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Cara Pesan -->
+  <section id="cara-pesan" class="cara-pesan">
+    <div class="container">
+      <div class="section-header">
+        <h2>Cara Kerja yang Sangat Mudah</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h4>Pilih Template</h4>
+          <p>Jelajahi galeri desain dan temukan yang paling pas.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h4>Isi Form & Foto</h4>
+          <p>Masukkan pesan, nama, lagu, dan upload fotomu.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h4>Bayar via QRIS</h4>
+          <p>Selesaikan pembayaran aman dan otomatis.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h4>Web Selesai!</h4>
+          <p>Link unik langsung siap dikirimkan.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Harga -->
+  <section id="harga" class="harga">
+    <div class="container">
+      <div class="pricing-card">
+        <h3>Paket Sekali Bayar</h3>
+        <div class="price">
+          <span class="coret">Rp 50.000</span>
+          <h2>Rp 25.000</h2>
+        </div>
+        <ul>
+          <li>✅ Upload hingga 6 Foto</li>
+          <li>✅ Custom Link (namamu.com/dia)</li>
+          <li>✅ Bebas Pilih Lagu Background</li>
+          <li>✅ Aktif selama 30 Hari</li>
+          <li>✅ Tanpa Watermark Logo Kami</li>
+        </ul>
+        <a href="#katalog" class="btn-primary" style="width: 100%; display: block; text-align: center; margin-top: 20px;">Mulai Sekarang</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-content">
+      <div class="brand">
+        <h2>Kado<span>Digital</span></h2>
+        <p>Mengubah kenangan dan karyamu menjadi pengalaman digital yang berkesan.</p>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2026 KadoDigital. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

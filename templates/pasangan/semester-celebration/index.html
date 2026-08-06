@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Semester Celebration ❤️</title>
+
+  <!-- CSS khusus halaman login -->
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+
+<body>
+  <!-- Background glow -->
+  <div class="ambient" aria-hidden="true">
+    <span class="orb orb-one"></span>
+    <span class="orb orb-two"></span>
+    <span class="orb orb-three"></span>
+  </div>
+
+  <!-- Floating hearts, sparkles, bubbles dari JavaScript -->
+  <div class="background-layer" aria-hidden="true" id="backgroundLayer"></div>
+
+  <!-- Halaman Login -->
+  <main class="login-page">
+    <section class="login-card" id="loginCard">
+      <div class="mini-badge">made with love</div>
+
+      <h1>Semester 6 Celebration <span>❤️</span></h1>
+
+      <p class="subtitle">Login untuk melihat hasil semester ini sayang</p>
+
+      <form id="loginForm" autocomplete="off">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <span>👤</span>
+          <input 
+            type="text" 
+            id="username" 
+            placeholder="Masukkan username" 
+            required 
+          />
+        </div>
+
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <span>🔒</span>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Masukkan password" 
+            required 
+          />
+        </div>
+
+        <p class="error-message" id="errorMessage">
+          aduhh.. username atau password salah.
+        </p>
+
+        <button type="submit" class="login-button" id="loginButton">
+          <span class="button-text">Login</span>
+          <span class="loader" aria-hidden="true"></span>
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <!-- 1. Panggil library Supabase DULU -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- JavaScript khusus halaman login -->
+  <script src="js/login.js"></script>
+</body>
+</html>

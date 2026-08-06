@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selamat Sayang ❤️</title>
+  <link rel="stylesheet" href="css/surprise.css" />
+</head>
+<body>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+  <div class="background-magic" id="backgroundMagic" aria-hidden="true"></div>
+
+  <header class="hero section-reveal">
+    <div class="hero-glass">
+      <p class="overline">semester celebration</p>
+      <h1>🎉 Selamat Sayang ❤️</h1>
+      <p class="hero-subtitle" id="heroTyping"></p>
+      <a href="#cards" class="scroll-button">Lihat Kejutannya</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="cards-section" id="cards">
+      <div class="section-title section-reveal">
+        <p>little reminder</p>
+        <h2>Hal-hal kecil yang berhasil kamu lewati</h2>
+      </div>
+
+      <div class="romantic-cards">
+        <article class="memory-card section-reveal">
+          <span>📚</span>
+          <p>Semua tugas berhasil dijalanin</p>
+        </article>
+        <article class="memory-card section-reveal">
+          <span>☕</span>
+          <p>Semua begadang akhirnya terbayarkan</p>
+        </article>
+        <article class="memory-card section-reveal">
+          <span>🌸</span>
+          <p>Semua perjuanganmu gaa sia-sia</p>
+        </article>
+        <article class="memory-card section-reveal">
+          <span>❤️</span>
+          <p>Aku slalu bangga sama kamu</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="achievement section-reveal">
+      <div class="achievement-card">
+        <p class="overline">game mode</p>
+        <h2>Achievement Unlocked</h2>
+        <div class="badge">🏆 Semester Survivor</div>
+
+        <div class="stats">
+          <div><span>Kesabaran</span><strong>+100</strong></div>
+          <div><span>Semangat</span><strong>+100</strong></div>
+          <div><span>Kerja Keras</span><strong>+100</strong></div>
+          <div><span>Kebanggaan dari akuu</span><strong>+999 ❤️</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery section-reveal">
+      <div class="section-title">
+        <p>our gallery</p>
+        <h2>Foto-foto manis buat dikenang</h2>
+      </div>
+
+      <div class="carousel" id="carousel">
+        <button class="nav prev" id="prevPhoto" aria-label="Foto sebelumnya">‹</button>
+        <div class="carousel-track" id="carouselTrack">
+          <img id="foto1" src="" alt="Foto kenangan 1" />
+          <img id="foto2" src="" alt="Foto kenangan 2" />
+          <img id="foto3" src="" alt="Foto kenangan 3" />
+          <img id="foto4" src="" alt="Foto kenangan 4" />
+          <img id="foto5" src="" alt="Foto kenangan 5" />
+
+        </div>
+        <button class="nav next" id="nextPhoto" aria-label="Foto berikutnya">›</button>
+      </div>
+    </section>
+
+    <section class="letter-section section-reveal">
+      <div class="section-title">
+        <p>love letter</p>
+        <h2>Surat kecil dari aku</h2>
+      </div>
+
+      <div class="envelope-area">
+        <button class="envelope" id="envelope" aria-label="Buka surat cinta">
+          <span class="flap"></span>
+          <span class="body"></span>
+          <span class="seal">❤️</span>
+          <span class="letter-preview">klik sayang</span>
+        </button>
+
+        <article class="letter-paper" id="letterPaper">
+          <p id="letterTyping"></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="reward section-reveal">
+      <h2>Reward spesial buat kamu</h2>
+      <p>Karna kamu udah bertahan, berjuang, dan tetap melalui sampai akhir semester</p>
+      <button class="reward-button" id="claimReward">🎁 Claim Reward</button>
+    </section>
+  </main>
+
+  <div class="popup" id="rewardPopup" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="popup-card">
+      <button class="close-popup" id="closePopup" aria-label="Tutup popup">×</button>
+      <h2>Reward Claimed ❤️</h2>
+      <p>Hadiah ini dapat ditukarin kapan aja</p>
+      <ul>
+        <li>❤️ Pelukan</li>
+        <li>❤️ Cium</li>
+        <li>❤️ Traktiran</li>
+        <li>❤️ Quality Time</li>
+      </ul>
+      <strong>Gaada Expired, berlaku seumur hidup</strong>
+    </div>
+  </div>
+
+  <div class="music-player" aria-label="Pemutar musik">
+    <audio id="bgMusic" src="" loop></audio>
+    <button id="playMusic">Play</button>
+    <button id="pauseMusic">Pause</button>
+    <input id="volumeMusic" type="range" min="0" max="1" step="0.01" value="0.45" aria-label="Volume musik" />
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script>
+    const SUPABASE_URL = 'https://rvsrazqskmtpwyzjnnfm.supabase.co/'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2c3JhenFza210cHd5empubmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTM2OTcsImV4cCI6MjEwMTQyOTY5N30.8pfXz_0ZTG8c2K5eP02kNHwg85MV2WEpBL1mpl0Ah9I';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+
+  <!-- 3. Baru panggil file surprise.js milikmu -->
+  <script src="js/surprise.js"></script>
+</body>
+</html>

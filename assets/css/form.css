@@ -1,0 +1,176 @@
+/* =========================================
+   DESAIN FORM PEMESANAN (PASTEL)
+   ========================================= */
+.bg-form {
+  background: radial-gradient(circle at top, #fff5f5 0%, var(--bg-light) 100%);
+}
+
+.order-section {
+  padding: 40px 0 80px;
+}
+
+.form-container {
+  max-width: 700px; /* Lebar dibatasi agar tidak terlalu melebar di layar PC */
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.form-header h2 {
+  font-size: 32px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.kado-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-card {
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px -5px rgba(255, 181, 167, 0.15);
+  position: relative;
+}
+
+.step-badge {
+  position: absolute;
+  top: -14px;
+  left: 30px;
+  background: var(--primary);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(255, 181, 167, 0.4);
+}
+
+.form-card h3 {
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.input-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+label span {
+  color: #ff5f56; /* Bintang merah untuk wajib diisi */
+}
+
+input[type="text"],
+input[type="url"],
+textarea,
+input[type="file"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fafafa;
+  color: var(--text-dark);
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-hover);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(255, 181, 167, 0.2);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Input URL Khusus */
+.url-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fafafa;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.url-input-wrapper:focus-within {
+  border-color: var(--primary-hover);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(255, 181, 167, 0.2);
+}
+
+.url-prefix {
+  padding: 12px 0 12px 16px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.url-input-wrapper input {
+  border: none;
+  background: transparent;
+  padding-left: 5px;
+}
+
+.url-input-wrapper input:focus {
+  box-shadow: none;
+}
+
+small {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Tombol Submit Lebar */
+.form-actions {
+  margin-top: 10px;
+}
+
+.btn-submit {
+  width: 100%;
+  font-size: 18px;
+  padding: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .input-row {
+    grid-template-columns: 1fr; /* Jadi atas-bawah di HP */
+  }
+  .form-card {
+    padding: 24px 20px;
+  }
+}

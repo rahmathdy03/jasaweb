@@ -1,0 +1,581 @@
+/* =========================================
+   1. VARIABEL TEMA (AESTHETIC PASTEL)
+   ========================================= */
+:root {
+  --primary: #ffb5a7;          /* Pastel Peach/Pink (Warna Utama) */
+  --primary-hover: #f4978e;    /* Peach sedikit lebih gelap saat di-hover */
+  --bg-light: #fdfaf6;         /* Krem/Off-white sangat lembut untuk background */
+  --bg-white: #ffffff;
+  --text-dark: #594a4e;        /* Coklat/Abu gelap (Lebih lembut dari hitam) */
+  --text-muted: #8a797d;       /* Teks Paragraf */
+  --border: #f8edeb;           /* Garis batas pastel */
+  --shadow: 0 15px 35px -5px rgba(255, 181, 167, 0.25);
+  --gradient: linear-gradient(135deg, #ffc2b4, #ffb5a7);
+}
+
+/* =========================================
+   2. RESET & BASE STYLES
+   ========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* =========================================
+   3. NAVBAR
+   ========================================= */
+.navbar {
+  background: rgba(253, 250, 246, 0.9);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.logo span {
+  color: var(--primary);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: var(--text-dark);
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+}
+
+/* =========================================
+   4. BUTTONS (TOMBOL)
+   ========================================= */
+/* Tombol Navbar & Global */
+.btn-primary-outline {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.btn-primary-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(255, 181, 167, 0.4);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  background: var(--primary-hover);
+  box-shadow: 0 15px 25px rgba(244, 151, 142, 0.5);
+}
+
+/* Tombol Khusus Hero Section */
+.btn-pastel-primary {
+  background: var(--primary);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(255, 181, 167, 0.4);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-pastel-primary:hover {
+  transform: translateY(-3px);
+  background: var(--primary-hover);
+  box-shadow: 0 15px 25px rgba(244, 151, 142, 0.5);
+}
+
+.btn-pastel-secondary {
+  background: white;
+  color: var(--text-dark);
+  border: 2px solid #fae1dd;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.btn-pastel-secondary:hover {
+  background: #fdf0ed;
+  border-color: var(--primary);
+}
+
+/* =========================================
+   5. HERO SECTION (CENTERED LAYOUT)
+   ========================================= */
+.centered-hero {
+  padding: 80px 0 20px;
+  background: radial-gradient(circle at top center, #fff5f5 0%, var(--bg-light) 70%);
+}
+
+.hero-content-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-text-center {
+  max-width: 800px;
+  margin-bottom: 50px;
+}
+
+.pastel-badge {
+  background: #fdf0ed;
+  color: #d77a6a;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 24px;
+  border: 1px solid #fae1dd;
+}
+
+.hero-text-center h1 {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+.highlight-text {
+  color: var(--primary-hover);
+  position: relative;
+}
+
+.hero-text-center p {
+  color: var(--text-muted);
+  font-size: 18px;
+  max-width: 600px;
+  margin: 0 auto 35px;
+}
+
+.hero-buttons-center {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Mockup Window */
+.hero-image-bottom {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  transform: perspective(1000px) rotateX(2deg);
+}
+
+.mockup-window {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+}
+
+.mockup-header {
+  background: #fdfaf6;
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.dot.red { background: #ffb5a7; }
+.dot.yellow { background: #ffd166; }
+.dot.green { background: #06d6a0; }
+
+.mockup-body {
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* =========================================
+   6. SECTION GLOBAL
+   ========================================= */
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-top: 60px;
+}
+
+.section-header h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.section-header p {
+  color: var(--text-muted);
+}
+
+/* =========================================
+   7. FITUR
+   ========================================= */
+.fitur {
+  padding: 60px 0;
+  background: white;
+}
+
+.fitur-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.fitur-card {
+  padding: 30px;
+  border-radius: 24px;
+  background: var(--bg-light);
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: transform 0.3s;
+}
+
+.fitur-card:hover {
+  transform: translateY(-5px);
+}
+
+.fitur-card .icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+.fitur-card h3 {
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.fitur-card p {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* =========================================
+   8. KATALOG & TABS
+   ========================================= */
+.katalog {
+  background: var(--bg-light);
+  padding-bottom: 80px;
+}
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.tab-btn {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 10px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.tab-btn.active, .tab-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.template-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.template-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow);
+}
+
+.card-img {
+  height: 180px;
+  width: 100%;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.category-tag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.tag-pink { background: #ffe4e1; color: #d63c6b; }
+.tag-purple { background: #f3e8ff; color: #7e22ce; }
+.tag-blue { background: #e0f2fe; color: #0369a1; }
+.tag-orange { background: #ffedd5; color: #c2410c; }
+
+.template-card h3 {
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.template-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.card-actions a {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+.btn-preview {
+  background: var(--bg-light);
+  color: var(--primary-hover);
+  border: 1px solid var(--border);
+}
+
+.btn-preview:hover {
+  background: var(--border);
+}
+
+.btn-order {
+  background: var(--primary);
+  color: white;
+}
+
+.wa-btn {
+  background: #a3c9a8; /* Hijau pastel */
+}
+
+/* =========================================
+   9. CARA PESAN
+   ========================================= */
+.cara-pesan {
+  background: white;
+  padding-bottom: 80px;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.step {
+  text-align: center;
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  background: var(--bg-light);
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  border: 2px solid #fae1dd;
+}
+
+.step h4 {
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.step p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* =========================================
+   10. HARGA
+   ========================================= */
+.harga {
+  background: var(--bg-light);
+  padding-bottom: 80px;
+}
+
+.pricing-card {
+  max-width: 420px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 30px;
+  padding: 40px;
+  border: 2px solid #fae1dd;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.pricing-card h3 {
+  color: var(--text-dark);
+}
+
+.price {
+  margin: 20px 0 30px;
+}
+
+.coret {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.pricing-card h2 {
+  font-size: 46px;
+  color: var(--primary-hover);
+}
+
+.pricing-card ul {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.pricing-card li {
+  margin-bottom: 15px;
+  font-size: 15px;
+  color: var(--text-dark);
+  display: flex;
+  gap: 10px;
+}
+
+/* =========================================
+   11. FOOTER
+   ========================================= */
+footer {
+  background: white;
+  border-top: 1px solid var(--border);
+  padding: 50px 0 30px;
+}
+
+.footer-content {
+  text-align: center;
+}
+
+.footer-content .brand h2 {
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.footer-content .brand span {
+  color: var(--primary);
+}
+
+.copyright {
+  margin-top: 30px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* =========================================
+   12. RESPONSIVE DESIGN (MOBILE)
+   ========================================= */
+@media (max-width: 768px) {
+  .hero-text-center h1 { font-size: 38px; }
+  .hero-buttons-center { flex-direction: column; padding: 0 20px; }
+  .btn-pastel-primary, .btn-pastel-secondary { width: 100%; text-align: center; }
+  .mockup-body { height: 250px; }
+  .nav-links { display: none; }
+  .fitur-grid { grid-template-columns: 1fr; }
+  .steps-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.demo-hint {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 400;
+}
+.demo-hint strong {
+  color: #555;
+}
