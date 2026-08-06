@@ -11,11 +11,20 @@
   padding: 0;
 }
 
+/* Pastikan margin bersih dan background fallback gelap agar tidak ada putih di bawah layar */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #0f0519; 
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   color: var(--color-text);
+  /* Background digenerate dari JS, fallback warna gelap */
   background: radial-gradient(circle at bottom, #1e1b4b, #020617);
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh; /* Kunci anti-terpotong di HP */
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -46,6 +55,11 @@ body {
   justify-content: center;
   transition: opacity 0.8s ease, visibility 0.8s;
   padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh; /* Kunci anti-terpotong di HP */
+  overflow: hidden;
+  z-index: 10;
 }
 .screen.hidden {
   opacity: 0;
@@ -203,8 +217,8 @@ video, .result-img {
   left: 0; 
   width: 100%; 
   height: 100%;
-  pointer-events: none; /* Agar tidak menghalangi tombol saat diklik */
-  z-index: 0; /* Tetap di belakang layar kaca */
+  pointer-events: none;
+  z-index: 0;
 }
 .particle {
   position: absolute;
@@ -219,11 +233,6 @@ video, .result-img {
   100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
 }
 
-/* Memastikan seluruh layar ada di depan efek partikel tanpa merusak kartu */
-.screen {
-  z-index: 10;
-}
-
 /* ==========================================================
    MICRO-INTERACTIONS: MENGETIK & SENTUHAN
    ========================================================== */
@@ -235,7 +244,7 @@ video, .result-img {
   font-size: 24px;
   transform: translate(-50%, -50%);
   animation: floatHeart 1s ease-out forwards;
-  z-index: 9999; /* Berada di lapisan paling depan */
+  z-index: 9999;
 }
 @keyframes floatHeart {
   0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
@@ -246,7 +255,7 @@ video, .result-img {
 .typing-cursor::after {
   content: '|';
   animation: blink 0.7s infinite;
-  color: #fbbf24; /* Warna emas */
+  color: #fbbf24;
 }
 @keyframes blink {
   0%, 100% { opacity: 1; }
@@ -264,7 +273,7 @@ video, .result-img {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000; /* Selalu di atas segalanya */
+  z-index: 10000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -332,7 +341,8 @@ video, .result-img {
   z-index: 10;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh; /* Kunci anti-terpotong di HP */
   padding: 20px;
   animation: slowFadeIn 1.5s ease-out forwards;
 }
