@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Kamu — Malam Ini</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,400&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- AUDIO BGM -->
+    <audio id="bgm" loop>
+        <source src="assets/audio/bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- CONTAINER UTAMA -->
+    <main id="cinematic-container">
+
+        <!-- LAPISAN PARTIKEL AMBIENT: hati & kilau melayang, tampil di semua halaman -->
+        <div id="ambient-fx"></div>
+
+        <!-- HALAMAN 1: CINEMATIC OPENING -->
+        <section id="page-1-opening" class="scene active">
+            
+            <!-- EFEK ZOOM ANIMASI LUAR ANGKASA (TANPA GEDUNG) -->
+            <div id="zoom-overlay" class="hidden">
+                <div class="stars-layer"></div>
+                <div class="earth-layer"></div>
+                <div class="clouds-layer"></div>
+                <div class="fog-layer"></div>
+                <div class="flash-layer"></div>
+            </div>
+
+            <div class="opening-content">
+                <h1 class="title-gold reveal">Happy Birthday, Sayang</h1>
+                <p class="subtitle reveal">Semesta membawaku tepat ke arahmu...</p>
+                <button id="btn-start" class="btn-cinematic" onclick="startCinematicZoom()">Buka Kejutannya ✨</button>
+            </div>
+        </section>
+
+        <!-- HALAMAN 2: LOVE LETTER -->
+        <section id="page-2-letter" class="scene hidden">
+            <div class="envelope-wrapper">
+                <p class="envelope-label">Sepucuk Surat Untukmu</p>
+                <div class="envelope-scene">
+                    <div class="envelope-body"></div>
+                    <div class="envelope-flap" id="envelopeFlap"></div>
+                    <div class="wax-seal" id="waxSeal">♥</div>
+                </div>
+                <div class="letter-paper" id="letterPaper">
+                    <p id="typewriter-text"></p>
+                    <div class="signature">
+                        <span class="date">Malam Ini</span>
+                        <span class="name">Dari aku, untukmu.</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextScene('page-2-letter', 'page-3-timeline')">Lanjut Perjalanan ➔</button>
+        </section>
+
+        <!-- HALAMAN 3: TIMELINE KENANGAN -->
+        <section id="page-3-timeline" class="scene hidden">
+            <h2 class="title-gold reveal">Jejak Langkah Kita</h2>
+            <div class="polaroid-string" id="polaroid-container">
+                <div class="line"></div>
+            </div>
+            <button class="btn-next" onclick="nextScene('page-3-timeline', 'page-4-reasons')">Ada Lagi... ➔</button>
+        </section>
+
+        <!-- HALAMAN 4: ALASAN -->
+        <section id="page-4-reasons" class="scene hidden">
+            <h2 class="title-gold reveal">Kenapa Aku Sayang Kamu?</h2>
+            <div class="jar-container glow-halo reveal" onclick="pickReason()">
+                <img src="assets/img/toples.png" alt="Toples Alasan" class="jar-img">
+                <p class="instruction">Ketuk toplesnya...</p>
+            </div>
+            <div id="reason-paper" class="paper-popup hidden"></div>
+            <button class="btn-next" onclick="nextScene('page-4-reasons', 'page-5-gift')">Menuju Akhir Perjalanan ➔</button>
+        </section>
+
+        <!-- HALAMAN 5: HADIAH -->
+        <section id="page-5-gift" class="scene hidden">
+            <div class="gift-container glow-halo reveal" onclick="openGift()">
+                <img src="assets/img/kado.png" alt="Kado" id="gift-box" class="gift-box-img">
+                <p class="instruction" style="margin-top: 0;">Buka kadonya...</p>
+            </div>
+            <div id="gift-content" class="hidden">
+                <h2 class="title-gold">Spesial Untukmu 🎁</h2>
+                <div class="voucher-card"></div>
+                <p class="closing-message"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
