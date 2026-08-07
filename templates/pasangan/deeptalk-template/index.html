@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepTalk Night ✨</title>
+  
+  <!-- Font Elegan -->
+   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="particles" class="particles"></div>
+  <!-- POP-UP SYARAT ROMANTIS -->
+  <div id="actionModal" class="modal-hidden">
+    <div class="modal-content">
+      <h3 style="color: #fbbf24; font-family: 'Playfair Display', serif; margin-bottom: 10px;">✨ Waktunya Jeda Sejenak</h3>
+      <p id="modalActionText" style="font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
+      <button onclick="closeModalAndProceed(event)" class="btn-primary" style="width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);">Udahh dilakuinn 💕</button>
+    </div>
+  </div>
+  <!-- Audio Background -->
+  <audio id="bgm" loop></audio>
+
+  <!-- BINTANG ANIMASI (Efek latar belakang) -->
+  <div id="stars"></div>
+
+  <!-- SCREEN 1: OPENING -->
+  <section id="screen-opening" class="screen active">
+<!-- Wadah Partikel Debu Cahaya & Kelopak Bunga -->
+<div id="hero-particles"></div>
+
+<!-- Tombol Audio Pojok Kanan Atas -->
+<button id="btn-audio" onclick="toggleAudio()" class="audio-toggle">
+  <span id="audio-icon">🎵</span>
+</button>
+
+<div class="premium-hero-container">
+  <div class="premium-glass-card" id="hero-card">
+    
+    <h1 class="hero-title">Alloww sayanggg.</h1>
+    <p class="hero-subtitle">Sebelum dunia kembali sibuk besok pagi.. yukk kita saling menyampaikan isi hati...</p>
+    
+    <!-- Identitas Pasangan -->
+    <div class="couple-identity">
+      <div class="names"><span id="heroNama1">Rahmat</span> <span class="heart-icon">🤍</span> <span id="heroNama2">Finka</span></div>
+      <div class="special-date" id="heroDate">14 Februari 2024</div>
+      <div class="duration" id="heroDuration">Menghitung waktu...</div>
+    </div>
+
+    <button class="btn-premium" onclick="startPremiumGame(event)">
+      <span>Tekan sayanggg ✨</span>
+    </button>
+  </div>
+  
+  <p class="hero-footer-text">
+    Dibuat khusus untuk seseorang yang selalu ingin kupilih, bahkan di hari-hari yang paling biasa.
+  </p>
+</div>
+  </section>
+
+  <!-- SCREEN 2: MAIN GAME (KARTU) -->
+  <section id="screen-game" class="screen hidden">
+    <div class="container text-center">
+      <h2 class="title-serif text-sm">Sesi DeepTalk</h2>
+      <div id="counter" class="counter-text">Pertanyaan 1 dari 10</div>
+
+      <div class="card-container" onclick="flipCard()">
+        <div class="card" id="activeCard">
+          <div class="card-face front glass-panel">
+            <span class="icon">✨</span>
+            <p>Sentuh untuk membuka kartu</p>
+          </div>
+          <div class="card-face back glass-panel-dark">
+            <p id="questionText" class="question-text">Memuat...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="nav-buttons">
+        <button id="btnNext" class="btn-outline" onclick="nextCard()">Kartu Selanjutnya ➔</button>
+      </div>
+    </div>
+    <div class="clock" id="clock">00:00</div>
+  </section>
+
+  <!-- SCREEN 3: WISHLIST -->
+  <section id="screen-wishlist" class="screen hidden">
+    <div class="glass-panel wishlist-panel">
+      <h2 class="title-serif">Satu Langkah ke Depan</h2>
+      <p class="subtitle">Tuliskan harapan jujur kita untuk tahun depan.</p>
+      
+      <div class="input-group">
+        <label>Harapan Rahmat:</label>
+        <textarea id="wishRahmat" placeholder="Aku berharap kita..."></textarea>
+      </div>
+      <div class="input-group">
+        <label>Harapan Finka:</label>
+        <textarea id="wishFinka" placeholder="Tulis harapanmu di sini..."></textarea>
+      </div>
+
+      <button class="btn-primary w-100" onclick="startCamera()">Simpan Kenangan 📸</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: CAMERA & RESULT -->
+  <section id="screen-camera" class="screen hidden text-center">
+    <h2 class="title-serif">Senyum untuk Kenangan</h2>
+    <div class="camera-wrapper glass-panel">
+      <video id="videoElement" autoplay playsinline></video>
+    </div>
+    <button class="btn-primary mt-2" onclick="takePhoto()">Jepret! 🤍</button>
+  </section>
+
+  <section id="screen-result" class="screen hidden text-center">
+    <div class="glass-panel">
+      <h2 class="title-serif">Wishlist Kita Tersimpan</h2>
+      <canvas id="resultCanvas" style="display:none;"></canvas>
+      <img id="finalImage" class="result-img">
+      <div class="mt-2">
+        <a id="downloadLink" download="Kenangan-DeepTalk.png">
+          <button class="btn-primary">Simpan ke Galeri 📥</button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Library Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Link JavaScript -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
