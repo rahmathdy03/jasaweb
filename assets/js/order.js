@@ -191,11 +191,13 @@ const templateBlueprints = {
             <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kotainitaksamatanpamu.mp3">🎵 Preset 2: Kota Ini Tak Sama Tanpamu</option>
             <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
           </select>
+          <button type="button" id="btnPreviewMusik" style="padding: 10px; border-radius: 12px; border: none; background: var(--primary); color: white; cursor: pointer; font-size: 18px; display: flex; justify-content: center; align-items: center; width: 48px; height: 48px; transition: 0.3s;" title="Dengarkan Lagu">▶️</button>
         </div>
+        <audio id="audioPreview" style="display: none;"></audio>
       </div>
       <div class="input-group" id="wrapperCustomMusik" style="display: none; margin-top: 10px;">
-        <label for="linkMusikCustom">Link Audio (.mp3) untuk Birthday Cinema</label>
-        <input type="url" id="linkMusikCustom" placeholder="https://website.com/lagu.mp3">
+        <label for="linkMusikCustom">Link Audio (.mp3)</label>
+        <input type="url" id="linkMusikCustom" placeholder="https://website.com/lagu-favorit.mp3">
       </div>
     </div>
   `
