@@ -170,20 +170,31 @@ const templateBlueprints = {
       
       <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
       
-      <div class="input-row" style="display:flex; gap:10px;">
-        <div class="input-group" style="flex:1;">
-          <label>Latitude (Lintang Bumi) <span>*</span></label>
-          <input type="text" id="latBumi" placeholder="Contoh: -0.9471" required>
-        </div>
-        <div class="input-group" style="flex:1;">
-          <label>Longitude (Bujur Bumi) <span>*</span></label>
-          <input type="text" id="lonBumi" placeholder="Contoh: 100.4172" required>
-        </div>
+      <!-- DROPDOWN LOKASI ZOOM (Pengganti Input Lintang & Bujur) -->
+      <div class="input-group">
+        <label>Lokasi Tujuan (Zoom Animasi Bumi) <span>*</span></label>
+        <select id="pilihProvinsi" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
+            <option value="" disabled selected>-- Pilih Provinsi / Kota Terdekat --</option>
+            <option value="4.6951,96.7494">Aceh</option>
+            <option value="3.5952,98.6722">Sumatera Utara (Medan)</option>
+            <option value="-0.9471,100.4172">Sumatera Barat (Padang)</option>
+            <option value="0.5071,101.4451">Riau (Pekanbaru)</option>
+            <option value="-0.9818,104.7565">Sumatera Selatan (Palembang)</option>
+            <option value="-6.2088,106.8456">DKI Jakarta</option>
+            <option value="-6.9147,107.6098">Jawa Barat (Bandung)</option>
+            <option value="-7.1509,110.1402">Jawa Tengah (Semarang)</option>
+            <option value="-7.7956,110.3695">DI Yogyakarta</option>
+            <option value="-7.2504,112.7688">Jawa Timur (Surabaya)</option>
+            <option value="-8.4095,115.1889">Bali</option>
+            <option value="-0.5022,117.1536">Kalimantan Timur (Balikpapan)</option>
+            <option value="-5.1476,119.4327">Sulawesi Selatan (Makassar)</option>
+            <option value="-2.5337,140.7181">Papua (Jayapura)</option>
+        </select>
+        <small style="color: #666; margin-top: 5px; display:block;">Pilih kota terdekat dengan domisili penerima kado.</small>
       </div>
-      <small style="color: #666; margin-bottom:15px; display:block;">Koordinat ini menentukan bumi akan zoom ke kota mana.</small>
 
       <!-- Fitur Musik Default Bawaan order.js -->
-      <div class="input-group">
+      <div class="input-group" style="margin-top: 15px;">
         <label for="selectMusik">Lagu Background (Opsional)</label>
         <div style="display: flex; gap: 10px; align-items: center;">
           <select id="selectMusik" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
@@ -311,8 +322,18 @@ if(form) {
       const kuponDeskripsi = document.getElementById('kuponDeskripsi')?.value.trim() || null;
       const pesanPenutup = document.getElementById('pesanPenutup')?.value.trim() || null;
       
-      const latBumi = document.getElementById('latBumi')?.value.trim() || null;
-      const lonBumi = document.getElementById('lonBumi')?.value.trim() || null;
+      // ===================================================
+      // PECAH DATA KOORDINAT DARI DROPDOWN
+      // ===================================================
+      const provinsiVal = document.getElementById('pilihProvinsi')?.value;
+      let latBumi = null;
+      let lonBumi = null;
+      
+      if (provinsiVal) {
+          const coords = provinsiVal.split(',');
+          latBumi = coords[0];
+          lonBumi = coords[1];
+      }
 
       // Data Musik
       const selectMusikVal = document.getElementById('selectMusik')?.value;
