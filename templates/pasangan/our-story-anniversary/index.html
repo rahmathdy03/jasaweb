@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Story - Happy Anniversary</title>
+    <!-- Fonts: Elegant Serif (Playfair) + Clean Sans (Jakarta) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <!-- CSS Utama -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading" class="loading-screen">
+        <h2 class="font-serif">Opening our story...</h2>
+    </div>
+
+    <!-- STAGE 2: GUESS THE MEMORY (Shell) -->
+    <section id="guess-memory" class="section hidden">
+        <div class="container text-center">
+            <h2 class="font-serif text-burgundy">Do you remember this moment?</h2>
+            <p class="font-sans text-brown subtext mt-2">Let's see how well you remember our little story.</p>
+            
+            <div id="game-ui" class="mt-4">
+                <!-- Game logic will be injected here on Stage 2 -->
+            </div>
+
+            <!-- Tombol Skip Sementara untuk testing STAGE 1 -->
+            <button class="btn-primary mt-4" onclick="document.getElementById('guess-memory').classList.add('hidden'); document.getElementById('main-content').classList.remove('hidden');">ENTER OUR STORY ❤️</button>
+        </div>
+    </section>
+
+    <!-- WRAPPER CERITA UTAMA (Muncul setelah game selesai) -->
+    <div id="main-content" class="hidden">
+        
+        <!-- STAGE 3: HERO -->
+        <section id="hero" class="section">
+            <div class="container text-center">
+                <h1 class="font-serif text-burgundy" id="hero-headline">Happy Anniversary</h1>
+                <p class="font-sans text-brown mt-2" id="hero-subheadline"></p>
+                <p class="font-serif text-rose mt-2 font-italic" id="hero-date"></p>
+                
+                <div class="hero-image-wrapper mt-4">
+                    <img id="hero-img" src="" alt="Our Memory" class="hero-image">
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 4: RELATIONSHIP COUNTER -->
+        <section id="counter" class="section bg-burgundy text-cream text-center">
+            <div class="container">
+                <div id="counter-ui" class="counter-grid">
+                    <!-- Counter will be injected on Stage 4 -->
+                    <h2 class="font-serif">Time stands still with you.</h2>
+                </div>
+                <p class="font-serif mt-4 font-italic">And I'd choose you all over again.</p>
+            </div>
+        </section>
+
+        <!-- STAGE 5: OUR STORY -->
+        <section id="our-story" class="section bg-cream">
+            <div class="container text-center">
+                <h2 class="font-serif text-burgundy mb-4">How It All Started</h2>
+                <!-- Story progression will go here -->
+            </div>
+        </section>
+
+        <!-- STAGE 6: OUR MEMORIES -->
+        <section id="memories" class="section bg-cream">
+            <div class="container text-center">
+                <h2 class="font-serif text-burgundy">Little Moments,<br>Big Memories</h2>
+                <p class="font-sans text-brown subtext mb-4 mt-2">Some moments are small, but somehow they become the ones we remember forever.</p>
+                <div class="gallery-grid" id="gallery-container">
+                    <!-- Images will go here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 7: WHY I LOVE YOU -->
+        <section id="reasons" class="section bg-rose text-cream">
+            <div class="container text-center">
+                <h2 class="font-serif mb-4">Why I Love You</h2>
+                <div id="reasons-list" class="text-left max-w-md mx-auto">
+                    <!-- Reasons will go here -->
+                </div>
+                <p class="font-serif font-italic text-center mt-4">And honestly... I could keep going forever.</p>
+            </div>
+        </section>
+
+        <!-- STAGE 8: OUR SONG -->
+        <section id="our-song" class="section bg-brown text-cream hidden">
+            <div class="container text-center">
+                <h2 class="font-serif text-dusty">Our Song</h2>
+                <div id="music-player" class="mt-4">
+                    <!-- Audio UI -->
+                </div>
+                <audio id="bgm" loop></audio>
+            </div>
+        </section>
+
+        <!-- STAGE 9: LOVE LETTER -->
+        <section id="love-letter" class="section bg-cream text-center hidden">
+            <div class="container flex-col-center">
+                <p class="font-serif text-burgundy italic">I wrote something for you...</p>
+                <div class="envelope-wrapper mt-4">
+                    <!-- Envelope UI -->
+                </div>
+                <button class="btn-primary mt-4">OPEN LETTER 💌</button>
+            </div>
+        </section>
+
+        <!-- STAGE 10: LOVE COUPON -->
+        <section id="coupon" class="section bg-dusty text-burgundy text-center hidden">
+            <div class="container flex-col-center">
+                <p class="font-sans subtext">A little gift</p>
+                <div class="coupon-card mt-4">
+                    <h3 class="font-serif font-bold text-burgundy" id="coupon-title">...</h3>
+                    <p class="font-sans mt-2" id="coupon-desc">...</p>
+                    <button class="btn-secondary mt-4">REDEEM ❤️</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 11: ONE LAST THING -->
+        <section id="one-last-thing" class="section bg-cream text-center">
+            <div class="container flex-col-center h-full">
+                <p class="font-sans text-brown">Before you go...</p>
+                <h2 class="font-serif text-burgundy mt-2">There's one more thing<br>I want you to know.</h2>
+                <button class="btn-primary mt-4">ONE LAST MESSAGE &rarr;</button>
+            </div>
+        </section>
+
+        <!-- STAGE 12: FINAL SURPRISE -->
+        <section id="final-surprise" class="section bg-brown text-cream text-center hidden">
+            <div class="container flex-col-center h-full">
+                <p class="font-serif text-dusty">Thank you for being part of my life.</p>
+                <h1 class="font-serif text-cream mt-4">I'd still choose you. ❤️</h1>
+                <p class="font-sans text-cream mt-4" id="final-msg"></p>
+                <button class="btn-outline mt-4">Replay Our Story &#8634;</button>
+            </div>
+        </section>
+
+    </div> <!-- End main-content -->
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
