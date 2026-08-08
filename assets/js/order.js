@@ -346,21 +346,52 @@ if(form) {
         linkMusikFinal = null; 
       }
 
-      // Proses Upload Foto (Bisa menampung sampai 6 foto, untuk birthday-cinema dipakai 4)
+// ===================================================
+      // PROSES KOMPRESI & UPLOAD FOTO 
+      // ===================================================
       const fotoInput = document.getElementById('fotoKado');
       let linkFotos = [null, null, null, null, null, null]; 
 
       if (fotoInput && fotoInput.files.length > 0) {
         const files = fotoInput.files;
+        
+        // Pengaturan Kompresi
+        const opsiKompresi = {
+          maxSizeMB: 0.3,          // Maksimal ukuran file 300KB
+          maxWidthOrHeight: 1200,  // Resolusi maksimal 1200px (Sangat cukup untuk polaroid/layar HP)
+          useWebWorker: true       // Biar browser tidak nge-lag saat proses kompresi
+        };
+
         for (let i = 0; i < files.length && i < 6; i++) {
-          const file = files[i];
-          const fileName = `${idKado}-${Date.now()}-${i}.${file.name.split('.').pop()}`;
+          let fileAsli = files[i];
+          let fileSiapUpload = fileAsli; // Default jika gagal kompresi
 
-          const { error: uploadError } = await supabaseClient.storage.from('foto_kado').upload(fileName, file);
-          if (uploadError) throw uploadError;
+          try {
+            // Cek apakah library kompresi sudah terpasang di HTML
+            if (typeof imageCompression === 'function') {
+                btnSubmit.innerHTML = `Mengompres Foto ${i+1}... ⏳`;
+                // Proses kompresi file
+                fileSiapUpload = await imageCompression(fileAsli, opsiKompresi);
+            }
+            
+            btnSubmit.innerHTML = `Mengupload Foto ${i+1}... 🚀`;
 
-          const { data: publicUrlData } = supabaseClient.storage.from('foto_kado').getPublicUrl(fileName);
-          linkFotos[i] = publicUrlData.publicUrl;
+            // Ekstensi nama file (Hasil kompresi biasanya tetap mempertahankan ekstensi)
+            const fileExt = fileSiapUpload.name.split('.').pop() || 'jpg';
+            const fileName = `${idKado}-${Date.now()}-${i}.${fileExt}`;
+
+            // Upload ke Supabase
+            const { error: uploadError } = await supabaseClient.storage.from('foto_kado').upload(fileName, fileSiapUpload);
+            if (uploadError) throw uploadError;
+
+            // Dapatkan Link Publik
+            const { data: publicUrlData } = supabaseClient.storage.from('foto_kado').getPublicUrl(fileName);
+            linkFotos[i] = publicUrlData.publicUrl;
+
+          } catch (compErr) {
+            console.error("Gagal memproses/mengupload foto:", compErr);
+            throw new Error(`Gagal memproses foto ke-${i+1}. Pastikan format gambar valid.`);
+          }
         }
       }
 
