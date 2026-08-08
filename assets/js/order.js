@@ -431,8 +431,15 @@ if(form) {
         throw error;
       }
 
+// ===================================================
+      // KIRIM LINK PENDEK KE WHATSAPP
+      // ===================================================
+      const domainUtama = window.location.origin;
+      // Membuat link pendek yang sangat bersih
+      const linkPendek = `${domainUtama}/?id=${idKado}`;
+      
       btnSubmit.innerHTML = 'Berhasil! Mengalihkan ke WhatsApp... ✅';
-      window.location.href = `https://wa.me/6282385827645?text=Halo Kak, saya sudah order web kado dengan ID Link: ${idKado}`;
+      window.location.href = `https://wa.me/6282385827645?text=Halo Kak, saya sudah order web kado.%0A%0AIni link pesanannya: ${encodeURIComponent(linkPendek)}`;
 
     } catch (err) {
       alert("Maaf, terjadi kesalahan: " + err.message);
