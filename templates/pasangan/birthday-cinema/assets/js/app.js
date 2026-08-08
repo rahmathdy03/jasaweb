@@ -63,6 +63,16 @@ async function fetchDataPesanan() {
         }
 
         dataKado = data;
+
+        // ==========================================
+        // SETTING AUDIO DARI SUPABASE (link_musik)
+        // ==========================================
+        const bgm = document.getElementById('bgm');
+        if (bgm && data.link_musik) {
+            bgm.src = data.link_musik;
+            bgm.load(); // Muat ulang audio dengan source baru
+        }
+
     } catch (err) {
         console.error("Gagal menarik data:", err);
     }
@@ -488,10 +498,15 @@ function startCinematicZoom() {
     const fog = overlay ? overlay.querySelector('.fog-layer') : null;
     const flash = overlay ? overlay.querySelector('.flash-layer') : null;
 
+    // Putar Audio saat tombol diklik
     const bgm = document.getElementById('bgm');
     if (bgm) {
         bgm.volume = 0.5;
-        bgm.play().catch(e => console.log("Audio dicegah"));
+        bgm.play().then(() => {
+            console.log("Audio berhasil dimainkan.");
+        }).catch(e => {
+            console.log("Audio dicegah (autoplay policy):", e);
+        });
     }
 
     let lat = parseFloat(activeData.latitude);
