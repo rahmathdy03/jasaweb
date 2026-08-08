@@ -78,8 +78,20 @@ async function fetchDataPesanan() {
         const bgm = document.getElementById('bgm');
         if (bgm && data.link_musik) {
             bgm.src = data.link_musik;
-            bgm.load(); // Muat ulang audio dengan source baru
+            bgm.load();
         }
+
+        // ==========================================
+        // PRELOAD GAMBAR POLAROID (ANTI-LEMOT)
+        // ==========================================
+        // Mengambil link dari Supabase, lalu memaksa browser mendownloadnya di balik layar
+        const fotoUrls = [data.link_foto_1, data.link_foto_2, data.link_foto_3, data.link_foto_4];
+        fotoUrls.forEach(url => {
+            if (url && url !== 'null' && url.trim() !== '') {
+                const img = new Image(); // Membuat elemen gambar virtual
+                img.src = url;           // Browser otomatis mengunduh & menyimpan ke cache
+            }
+        });
 
     } catch (err) {
         console.error("Gagal menarik data:", err);
