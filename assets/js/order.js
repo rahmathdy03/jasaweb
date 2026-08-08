@@ -47,7 +47,8 @@ const templateBlueprints = {
         <label for="selectMusik">Pilih Lagu Background</label>
         <div style="display: flex; gap: 10px; align-items: center;">
           <select id="selectMusik" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
-            <option value="MASUKKAN_LINK_SUPABASE_KAMU_DI_SINI">🎵 Preset 1: Lagu Default KadoDigital</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kasihputih.mp3">🎵 Preset 1: Kasih Putih</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kotainitaksamatanpamu.mp3">🎵 Preset 2: Kota Ini Tak Sama Tanpamu</option>
             <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
           </select>
           <button type="button" id="btnPreviewMusik" style="padding: 10px; border-radius: 12px; border: none; background: var(--primary); color: white; cursor: pointer; font-size: 18px; display: flex; justify-content: center; align-items: center; width: 48px; height: 48px; transition: 0.3s;" title="Dengarkan Lagu">▶️</button>
@@ -83,7 +84,8 @@ const templateBlueprints = {
         <label for="selectMusik">Pilih Lagu Background</label>
         <div style="display: flex; gap: 10px; align-items: center;">
           <select id="selectMusik" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
-            <option value="MASUKKAN_LINK_LAGU_ROMANTIS_DISINI">🎵 Preset 1: Romantis Akustik</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kasihputih.mp3">🎵 Preset 1: Kasih Putih</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kotainitaksamatanpamu.mp3">🎵 Preset 2: Kota Ini Tak Sama Tanpamu</option>
             <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
           </select>
           <button type="button" id="btnPreviewMusik" style="padding: 10px; border-radius: 12px; border: none; background: var(--primary); color: white; cursor: pointer; font-size: 18px; display: flex; justify-content: center; align-items: center; width: 48px; height: 48px; transition: 0.3s;" title="Dengarkan Lagu">▶️</button>
@@ -185,7 +187,8 @@ const templateBlueprints = {
         <label for="selectMusik">Lagu Background (Opsional)</label>
         <div style="display: flex; gap: 10px; align-items: center;">
           <select id="selectMusik" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
-            <option value="">🔇 Tidak pakai preset</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kasihputih.mp3">🎵 Preset 1: Kasih Putih</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kotainitaksamatanpamu.mp3">🎵 Preset 2: Kota Ini Tak Sama Tanpamu</option>
             <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
           </select>
         </div>
