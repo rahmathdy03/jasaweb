@@ -65,6 +65,14 @@ async function fetchDataPesanan() {
         dataKado = data;
 
         // ==========================================
+        // GANTI JUDUL PEMBUKA (HERO) DARI DATABASE
+        // ==========================================
+        const heroTitle = document.querySelector('.opening-content .title-gold');
+        if (heroTitle && data.teks_hero) {
+            heroTitle.innerText = data.teks_hero;
+        }
+
+        // ==========================================
         // SETTING AUDIO DARI SUPABASE (link_musik)
         // ==========================================
         const bgm = document.getElementById('bgm');
