@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Kamu - Spesial</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,400&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Utama -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Three.js & GSAP untuk Animasi 3D & Sinematik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Supabase Client UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Efek Partikel Latar Belakang (Ambient FX) -->
+    <div id="ambient-fx"></div>
+
+    <!-- Container Utama Sinematik -->
+    <div id="cinematic-container">
+
+        <!-- ========================================== -->
+        <!-- SCENE 1: HALAMAN PEMBUKA (OPENING)         -->
+        <!-- ========================================== -->
+        <div id="page-1-opening" class="scene active">
+            <div class="opening-content">
+                <h1 class="title-gold reveal">Happy Birthday Sayang</h1>
+                <p class="subtitle reveal">Jangan lupa dibukaaa Kejutannya yaaa</p>
+                <button id="btn-start" class="btn-cinematic reveal">Buka Kejutannya ✨</button>
+            </div>
+        </div>
+
+     <!-- ========================================== -->
+        <!-- SCENE 2: SURAT CINTA & EFEK MENGETIK       -->
+        <!-- ========================================== -->
+        <div id="page-2-letter" class="scene hidden">
+            <div class="envelope-wrapper">
+                <div class="envelope-label">Sepucuk Surat Untukmu</div>
+                
+                <!-- Animasi Amplop -->
+                <div class="envelope-scene">
+                    <div class="envelope-body"></div>
+                    <div id="envelopeFlap" class="envelope-flap"></div>
+                    <div id="waxSeal" class="wax-seal">❤</div>
+                </div>
+
+                <!-- Kertas Surat (Muncul setelah amplop terbuka) -->
+                <div id="letterPaper" class="letter-paper">
+                    <div id="typewriter-text"></div>
+                    
+                    <div class="signature">
+                        <span class="date">Malam Ini</span>
+                        <span class="name">Dari: rahmat</span>
+                    </div>
+                </div>
+
+                <!-- Tombol Lanjut -->
+                <button id="btn-next-letter" class="btn-next" style="opacity: 0; transition: opacity 1s ease;" onclick="nextScene('page-2-letter', 'page-3-timeline')">Lanjut Perjalanan →</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCENE 3: TIMELINE / POLAROID KENANGAN      -->
+        <!-- ========================================== -->
+        <div id="page-3-timeline" class="scene hidden">
+            <h2 class="title-gold">Kenangan Kita</h2>
+            <p class="subtitle">Setiap detik berharga bersamamu.</p>
+            
+            <div class="polaroid-string" id="polaroid-container">
+                <!-- Polaroid akan dirender otomatis melalui app.js -->
+            </div>
+
+            <button class="btn-next" onclick="nextScene('page-3-timeline', 'page-4-jar')">Lanjut Lagi →</button>
+        </div>
+
+<!-- ========================================== -->
+        <!-- SCENE 4: TOPLES ALASAN (JAR OF REASONS)    -->
+        <!-- ========================================== -->
+        <div id="page-4-jar" class="scene hidden">
+            <h2 class="title-gold">Alasan Kenapa Sayang</h2>
+            <p class="subtitle">Sentuh toplesnya untuk melihat isi hatiku.</p>
+            
+            <div class="jar-container glow-halo" onclick="pickReason()">
+                <!-- Gunakan path lokal assets gambar toples kamu -->
+                <img src="assets/img/toples.png" alt="Toples Alasan" class="jar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3063/3063823.png'">
+            </div>
+            <div class="instruction">Klik Toplesnya! 👆</div>
+
+            <div id="reason-paper" class="paper-popup hidden"></div>
+
+            <button class="btn-next" onclick="nextScene('page-4-jar', 'page-5-gift')">Buka Hadiah Terakhir →</button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCENE 5: KOTAK HADIAH & KUPON SPESIAL      -->
+        <!-- ========================================== -->
+        <div id="page-5-gift" class="scene hidden">
+            <h2 class="title-gold">Hadiah Spesial Untukmu</h2>
+            <p class="subtitle">Ketuk kotak kado di bawah ini.</p>
+            
+            <div class="gift-container glow-halo" onclick="openGift()">
+                <!-- Gunakan path lokal assets gambar kado kamu -->
+                <img src="assets/img/kado.jpg" alt="Kotak Kado" class="gift-box-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4213/4213856.png'">
+            </div>
+
+            <div id="gift-content" class="hidden">
+                <div class="voucher-card"></div>
+                <p class="closing-message"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- OVERLAY ZOOM BUMI 3D (THREE.JS & GSAP)     -->
+    <!-- ========================================== -->
+    <div id="zoom-overlay" class="hidden">
+        <div class="clouds-layer"></div>
+        <div class="fog-layer"></div>
+        <div class="flash-layer"></div>
+    </div>
+
+    <!-- Audio Latar Belakang (Opsional) -->
+    <audio id="bgm" loop>
+        <source src="assets/audio/backsound.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Skrip Logika Utama -->
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
