@@ -15,12 +15,12 @@ const templateBlueprints = {
     <div class="form-card">
       <div class="step-badge">Langkah 2</div>
       <h3>Keamanan & Pesan Kejutan</h3>
-      <div class="input-row">
-        <div class="input-group">
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
           <label>Username (Untuk Login) <span>*</span></label>
           <input type="text" id="orderUser" placeholder="Misal: sayang" required>
         </div>
-        <div class="input-group">
+        <div class="input-group" style="flex:1;">
           <label>Password Login <span>*</span></label>
           <input type="text" id="orderPass" placeholder="Misal: 12345" required>
         </div>
@@ -74,10 +74,10 @@ const templateBlueprints = {
         <small>Pilih 2 foto: 1 untuk halaman pembuka, 1 untuk latar permainan.</small>
       </div>
       <div class="input-group">
-  <label>Tanggal Spesial / Jadian <span>*</span></label>
-  <input type="date" id="orderTanggal" required>
-  <small>Untuk menghitung berapa lama kalian sudah bersama.</small>
-</div>
+        <label>Tanggal Spesial / Jadian <span>*</span></label>
+        <input type="date" id="orderTanggal" required>
+        <small>Untuk menghitung berapa lama kalian sudah bersama.</small>
+      </div>
 
       <div class="input-group">
         <label for="selectMusik">Pilih Lagu Background</label>
@@ -106,6 +106,93 @@ const templateBlueprints = {
       <div class="input-group">
         <label>Profesi / Keahlian Utama <span>*</span></label>
         <input type="text" id="orderProfesi" placeholder="Misal: UI/UX Designer" required>
+      </div>
+    </div>
+  `,
+
+  // =========================================================================
+  // TAMBAHAN BARU: Template 4 - Birthday Cinema
+  // =========================================================================
+  "birthday-cinema": `
+    <div class="form-card">
+      <div class="step-badge">Langkah 2</div>
+      <h3>Teks Pembuka & Surat</h3>
+      <div class="input-group">
+        <label>Judul Pembuka <span>*</span></label>
+        <input type="text" id="teksHero" placeholder="Contoh: Happy Birthday Sayang" required>
+      </div>
+      <div class="input-group">
+        <label>Surat Cinta (Efek Ketik) <span>*</span></label>
+        <textarea id="teksSurat" rows="3" placeholder="Tuliskan ucapan dan harapanmu di sini..." required></textarea>
+      </div>
+      <div class="input-group">
+        <label>Alasan Kenapa Sayang (Toples) <span>*</span></label>
+        <textarea id="alasanSayang" rows="3" placeholder="Karena senyummu manis.&#10;Karena kamu baik.&#10;(Gunakan 'Enter' untuk pisahkan kalimat)" required></textarea>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="step-badge">Langkah 3</div>
+      <h3>Kenangan (Upload 4 Foto & Caption)</h3>
+      <div class="input-group">
+        <label>Upload Foto Polaroid (Maks 4 Foto) <span>*</span></label>
+        <input type="file" id="fotoKado" accept="image/jpeg, image/png, image/webp" multiple required>
+      </div>
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;"><label>Caption Foto 1</label><input type="text" id="caption1" placeholder="Awal kita bertemu"></div>
+        <div class="input-group" style="flex:1;"><label>Caption Foto 2</label><input type="text" id="caption2" placeholder="Hari bahagia"></div>
+      </div>
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;"><label>Caption Foto 3</label><input type="text" id="caption3" placeholder="Senyum manismu"></div>
+        <div class="input-group" style="flex:1;"><label>Caption Foto 4</label><input type="text" id="caption4" placeholder="Selamanya"></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="step-badge">Langkah 4</div>
+      <h3>Kupon Hadiah & Koordinat Bumi</h3>
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>Judul Kupon</label>
+          <input type="text" id="kuponJudul" placeholder="Tiket Peluk">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>Deskripsi Kupon</label>
+          <input type="text" id="kuponDeskripsi" placeholder="Berlaku seumur hidup">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Pesan Penutup</label>
+        <input type="text" id="pesanPenutup" placeholder="Mari buat kenangan bersama di tahun ini">
+      </div>
+      
+      <div style="border-top: 1px dashed #ccc; margin: 15px 0;"></div>
+      
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>Latitude (Lintang Bumi) <span>*</span></label>
+          <input type="text" id="latBumi" placeholder="Contoh: -0.9471" required>
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>Longitude (Bujur Bumi) <span>*</span></label>
+          <input type="text" id="lonBumi" placeholder="Contoh: 100.4172" required>
+        </div>
+      </div>
+      <small style="color: #666; margin-bottom:15px; display:block;">Koordinat ini menentukan bumi akan zoom ke kota mana.</small>
+
+      <!-- Fitur Musik Default Bawaan order.js -->
+      <div class="input-group">
+        <label for="selectMusik">Lagu Background (Opsional)</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <select id="selectMusik" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: white; font-family: inherit; font-size: 14px; color: var(--text-dark);">
+            <option value="">🔇 Tidak pakai preset</option>
+            <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group" id="wrapperCustomMusik" style="display: none; margin-top: 10px;">
+        <label for="linkMusikCustom">Link Audio (.mp3) untuk Birthday Cinema</label>
+        <input type="url" id="linkMusikCustom" placeholder="https://website.com/lagu.mp3">
       </div>
     </div>
   `
@@ -196,18 +283,31 @@ if(form) {
       const templateName = urlParams.get('template') || 'default-template';
 
       // Data Dasar
-      const idKado = document.getElementById('orderId').value.trim().toLowerCase();
-      const namaPengirim = document.getElementById('namaPengirim').value.trim();
-      const tanggalJadian = document.getElementById('orderTanggal')?.value || null;
-      const namaPenerima = document.getElementById('namaPenerima').value.trim();
+      const idKado = document.getElementById('orderId')?.value.trim().toLowerCase();
+      const namaPengirim = document.getElementById('namaPengirim')?.value.trim();
+      const namaPenerima = document.getElementById('namaPenerima')?.value.trim();
       
-      // Data Login (BARU DITAMBAHKAN)
+      // Data Spesifik Template Lain
+      const tanggalJadian = document.getElementById('orderTanggal')?.value || null;
       const username = document.getElementById('orderUser')?.value.trim() || null;
       const password = document.getElementById('orderPass')?.value.trim() || null;
 
-      // Data Teks
-      const teksHero = document.getElementById('teksHero')?.value.trim() || '';
-      const teksSurat = document.getElementById('teksSurat')?.value.trim() || '';
+      // Data Spesifik Birthday Cinema & Lainnya
+      const teksHero = document.getElementById('teksHero')?.value.trim() || null;
+      const teksSurat = document.getElementById('teksSurat')?.value.trim() || null;
+      const alasanSayang = document.getElementById('alasanSayang')?.value.trim() || null;
+      
+      const caption1 = document.getElementById('caption1')?.value.trim() || null;
+      const caption2 = document.getElementById('caption2')?.value.trim() || null;
+      const caption3 = document.getElementById('caption3')?.value.trim() || null;
+      const caption4 = document.getElementById('caption4')?.value.trim() || null;
+      
+      const kuponJudul = document.getElementById('kuponJudul')?.value.trim() || null;
+      const kuponDeskripsi = document.getElementById('kuponDeskripsi')?.value.trim() || null;
+      const pesanPenutup = document.getElementById('pesanPenutup')?.value.trim() || null;
+      
+      const latBumi = document.getElementById('latBumi')?.value.trim() || null;
+      const lonBumi = document.getElementById('lonBumi')?.value.trim() || null;
 
       // Data Musik
       const selectMusikVal = document.getElementById('selectMusik')?.value;
@@ -220,7 +320,7 @@ if(form) {
         linkMusikFinal = null; 
       }
 
-      // Proses Upload Foto
+      // Proses Upload Foto (Bisa menampung sampai 6 foto, untuk birthday-cinema dipakai 4)
       const fotoInput = document.getElementById('fotoKado');
       let linkFotos = [null, null, null, null, null, null]; 
 
@@ -238,7 +338,7 @@ if(form) {
         }
       }
 
-      // Simpan Semua Data ke Supabase
+      // Simpan Semua Data ke Supabase (Otomatis menyesuaikan kolom, jika tidak diisi akan Null)
       const { error } = await supabaseClient.from('pesanan').insert([{
         id_kado: idKado,
         template: templateName,
@@ -249,6 +349,16 @@ if(form) {
         password: password,
         teks_hero: teksHero,
         teks_surat: teksSurat,
+        alasan_sayang: alasanSayang,
+        caption_1: caption1,
+        caption_2: caption2,
+        caption_3: caption3,
+        caption_4: caption4,
+        kupon_judul: kuponJudul,
+        kupon_deskripsi: kuponDeskripsi,
+        pesan_penutup: pesanPenutup,
+        latitude: latBumi,
+        longitude: lonBumi,
         link_musik: linkMusikFinal,
         link_foto_1: linkFotos[0],
         link_foto_2: linkFotos[1],
@@ -256,7 +366,7 @@ if(form) {
         link_foto_4: linkFotos[3],
         link_foto_5: linkFotos[4],
         link_foto_6: linkFotos[5],
-        status: 'pending'
+        status: 'pending' // Ganti menjadi 'aktif' jika mau langsung terputar tanpa campur tangan admin
       }]);
 
       if (error) {
