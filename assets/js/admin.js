@@ -3,27 +3,26 @@
 // =========================================================================
 const SUPABASE_URL = 'https://rvsrazqskmtpwyzjnnfm.supabase.co/'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2c3JhenFza210cHd5empubmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTM2OTcsImV4cCI6MjEwMTQyOTY5N30.8pfXz_0ZTG8c2K5eP02kNHwg85MV2WEpBL1mpl0Ah9I';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// UBAH NAMA VARIABEL JADI supabaseClient AGAR TIDAK BENTROK (ERROR)
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 // =========================================================================
 // 2. SISTEM OTENTIKASI REAL (Login, Logout, Cek Sesi)
 // =========================================================================
 
-// A. Cek Sesi (Apakah Admin sudah login sebelumnya?)
 async function checkLoginStatus() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
     if (session) {
-        // Jika sudah ada sesi aktif, sembunyikan login, tampilkan layout admin baru
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminLayout").style.display = "flex"; 
-        fetchPesanan(); // Langsung tarik data
+        fetchPesanan(); 
     }
 }
-checkLoginStatus(); // Jalankan saat halaman dimuat
+checkLoginStatus(); 
 
-// B. Fungsi Login (Dipanggil dari form HTML onsubmit="handleLogin(event)")
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -36,8 +35,7 @@ async function handleLogin(e) {
     btnLogin.disabled = true;
     errorMsg.style.display = "none";
 
-    // Proses otentikasi ke Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: pass,
     });
@@ -48,21 +46,19 @@ async function handleLogin(e) {
         btnLogin.textContent = "Masuk Dashboard";
         btnLogin.disabled = false;
     } else {
-        // Login berhasil!
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminLayout").style.display = "flex";
         btnLogin.textContent = "Masuk Dashboard";
         btnLogin.disabled = false;
-        fetchPesanan(); // Tarik data pesanan
+        fetchPesanan(); 
     }
 }
 
-// C. Fungsi Logout (Dipanggil dari tombol sidebar onclick="handleLogout()")
 async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     if (!error) {
         document.getElementById("adminLayout").style.display = "none";
-        document.getElementById("loginSection").style.display = "flex"; // Kembali ke layar login
+        document.getElementById("loginSection").style.display = "flex"; 
         document.getElementById("adminLoginForm").reset();
     } else {
         alert("Terjadi kesalahan saat logout: " + error.message);
@@ -74,15 +70,12 @@ async function handleLogout() {
 // 3. NAVIGASI UI DASHBOARD (Pindah antar Menu)
 // =========================================================================
 function switchMenu(menuId) {
-    // Ganti warna menu sidebar
     document.querySelectorAll('.sidebar-menu li').forEach(item => item.classList.remove('active'));
     event.currentTarget.classList.add('active');
     
-    // Ganti tampilan konten section
     document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
     document.getElementById('sec-' + menuId).classList.add('active');
     
-    // Ganti judul atas
     const titles = {
         'dashboard': 'Dashboard Ringkasan',
         'pesanan': 'Manajemen Pesanan',
@@ -92,7 +85,6 @@ function switchMenu(menuId) {
     document.getElementById('pageTitle').innerText = titles[menuId];
 }
 
-// Untuk buka/tutup form Pop-up
 function toggleModal(modalId) {
     document.getElementById(modalId).classList.toggle('active');
 }
@@ -102,13 +94,12 @@ function toggleModal(modalId) {
 // 4. FITUR MANAJEMEN PESANAN (Tarik, ACC, Hapus Data)
 // =========================================================================
 
-// A. Mengambil data dari tabel 'pesanan'
 async function fetchPesanan() {
     const tbody = document.querySelector('#sec-pesanan tbody');
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Mencari data pesanan... ⏳</td></tr>';
 
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('pesanan')
             .select('*')
             .order('created_at', { ascending: false });
@@ -116,7 +107,7 @@ async function fetchPesanan() {
         if (error) throw error;
 
         renderTabelPesanan(data);
-        updateDashboardStats(data); // Hitung statistik untuk Dashboard
+        updateDashboardStats(data); 
 
     } catch (err) {
         console.error(err);
@@ -124,12 +115,10 @@ async function fetchPesanan() {
     }
 }
 
-// B. Mencetak data ke tabel HTML
 function renderTabelPesanan(data) {
     const tbody = document.querySelector('#sec-pesanan tbody');
     tbody.innerHTML = ''; 
 
-    // Tampilkan 5 pesanan terbaru di Ringkasan (Dashboard)
     const recentTable = document.querySelector('#sec-dashboard table');
     recentTable.innerHTML = '';
 
@@ -139,7 +128,6 @@ function renderTabelPesanan(data) {
     }
 
     data.forEach((item, index) => {
-        // --- 1. Cetak ke Tabel Utama (Tab Pesanan) ---
         const statusBadge = item.status === 'active' 
             ? `<span class="badge badge-active">Active</span>` 
             : `<span class="badge badge-pending">Pending</span>`;
@@ -164,7 +152,6 @@ function renderTabelPesanan(data) {
         `;
         tbody.appendChild(tr);
 
-        // --- 2. Cetak ke Tabel Aktivitas Terbaru (Maksimal 5) ---
         if (index < 5) {
             const trRecent = document.createElement('tr');
             trRecent.innerHTML = `
@@ -177,45 +164,42 @@ function renderTabelPesanan(data) {
     });
 }
 
-// C. Mengubah Status (Pending -> Active)
 async function accPesanan(id) {
     if (!confirm(`Yakin ingin ACC pesanan ${id}? Website klien akan bisa diakses.`)) return;
 
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('pesanan')
             .update({ status: 'active' })
             .eq('id', id);
 
         if (error) throw error;
         alert('✅ Pesanan berhasil diaktifkan!');
-        fetchPesanan(); // Refresh data
+        fetchPesanan(); 
 
     } catch (err) {
         alert('Gagal mengaktifkan pesanan: ' + err.message);
     }
 }
 
-// D. Menghapus Pesanan
 async function hapusPesanan(id) {
     if (!confirm(`TINDAKAN PERMANEN!\nYakin ingin menghapus seluruh data kado milik ${id}?`)) return;
 
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('pesanan')
             .delete()
             .eq('id', id);
 
         if (error) throw error;
         alert('🗑️ Data berhasil dihapus permanen!');
-        fetchPesanan(); // Refresh data
+        fetchPesanan(); 
 
     } catch (err) {
         alert('Gagal menghapus data: ' + err.message);
     }
 }
 
-// E. Hitung & Update Statistik Dashboard Utama
 function updateDashboardStats(data) {
     const totalOrder = data.length;
     const activeOrder = data.filter(d => d.status === 'active').length;
