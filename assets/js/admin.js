@@ -115,10 +115,12 @@ async function fetchPesanan() {
     }
 }
 
+// B. Mencetak data ke tabel HTML
 function renderTabelPesanan(data) {
     const tbody = document.querySelector('#sec-pesanan tbody');
     tbody.innerHTML = ''; 
 
+    // Tampilkan 5 pesanan terbaru di Ringkasan (Dashboard)
     const recentTable = document.querySelector('#sec-dashboard table');
     recentTable.innerHTML = '';
 
@@ -128,6 +130,7 @@ function renderTabelPesanan(data) {
     }
 
     data.forEach((item, index) => {
+        // --- 1. Cetak ke Tabel Utama (Tab Pesanan) ---
         const statusBadge = item.status === 'active' 
             ? `<span class="badge badge-active">Active</span>` 
             : `<span class="badge badge-pending">Pending</span>`;
@@ -138,13 +141,13 @@ function renderTabelPesanan(data) {
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><b>${item.id}</b></td>
-            <td>${item.nama_panggilan_pria || 'Klien'} & ${item.nama_panggilan_wanita || '?'}</td>
-            <td>${item.template_id || 'Our Story'}</td>
+            <td><b>${item.id_kado}</b></td>
+            <td>${item.nama_pengirim} & ${item.nama_penerima}</td>
+            <td style="text-transform: capitalize;">${item.template}</td>
             <td>${statusBadge}</td>
             <td>
                 ${btnAcc}
-                <a href="/templates/pasangan/our-story-anniversary/index.html?id=${item.id}" target="_blank">
+                <a href="/templates/pasangan/${item.template}/index.html?id=${item.id_kado}" target="_blank">
                     <button class="btn-sm btn-edit" title="Lihat Website Klien">👁️ View</button>
                 </a>
                 <button class="btn-sm btn-del" onclick="hapusPesanan('${item.id}')" title="Hapus Permanen">🗑️</button>
@@ -152,11 +155,12 @@ function renderTabelPesanan(data) {
         `;
         tbody.appendChild(tr);
 
+        // --- 2. Cetak ke Tabel Aktivitas Terbaru (Dashboard) ---
         if (index < 5) {
             const trRecent = document.createElement('tr');
             trRecent.innerHTML = `
-                <td><b>${item.id}</b></td>
-                <td>${item.nama_panggilan_pria || 'Klien'} & ${item.nama_panggilan_wanita || '?'}</td>
+                <td><b>${item.id_kado}</b></td>
+                <td>${item.nama_pengirim} & ${item.nama_penerima}</td>
                 <td>${statusBadge}</td>
             `;
             recentTable.appendChild(trRecent);
