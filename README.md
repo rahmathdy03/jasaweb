@@ -118,3 +118,20 @@ Status: hardened dan siap dipakai.
 - Inline `onclick` / `onerror` di halaman utama sudah dihapus.
 - Upload Birthday Cinema dibatasi maksimal 4 foto.
 - DeepTalk Night divalidasi tepat 2 foto sesuai desain template.
+
+
+## DeepTalk Night
+
+Status: hardened dan siap dipakai.
+
+- Data pasangan dimuat dari RPC Supabase tanpa fallback palsu.
+- Error state untuk link salah / template salah dibuat eksplisit.
+- Tombol audio memakai `link_musik` dari Supabase dan sekarang benar-benar berfungsi.
+- Inline `onclick` dihapus dan diganti `addEventListener`.
+- Kartu pertanyaan bisa dibuka dengan mouse/touch maupun keyboard.
+- Transition screen antar bab sekarang benar-benar ada.
+- Tanggal jadian ditampilkan dalam format Indonesia.
+- Typewriter tidak memakai `innerHTML`.
+- Kamera memakai `getUserMedia` dengan error handling.
+- Wishlist pada hasil foto dibungkus ke beberapa baris agar tidak mudah terpotong.
+- Form order mewajibkan tepat 2 foto untuk DeepTalk Night.
