@@ -511,3 +511,81 @@ video, .result-img {
   50% { opacity: 0.6; }
   100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
 }
+
+/* DeepTalk completion states */
+#question-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 8px;
+  border-radius: 26px;
+}
+
+.audio-toggle:disabled,
+.audio-toggle.audio-unavailable {
+  opacity: .38;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.camera-status {
+  min-height: 24px;
+  margin: 12px auto 0;
+  color: #fecdd3;
+  font-size: .85rem;
+  max-width: 420px;
+}
+
+.deeptalk-error-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at bottom, #1e1b4b, #020617);
+  color: #f8fafc;
+  text-align: center;
+}
+
+.deeptalk-error-card {
+  width: min(560px, 100%);
+  padding: 42px 30px;
+  background: rgba(15, 23, 42, .54);
+  border: 1px solid rgba(251, 191, 36, .24);
+  border-radius: 26px;
+  box-shadow: 0 28px 75px rgba(0,0,0,.4);
+  backdrop-filter: blur(14px);
+}
+
+.deeptalk-error-icon {
+  color: var(--color-accent);
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.deeptalk-error-card h1 {
+  color: var(--color-accent);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  margin-bottom: 12px;
+}
+
+.deeptalk-error-card p {
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    width: min(320px, calc(100vw - 34px));
+    height: min(400px, 58vh);
+  }
+
+  .glass-panel {
+    padding: 28px 20px;
+  }
+
+  .premium-glass-card {
+    padding: 32px 22px;
+  }
+}
