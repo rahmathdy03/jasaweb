@@ -1,150 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Story - Happy Anniversary</title>
-    <!-- Fonts: Elegant Serif (Playfair) + Clean Sans (Jakarta) -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
-    <!-- CSS Utama -->
-    <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#7b263a">
+  <title>Our Story — Happy Anniversary</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- LOADING SCREEN -->
-    <div id="loading" class="loading-screen">
-        <h2 class="font-serif">Opening our story...</h2>
+  <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
+  <div id="ambient-layer" class="ambient-layer" aria-hidden="true"></div>
+
+  <div id="loading" class="loading-screen">
+    <div class="loading-card">
+      <div class="loading-heart" aria-hidden="true">♥</div>
+      <p class="eyebrow">OUR STORY</p>
+      <h1>Opening our story...</h1>
+      <p class="loading-copy">Mengumpulkan potongan kecil yang membuat cerita ini berarti.</p>
+      <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
+  </div>
 
-    <!-- STAGE 2: GUESS THE MEMORY (Shell) -->
-    <section id="guess-memory" class="section hidden">
-        <div class="container text-center">
-            <h2 class="font-serif text-burgundy">Do you remember this moment?</h2>
-            <p class="font-sans text-brown subtext mt-2">Let's see how well you remember our little story.</p>
-            
-            <div id="game-ui" class="mt-4">
-                <!-- Game logic will be injected here on Stage 2 -->
-            </div>
+  <section id="guess-memory" class="section quiz-section hidden">
+    <div class="section-glow glow-one"></div>
+    <div class="section-glow glow-two"></div>
+    <div class="container quiz-shell">
+      <div class="section-heading center reveal">
+        <span class="eyebrow">A LITTLE MEMORY CHECK</span>
+        <h1>Masih ingat momen ini?</h1>
+        <p>Tiga foto, empat pilihan. Tebak kenangan kecil kita sebelum membuka seluruh cerita.</p>
+      </div>
+      <div id="game-ui" class="game-ui reveal"></div>
+    </div>
+  </section>
 
-            <!-- Tombol Skip Sementara untuk testing STAGE 1 -->
-            <button class="btn-primary mt-4" onclick="document.getElementById('guess-memory').classList.add('hidden'); document.getElementById('main-content').classList.remove('hidden');">ENTER OUR STORY ❤️</button>
+  <main id="main-content" class="hidden">
+    <section id="hero" class="section hero-section">
+      <div class="hero-blob hero-blob-a"></div>
+      <div class="hero-blob hero-blob-b"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <span class="eyebrow">A LOVE LETTER IN CHAPTERS</span>
+          <p class="script-note">for my favorite person</p>
+          <h1 id="hero-headline">Happy Anniversary</h1>
+          <p id="hero-subheadline" class="hero-subheadline"></p>
+          <div class="hero-meta">
+            <span class="mini-line"></span>
+            <span id="hero-date">our favorite date</span>
+          </div>
+          <button id="hero-continue" class="btn btn-primary" type="button">Mulai ceritanya <span>↓</span></button>
         </div>
+
+        <div class="hero-visual reveal">
+          <div class="photo-orbit" aria-hidden="true"></div>
+          <figure class="hero-photo-card tilt-card">
+            <div class="photo-tape"></div>
+            <img id="hero-img" src="" alt="Kenangan utama kami">
+            <figcaption id="hero-photo-caption">one of my favorite memories</figcaption>
+          </figure>
+          <span class="floating-sticker sticker-heart">♥</span>
+          <span class="floating-sticker sticker-spark">✦</span>
+        </div>
+      </div>
     </section>
 
-    <!-- WRAPPER CERITA UTAMA (Muncul setelah game selesai) -->
-    <div id="main-content" class="hidden">
-        
-        <!-- STAGE 3: HERO -->
-        <section id="hero" class="section">
-            <div class="container text-center">
-                <h1 class="font-serif text-burgundy" id="hero-headline">Happy Anniversary</h1>
-                <p class="font-sans text-brown mt-2" id="hero-subheadline"></p>
-                <p class="font-serif text-rose mt-2 font-italic" id="hero-date"></p>
-                
-                <div class="hero-image-wrapper mt-4">
-                    <img id="hero-img" src="" alt="Our Memory" class="hero-image">
-                </div>
-            </div>
-        </section>
+    <section id="counter" class="section counter-section">
+      <div class="container">
+        <div class="section-heading center reveal light-heading">
+          <span class="eyebrow">SINCE OUR STORY BEGAN</span>
+          <h2>Waktu terus jalan. Aku tetap memilih kamu.</h2>
+          <p id="counter-since-label">Setiap detiknya jadi bagian dari cerita kita.</p>
+        </div>
+        <div id="counter-ui" class="counter-grid reveal" aria-live="polite"></div>
+        <p class="counter-footer reveal">And I'd choose you all over again. ♡</p>
+      </div>
+    </section>
 
-        <!-- STAGE 4: RELATIONSHIP COUNTER -->
-        <section id="counter" class="section bg-burgundy text-cream text-center">
-            <div class="container">
-                <div id="counter-ui" class="counter-grid">
-                    <!-- Counter will be injected on Stage 4 -->
-                    <h2 class="font-serif">Time stands still with you.</h2>
-                </div>
-                <p class="font-serif mt-4 font-italic">And I'd choose you all over again.</p>
-            </div>
-        </section>
+    <section id="our-story" class="section story-section">
+      <div class="container">
+        <div class="section-heading reveal">
+          <span class="eyebrow">CHAPTERS OF US</span>
+          <h2>How it all became <em>our story.</em></h2>
+          <p>Bukan cuma tanggal besar. Justru momen kecil yang diam-diam jadi favorit.</p>
+        </div>
+        <div id="story-timeline" class="story-timeline"></div>
+      </div>
+    </section>
 
-        <!-- STAGE 5: OUR STORY -->
-        <section id="our-story" class="section bg-cream">
-            <div class="container text-center">
-                <h2 class="font-serif text-burgundy mb-4">How It All Started</h2>
-                <!-- Story progression will go here -->
-            </div>
-        </section>
+    <section id="memories" class="section memories-section">
+      <div class="container">
+        <div class="section-heading center reveal">
+          <span class="eyebrow">OUR LITTLE ARCHIVE</span>
+          <h2>Little moments,<br><em>big memories.</em></h2>
+          <p>Geser, lihat, dan ingat lagi hari-hari yang mungkin sederhana untuk orang lain.</p>
+        </div>
+        <div id="gallery-container" class="gallery-grid"></div>
+      </div>
+    </section>
 
-        <!-- STAGE 6: OUR MEMORIES -->
-        <section id="memories" class="section bg-cream">
-            <div class="container text-center">
-                <h2 class="font-serif text-burgundy">Little Moments,<br>Big Memories</h2>
-                <p class="font-sans text-brown subtext mb-4 mt-2">Some moments are small, but somehow they become the ones we remember forever.</p>
-                <div class="gallery-grid" id="gallery-container">
-                    <!-- Images will go here -->
-                </div>
-            </div>
-        </section>
+    <section id="reasons" class="section reasons-section">
+      <div class="container reasons-layout">
+        <div class="section-heading reveal light-heading">
+          <span class="eyebrow">A FEW OF A MILLION REASONS</span>
+          <h2>Why I love you.</h2>
+          <p>Aku tahu daftar ini nggak akan pernah benar-benar selesai.</p>
+        </div>
+        <div id="reasons-list" class="reasons-list"></div>
+      </div>
+    </section>
 
-        <!-- STAGE 7: WHY I LOVE YOU -->
-        <section id="reasons" class="section bg-rose text-cream">
-            <div class="container text-center">
-                <h2 class="font-serif mb-4">Why I Love You</h2>
-                <div id="reasons-list" class="text-left max-w-md mx-auto">
-                    <!-- Reasons will go here -->
-                </div>
-                <p class="font-serif font-italic text-center mt-4">And honestly... I could keep going forever.</p>
-            </div>
-        </section>
+    <section id="our-song" class="section song-section hidden">
+      <div class="container">
+        <div class="song-card tilt-card reveal">
+          <div class="vinyl-wrap" aria-hidden="true">
+            <div id="vinyl-disc" class="vinyl-disc"><span>♥</span></div>
+          </div>
+          <div class="song-copy">
+            <span class="eyebrow">PRESS PLAY ON US</span>
+            <h2>Our song.</h2>
+            <p>Ada lagu yang kalau diputar, rasanya langsung membawa kita ke satu tempat yang sama.</p>
+            <button id="music-toggle" class="btn btn-light" type="button">▶ Putar lagu kita</button>
+            <div class="music-status"><span id="music-status-dot"></span><span id="music-status-text">paused</span></div>
+          </div>
+        </div>
+        <audio id="bgm" loop preload="metadata"></audio>
+      </div>
+    </section>
 
-        <!-- STAGE 8: OUR SONG -->
-        <section id="our-song" class="section bg-brown text-cream hidden">
-            <div class="container text-center">
-                <h2 class="font-serif text-dusty">Our Song</h2>
-                <div id="music-player" class="mt-4">
-                    <!-- Audio UI -->
-                </div>
-                <audio id="bgm" loop></audio>
-            </div>
-        </section>
+    <section id="love-letter" class="section letter-section hidden">
+      <div class="container letter-layout">
+        <div class="section-heading center reveal">
+          <span class="eyebrow">SOMETHING I NEVER WANT TO FORGET TO SAY</span>
+          <h2>I wrote something for you.</h2>
+        </div>
 
-        <!-- STAGE 9: LOVE LETTER -->
-        <section id="love-letter" class="section bg-cream text-center hidden">
-            <div class="container flex-col-center">
-                <p class="font-serif text-burgundy italic">I wrote something for you...</p>
-                <div class="envelope-wrapper mt-4">
-                    <!-- Envelope UI -->
-                </div>
-                <button class="btn-primary mt-4">OPEN LETTER 💌</button>
-            </div>
-        </section>
+        <div id="envelope-scene" class="envelope-scene reveal">
+          <button id="open-letter" class="envelope-button" type="button" aria-label="Buka surat">
+            <span class="envelope-back"></span>
+            <span class="letter-preview">for you ♡</span>
+            <span class="envelope-front"></span>
+            <span class="wax-seal">R</span>
+          </button>
+          <p class="tap-hint">tap the envelope</p>
+        </div>
 
-        <!-- STAGE 10: LOVE COUPON -->
-        <section id="coupon" class="section bg-dusty text-burgundy text-center hidden">
-            <div class="container flex-col-center">
-                <p class="font-sans subtext">A little gift</p>
-                <div class="coupon-card mt-4">
-                    <h3 class="font-serif font-bold text-burgundy" id="coupon-title">...</h3>
-                    <p class="font-sans mt-2" id="coupon-desc">...</p>
-                    <button class="btn-secondary mt-4">REDEEM ❤️</button>
-                </div>
-            </div>
-        </section>
+        <article id="letter-paper" class="letter-paper hidden">
+          <div class="letter-paper-inner">
+            <span class="letter-date" id="letter-date"></span>
+            <p id="letter-text"></p>
+            <p class="letter-signature">always,<br><span id="letter-sender">me</span> ♡</p>
+          </div>
+        </article>
+      </div>
+    </section>
 
-        <!-- STAGE 11: ONE LAST THING -->
-        <section id="one-last-thing" class="section bg-cream text-center">
-            <div class="container flex-col-center h-full">
-                <p class="font-sans text-brown">Before you go...</p>
-                <h2 class="font-serif text-burgundy mt-2">There's one more thing<br>I want you to know.</h2>
-                <button class="btn-primary mt-4">ONE LAST MESSAGE &rarr;</button>
-            </div>
-        </section>
+    <section id="coupon" class="section coupon-section hidden">
+      <div class="container coupon-layout">
+        <div class="section-heading reveal">
+          <span class="eyebrow">ONE SMALL EXTRA</span>
+          <h2>A little gift,<br>just because.</h2>
+        </div>
+        <div id="coupon-card" class="coupon-card tilt-card reveal">
+          <div class="coupon-side-label">LOVE COUPON</div>
+          <div class="coupon-content">
+            <span class="coupon-heart">♥</span>
+            <p class="coupon-kicker">this coupon is good for</p>
+            <h3 id="coupon-title">One Unlimited Hug</h3>
+            <p id="coupon-desc"></p>
+            <button id="redeem-coupon" class="btn btn-primary" type="button">Redeem sekarang</button>
+            <p id="coupon-status" class="coupon-status"></p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- STAGE 12: FINAL SURPRISE -->
-        <section id="final-surprise" class="section bg-brown text-cream text-center hidden">
-            <div class="container flex-col-center h-full">
-                <p class="font-serif text-dusty">Thank you for being part of my life.</p>
-                <h1 class="font-serif text-cream mt-4">I'd still choose you. ❤️</h1>
-                <p class="font-sans text-cream mt-4" id="final-msg"></p>
-                <button class="btn-outline mt-4">Replay Our Story &#8634;</button>
-            </div>
-        </section>
+    <section id="one-last-thing" class="section last-thing-section">
+      <div class="container last-thing-card reveal">
+        <span class="eyebrow">BEFORE YOU GO</span>
+        <p class="script-note">one last thing...</p>
+        <h2>Ada satu hal lagi<br>yang ingin aku bilang.</h2>
+        <button id="show-final" class="btn btn-primary" type="button">Buka pesan terakhir →</button>
+      </div>
+    </section>
 
-    </div> <!-- End main-content -->
+    <section id="final-surprise" class="section final-section hidden">
+      <div id="celebration-layer" class="celebration-layer" aria-hidden="true"></div>
+      <div class="container final-content">
+        <p class="script-note reveal">thank you for being here</p>
+        <h1 class="reveal">I'd still choose you.<br><span>Again. And again. ♥</span></h1>
+        <p id="final-msg" class="final-message reveal"></p>
+        <div class="final-actions reveal">
+          <button id="replay-story" class="btn btn-light" type="button">↻ Replay our story</button>
+          <button id="back-to-top" class="btn btn-ghost-light" type="button">Kembali ke awal</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <button id="floating-music" class="floating-music hidden" type="button" aria-label="Putar atau jeda musik">
+    <span class="floating-music-icon">♪</span>
+    <span id="floating-music-label">play</span>
+  </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase.js"></script>
-    <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
