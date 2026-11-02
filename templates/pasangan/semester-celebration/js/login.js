@@ -59,9 +59,7 @@ form.addEventListener("submit", async (event) => {
   try {
     // Mencari data di database berdasarkan ID yang ada di URL secara dinamis
     const { data, error } = await supabaseClient
-      .from('pesanan')
-      .select('nama_pengirim, nama_penerima, status')
-      .eq('id_kado', orderId)
+      .rpc('get_kado_by_id', { p_id_kado: orderId })
       .single();
 
     if (error || !data) {
