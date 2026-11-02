@@ -1,0 +1,16 @@
+# Local/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Vercel local metadata
+.vercel/
+
+# Node tooling if added later
+node_modules/
+
+# Environment files must never be committed
+.env
+.env.*
+!.env.example
