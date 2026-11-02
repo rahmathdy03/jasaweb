@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#24151b" />
+  <title>Pembayaran QRIS — KadoDigital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f1ed;
+      --ink: #2b1720;
+      --muted: #765e67;
+      --line: rgba(43, 23, 32, .12);
+      --card: rgba(255, 255, 255, .78);
+      --accent: #9f3f61;
+      --accent-dark: #713047;
+      --green: #187b55;
+      --shadow: 0 24px 70px rgba(73, 36, 50, .13);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 7%, rgba(206, 135, 159, .24), transparent 28rem),
+        radial-gradient(circle at 92% 92%, rgba(233, 188, 158, .28), transparent 26rem),
+        var(--bg);
+      font-family: "DM Sans", sans-serif;
+    }
+    a { color: inherit; }
+    .shell { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    .logo { text-decoration: none; font-weight: 800; letter-spacing: -.03em; font-size: 21px; }
+    .logo span { color: var(--accent); }
+    .secure { font-size: 12px; font-weight: 700; color: var(--green); padding: 8px 11px; border: 1px solid rgba(24,123,85,.18); background: rgba(255,255,255,.58); border-radius: 999px; }
+    .payment-grid { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(320px, .96fr); gap: 24px; align-items: start; }
+    .panel { background: var(--card); border: 1px solid rgba(255,255,255,.72); box-shadow: var(--shadow); backdrop-filter: blur(18px); border-radius: 28px; }
+    .info { padding: clamp(25px, 4vw, 42px); }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 800; letter-spacing: .13em; color: var(--accent); }
+    h1 { font-family: "Playfair Display", serif; font-size: clamp(35px, 5vw, 55px); line-height: 1.02; margin: 15px 0 13px; letter-spacing: -.035em; }
+    h1 em { color: var(--accent); font-weight: 600; }
+    .lead { color: var(--muted); line-height: 1.75; margin: 0 0 28px; max-width: 590px; }
+    .summary { border: 1px solid var(--line); background: rgba(255,255,255,.7); border-radius: 20px; overflow: hidden; margin-bottom: 28px; }
+    .summary-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+    .summary-row:last-child { border-bottom: 0; }
+    .summary-row span { color: var(--muted); font-size: 13px; }
+    .summary-row strong { text-align: right; font-size: 14px; word-break: break-word; }
+    .summary-row.total strong { color: var(--accent-dark); font-size: 25px; letter-spacing: -.03em; }
+    .steps { display: grid; gap: 14px; }
+    .step { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+    .step-num { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: white; font-size: 12px; font-weight: 800; }
+    .step h3 { margin: 2px 0 4px; font-size: 14px; }
+    .step p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+    .qris-panel { padding: 22px; position: sticky; top: 18px; }
+    .qris-card { padding: 20px; border: 1px solid var(--line); background: #fff; border-radius: 22px; text-align: center; }
+    .qris-label { font-size: 11px; letter-spacing: .12em; font-weight: 800; color: var(--muted); margin-bottom: 12px; }
+    .qris-img { width: min(100%, 430px); aspect-ratio: 1; object-fit: contain; image-rendering: crisp-edges; display: block; margin: 0 auto; border-radius: 12px; }
+    .merchant { margin: 14px 0 3px; font-weight: 800; }
+    .merchant-sub { margin: 0; color: var(--muted); font-size: 12px; }
+    .qris-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 0; }
+    .mini-btn { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 12px; font-size: 12px; font-weight: 800; border: 1px solid var(--line); background: #fff; }
+    .wa-btn { margin-top: 14px; width: 100%; min-height: 54px; border: 0; border-radius: 15px; background: #1f9d63; color: white; display: flex; align-items: center; justify-content: center; text-align: center; text-decoration: none; font-weight: 800; font-size: 14px; padding: 12px 16px; box-shadow: 0 13px 26px rgba(31,157,99,.22); transition: .2s ease; }
+    .wa-btn:hover { transform: translateY(-2px); background: #168653; }
+    .wa-btn.disabled { opacity: .5; pointer-events: none; box-shadow: none; }
+    .note { margin: 13px 2px 0; font-size: 11px; line-height: 1.55; color: var(--muted); text-align: center; }
+    .error { display: none; margin-bottom: 18px; border-radius: 14px; padding: 13px 15px; background: #fff1f1; color: #9b2c2c; border: 1px solid #f3c7c7; font-size: 13px; line-height: 1.5; }
+    @media (max-width: 800px) {
+      .shell { width: min(100% - 20px, 620px); padding-top: 18px; }
+      .payment-grid { grid-template-columns: 1fr; }
+      .qris-panel { position: static; }
+      .topbar { margin-bottom: 18px; }
+      .secure { display: none; }
+      .info { order: 1; }
+      .qris-panel { order: 2; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar">
+      <a class="logo" href="index.html">Kado<span>Digital</span></a>
+      <span class="secure">● Pembayaran manual via QRIS</span>
+    </div>
+
+    <section class="payment-grid">
+      <div class="panel info">
+        <span class="eyebrow">PEMBAYARAN ORDER</span>
+        <h1>Tinggal satu langkah<br><em>sebelum kadonya diproses.</em></h1>
+        <p class="lead">Order kamu sudah tersimpan. Bayar Rp5.000 lewat QRIS di samping, lalu kirim screenshot bukti pembayaran ke WhatsApp agar admin bisa mengecek dan mengaktifkan link.</p>
+
+        <div id="paymentError" class="error">Data order tidak ditemukan di URL. Silakan kembali ke halaman template dan isi order lagi.</div>
+
+        <div class="summary">
+          <div class="summary-row"><span>Order ID</span><strong id="orderId">-</strong></div>
+          <div class="summary-row"><span>Template</span><strong id="templateName">-</strong></div>
+          <div class="summary-row total"><span>Total pembayaran</span><strong>Rp5.000</strong></div>
+        </div>
+
+        <div class="steps">
+          <div class="step"><span class="step-num">1</span><div><h3>Scan atau simpan QRIS</h3><p>Kalau bayar dari HP yang sama, simpan gambar QRIS lalu pilih gambar tersebut dari aplikasi pembayaranmu.</p></div></div>
+          <div class="step"><span class="step-num">2</span><div><h3>Bayar tepat Rp5.000</h3><p>Gunakan aplikasi bank atau e-wallet yang mendukung QRIS.</p></div></div>
+          <div class="step"><span class="step-num">3</span><div><h3>Screenshot bukti pembayaran</h3><p>Pastikan nominal dan status transaksi terlihat jelas.</p></div></div>
+          <div class="step"><span class="step-num">4</span><div><h3>Kirim bukti lewat WhatsApp</h3><p>Tekan tombol WhatsApp, lalu lampirkan screenshot bukti pembayaran di chat.</p></div></div>
+        </div>
+      </div>
+
+      <aside class="panel qris-panel">
+        <div class="qris-card">
+          <div class="qris-label">SCAN QRIS</div>
+          <img class="qris-img" src="assets/images/qris-payment.png" alt="QRIS pembayaran KadoDigital">
+          <div class="merchant">R WALLET, Service</div>
+          <p class="merchant-sub">QRIS • Semua aplikasi pembayaran yang mendukung QRIS</p>
+          <div class="qris-actions">
+            <a class="mini-btn" href="assets/images/qris-payment.png" target="_blank" rel="noopener">Buka QRIS</a>
+            <a class="mini-btn" href="assets/images/qris-payment.png" download="QRIS-KadoDigital.png">Simpan QRIS</a>
+          </div>
+        </div>
+
+        <a id="whatsappBtn" class="wa-btn disabled" href="#" target="_blank" rel="noopener">Saya Sudah Bayar — Kirim Bukti di WhatsApp</a>
+        <p class="note">Pembayaran belum otomatis diverifikasi. Link kado tetap berstatus pending sampai bukti pembayaran dicek admin.</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const PRICE = 5000;
+      const WHATSAPP = "6282385827645";
+      const params = new URLSearchParams(window.location.search);
+      const id = (params.get("id") || "").trim().toLowerCase();
+      const template = (params.get("template") || "").trim();
+
+      const prettyTemplate = template
+        ? template.split("-").filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(" ")
+        : "-";
+
+      document.getElementById("orderId").textContent = id || "-";
+      document.getElementById("templateName").textContent = prettyTemplate;
+
+      const btn = document.getElementById("whatsappBtn");
+      const error = document.getElementById("paymentError");
+
+      if (!id) {
+        error.style.display = "block";
+        return;
+      }
+
+      const orderLink = window.location.origin + "/?id=" + encodeURIComponent(id);
+      const message = [
+        "Halo Kak, saya sudah melakukan pembayaran QRIS untuk KadoDigital.",
+        "",
+        "Order ID: " + id,
+        "Template: " + prettyTemplate,
+        "Total: Rp" + PRICE.toLocaleString("id-ID"),
+        "Link pesanan: " + orderLink,
+        "",
+        "Saya lampirkan screenshot bukti pembayaran di chat ini ya."
+      ].join("\n");
+
+      btn.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(message);
+      btn.classList.remove("disabled");
+    })();
+  </script>
+</body>
+</html>
