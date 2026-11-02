@@ -3,296 +3,382 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KadoDigital - Jasa Website Kejutan & Portofolio</title>
+  <meta name="theme-color" content="#2b1720" />
+  <title>KadoDigital — Website Kejutan yang Terasa Personal</title>
 
-    <!-- SCRIPT ROUTER LINK KADO PENDEK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/supabase.js"></script>
   <script>
-    // 1. Cek apakah ada '?id=' di URL
     const urlParamsRouter = new URLSearchParams(window.location.search);
     const idKadoCek = urlParamsRouter.get('id');
-  
+
     if (idKadoCek) {
-      // 2. Munculkan layar loading sementara
-      document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#fff; font-family:sans-serif;'>Membuka kado... 🎁</h2></div>");
-  
-      // 3. Tarik data template dari Supabase
+      document.write("<div style='position:fixed;inset:0;background:#24151b;display:grid;place-items:center;z-index:99999;color:#fff7f2;font-family:system-ui,sans-serif;text-align:center;padding:24px'><div><div style='font-size:42px;margin-bottom:12px'>🎁</div><h2 style='margin:0 0 8px'>Membuka kado...</h2><p style='margin:0;color:#d9bfc7'>Sebentar ya, lagi cari cerita yang tepat.</p></div></div>");
+
       const supabaseRouter = window.KadoDigital.createSupabaseClient();
-  
+
       async function arahkanKado() {
-      const { data, error } = await supabaseRouter
-        .rpc('get_kado_route_by_id', { p_id_kado: idKadoCek })
-        .single();
+        const { data, error } = await supabaseRouter
+          .rpc('get_kado_route_by_id', { p_id_kado: idKadoCek })
+          .single();
 
-      if (error || !data) {
-        document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#ff4d4d; font-family:sans-serif;'>Kado tidak ditemukan 🥺</h2></div>");
-        return;
-      }
+        if (error || !data) {
+          document.write("<div style='position:fixed;inset:0;background:#24151b;display:grid;place-items:center;z-index:99999;color:#fff7f2;font-family:system-ui,sans-serif;text-align:center;padding:24px'><div><div style='font-size:42px;margin-bottom:12px'>🥺</div><h2 style='margin:0 0 8px'>Kado tidak ditemukan</h2><p style='margin:0;color:#d9bfc7'>Cek lagi link yang kamu buka ya.</p></div></div>");
+          return;
+        }
 
-      if (data.status !== 'active') {
-        document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#fff; font-family:sans-serif;'>Kado belum diaktifkan ⏳</h2></div>");
-        return;
-      }
+        if (data.status !== 'active') {
+          document.write("<div style='position:fixed;inset:0;background:#24151b;display:grid;place-items:center;z-index:99999;color:#fff7f2;font-family:system-ui,sans-serif;text-align:center;padding:24px'><div><div style='font-size:42px;margin-bottom:12px'>⏳</div><h2 style='margin:0 0 8px'>Kado belum diaktifkan</h2><p style='margin:0;color:#d9bfc7'>Coba buka lagi setelah admin mengaktifkannya.</p></div></div>");
+          return;
+        }
 
-      if (data.template) {
         const templateAliases = {
           "default-template": "semester-celebration",
           "deeptalk": "deeptalk-template",
           "birthday": "birthday-cinema"
         };
+
         const templateSlug = templateAliases[data.template] || data.template;
 
-        // 1. Set default folder (kebanyakan template ada di sini)
-        let kategoriFolder = "pasangan"; 
+        if (!templateSlug) return;
 
-        // 2. Buat pengecualian untuk template yang beda folder
-        // Jika nanti ada template baru di folder lain, tambahkan di sini
-        if (templateSlug === "modern-resume") {
-            kategoriFolder = "portofolio"; // Arahkan ke folder portofolio
-        }
+        let kategoriFolder = "pasangan";
+        if (templateSlug === "modern-resume") kategoriFolder = "portofolio";
 
-        // 3. Arahkan secara instan ke folder kategori yang tepat
-        window.location.replace(`/templates/${kategoriFolder}/${templateSlug}/index.html?id=${idKadoCek}`);
-      } else {
-        document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#ff4d4d; font-family:sans-serif;'>Kado tidak ditemukan 🥺</h2></div>");
+        window.location.replace(
+          `/templates/${kategoriFolder}/${templateSlug}/index.html?id=${encodeURIComponent(idKadoCek)}`
+        );
       }
-    }
-      
+
       arahkanKado();
     }
   </script>
-  
-  <!-- Font Modern: Plus Jakarta Sans -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+  <div class="page-noise" aria-hidden="true"></div>
 
-  <!-- Navbar -->
-  <nav class="navbar">
+  <nav class="navbar" id="navbar">
     <div class="container nav-container">
-      <a href="#" class="logo">Kado<span>Digital</span></a>
-      <ul class="nav-links">
-        <li><a href="#hero">Beranda</a></li>
-        <li><a href="#katalog">Katalog</a></li>
-        <li><a href="#cara-pesan">Cara Pesan</a></li>
-      </ul>
-      <a href="#katalog" class="btn-primary-outline">Buat Web Sekarang</a>
+      <a href="#hero" class="logo" aria-label="KadoDigital">
+        <span class="logo-mark">K</span>
+        <span class="logo-text">KadoDigital</span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Buka menu" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+
+      <div class="nav-menu" id="navMenu">
+        <a href="#katalog">Template</a>
+        <a href="#cara-pesan">Cara pesan</a>
+        <a href="#harga">Harga</a>
+        <a href="#faq">FAQ</a>
+      </div>
+
+      <a href="#katalog" class="nav-cta">Pilih template <span>↗</span></a>
     </div>
   </nav>
 
-<!-- Hero Section (Model Centered & Pastel) -->
-  <header id="hero" class="hero centered-hero">
-    <div class="container hero-content-center">
-      <div class="hero-text-center">
-        <span class="badge pastel-badge">✨ Selesai dalam 3 Menit</span>
-        <h1>Bikin Website Kejutan & Portofolio <br/> <span class="highlight-text">Tanpa Ribet</span></h1>
-        <p>Kirimkan kado digital estetik berupa surat cinta, galeri foto, atau buat web portofolio profesionalmu sendiri secara instan.</p>
-        <div class="hero-buttons-center">
-          <a href="#katalog" class="btn-pastel-primary">Pilih Template</a>
-          <a href="#fitur" class="btn-pastel-secondary">Pelajari Lebih Lanjut</a>
+  <header id="hero" class="hero">
+    <div class="hero-orb orb-a" aria-hidden="true"></div>
+    <div class="hero-orb orb-b" aria-hidden="true"></div>
+
+    <div class="container hero-grid">
+      <div class="hero-copy reveal">
+        <span class="eyebrow">WEBSITE KADO YANG NGGAK TERASA TEMPLATE</span>
+        <h1>Bikin momen kecil terasa <em>lebih berarti.</em></h1>
+        <p class="hero-lead">
+          Ubah foto, pesan, lagu, dan cerita kalian jadi satu pengalaman digital yang personal—siap dibagikan lewat satu link.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#katalog" class="btn btn-primary">Lihat template <span>↓</span></a>
+          <a href="#cara-pesan" class="btn btn-ghost">Lihat cara kerja</a>
+        </div>
+
+        <div class="hero-proof">
+          <div><strong>4</strong><span>template interaktif</span></div>
+          <div><strong>1</strong><span>link unik untuk dibagikan</span></div>
+          <div><strong>0</strong><span>aplikasi tambahan</span></div>
         </div>
       </div>
-      
-      <!-- Mockup Berada di Bawah Teks -->
-      <div class="hero-image-bottom">
-        <div class="mockup-window">
-          <div class="mockup-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-<div class="mockup-body" style="padding: 0;">
-  <img src="assets/images/mockup.png" alt="Contoh Kado Digital" style="width: 100%; height: 100%; object-fit: cover;">
-</div>
-        </div>
+
+      <div class="hero-showcase reveal" id="heroShowcase" aria-label="Preview template KadoDigital">
+        <div class="showcase-glow" aria-hidden="true"></div>
+
+        <a class="preview-stack preview-main" href="templates/pasangan/our-story-anniversary/index.html?id=demo-ourstory" target="_blank" rel="noopener noreferrer">
+          <img src="assets/images/preview-ourstory.svg" alt="Preview Our Story">
+          <span class="preview-chip">Our Story</span>
+        </a>
+
+        <a class="preview-stack preview-back-left" href="templates/pasangan/birthday-cinema/index.html?id=demo-birthdaycinema" target="_blank" rel="noopener noreferrer">
+          <img src="assets/images/preview-birthdaycinema.png" alt="Preview Birthday Cinema">
+          <span class="preview-chip">Birthday</span>
+        </a>
+
+        <a class="preview-stack preview-back-right" href="templates/pasangan/deeptalk-template/index.html?id=demo-deeptalk" target="_blank" rel="noopener noreferrer">
+          <img src="assets/images/preview-deeptalk.png" alt="Preview DeepTalk Night">
+          <span class="preview-chip">DeepTalk</span>
+        </a>
+
+        <div class="floating-note note-one">made for one person ♡</div>
+        <div class="floating-note note-two">music • photos • story</div>
+      </div>
+    </div>
+
+    <div class="hero-marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>ROMANTIC DIGITAL GIFT ✦</span>
+        <span>PERSONAL STORY ✦</span>
+        <span>MUSIC & MEMORIES ✦</span>
+        <span>ONE LINK TO SHARE ✦</span>
+        <span>ROMANTIC DIGITAL GIFT ✦</span>
+        <span>PERSONAL STORY ✦</span>
+        <span>MUSIC & MEMORIES ✦</span>
+        <span>ONE LINK TO SHARE ✦</span>
       </div>
     </div>
   </header>
 
-  <!-- Fitur Utama -->
-  <section id="fitur" class="fitur">
+  <section class="experience-section" id="fitur">
     <div class="container">
-      <div class="fitur-grid">
-        <div class="fitur-card">
-          <div class="icon">🚀</div>
-          <h3>Aktif Instan</h3>
-          <p>Selesai pembayaran, link website unikmu langsung bisa digunakan dan dibagikan.</p>
-        </div>
-        <div class="fitur-card">
-          <div class="icon">🎵</div>
-          <h3>Bebas Pilih Lagu</h3>
-          <p>Tambahkan latar musik favorit untuk membangun suasana yang lebih emosional.</p>
-        </div>
-        <div class="fitur-card">
-          <div class="icon">📸</div>
-          <h3>Galeri Estetik</h3>
-          <p>Tersedia tata letak memukau untuk memajang foto-foto terbaik kalian atau karyamu.</p>
-        </div>
+      <div class="section-heading reveal">
+        <span class="eyebrow">BUKAN CUMA HALAMAN WEB</span>
+        <h2>Yang dikirim itu <em>pengalaman.</em></h2>
+        <p>Setiap template punya cara sendiri untuk bikin orang yang buka link-nya berhenti sebentar, senyum, lalu lanjut sampai akhir.</p>
+      </div>
+
+      <div class="experience-grid">
+        <article class="experience-card reveal">
+          <span class="card-index">01</span>
+          <div class="experience-icon">✦</div>
+          <h3>Interaktif, bukan statis</h3>
+          <p>Kuis memori, kartu pertanyaan, surprise scene, surat digital, sampai galeri yang bergerak.</p>
+        </article>
+
+        <article class="experience-card reveal">
+          <span class="card-index">02</span>
+          <div class="experience-icon">♫</div>
+          <h3>Punya suasana sendiri</h3>
+          <p>Tambahkan lagu favorit agar tiap klik terasa lebih personal dan emosional.</p>
+        </article>
+
+        <article class="experience-card reveal">
+          <span class="card-index">03</span>
+          <div class="experience-icon">♡</div>
+          <h3>Isi sesuai cerita kalian</h3>
+          <p>Nama, foto, surat, tanggal spesial, pesan penutup, sampai detail kecil lainnya bisa diisi sendiri.</p>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- Katalog Template dengan Tab Filter -->
-  <section id="katalog" class="katalog">
+  <section id="katalog" class="catalog-section">
     <div class="container">
-      <div class="section-header">
-        <h2>Jelajahi Koleksi Template Kami</h2>
-        <p>Temukan desain yang sempurna untuk setiap momen spesial atau kebutuhan profesionalmu.</p>
+      <div class="catalog-head reveal">
+        <div>
+          <span class="eyebrow">PILIH VIBE-NYA</span>
+          <h2>Template yang punya <em>karakter.</em></h2>
+        </div>
+        <p>Pilih yang paling cocok dengan momenmu. Preview dulu, baru pakai kalau rasanya pas.</p>
       </div>
 
-      <!-- Tab Buttons -->
-      <div class="tab-container">
-        <button class="tab-btn active" data-filter="all">Semua</button>
-        <button class="tab-btn" data-filter="pasangan">Pasangan</button>
-        <button class="tab-btn" data-filter="portofolio">Portofolio</button>
-        <button class="tab-btn" data-filter="custom">Custom (WA)</button>
+      <div class="tab-container reveal" role="tablist" aria-label="Filter template">
+        <button class="tab-btn active" type="button" data-filter="all">Semua</button>
+        <button class="tab-btn" type="button" data-filter="pasangan">Pasangan</button>
+        <button class="tab-btn" type="button" data-filter="custom">Custom</button>
       </div>
 
-      <!-- Template Grid -->
       <div class="template-grid" id="templateGrid">
-        
-        <!-- Item: Pasangan 1 -->
-        <div class="template-card pasangan">
-          <div class="card-img" style="background-image: url('assets/images/preview-semester.png'); background-size: cover; background-position: center;"></div>
-          <div class="card-body">
-            <span class="category-tag tag-pink">Score Semester</span>
+        <article class="template-card pasangan featured reveal" data-card>
+          <div class="template-media">
+            <img src="assets/images/preview-ourstory.svg" alt="Preview Our Story Anniversary">
+            <span class="template-badge">Featured</span>
+            <span class="template-number">01</span>
+          </div>
+          <div class="template-content">
+            <div class="template-meta"><span>Anniversary</span><span>Interactive story</span></div>
+            <h3>Our Story</h3>
+            <p>Memory quiz, timeline, gallery, love letter, coupon, music, dan final surprise dalam satu cerita.</p>
+            <div class="template-actions">
+              <a href="templates/pasangan/our-story-anniversary/index.html?id=demo-ourstory" target="_blank" rel="noopener noreferrer" class="btn-preview">Preview</a>
+              <a href="order.html?template=our-story-anniversary" class="btn-order">Gunakan <span>↗</span></a>
+            </div>
+          </div>
+        </article>
+
+        <article class="template-card pasangan reveal" data-card>
+          <div class="template-media">
+            <img src="assets/images/preview-birthdaycinema.png" alt="Preview Birthday Cinema">
+            <span class="template-number">02</span>
+          </div>
+          <div class="template-content">
+            <div class="template-meta"><span>Birthday</span><span>Cinematic</span></div>
+            <h3>Birthday Cinema</h3>
+            <p>Perjalanan ulang tahun yang terasa seperti film pendek—dengan surat, timeline, reason jar, dan hadiah terakhir.</p>
+            <div class="template-actions">
+              <a href="templates/pasangan/birthday-cinema/index.html?id=demo-birthdaycinema" target="_blank" rel="noopener noreferrer" class="btn-preview">Preview</a>
+              <a href="order.html?template=birthday-cinema" class="btn-order">Gunakan <span>↗</span></a>
+            </div>
+          </div>
+        </article>
+
+        <article class="template-card pasangan reveal" data-card>
+          <div class="template-media">
+            <img src="assets/images/preview-deeptalk.png" alt="Preview DeepTalk Night">
+            <span class="template-number">03</span>
+          </div>
+          <div class="template-content">
+            <div class="template-meta"><span>Couple game</span><span>Camera mode</span></div>
+            <h3>DeepTalk Night</h3>
+            <p>Kartu pertanyaan, challenge kecil, wishlist berdua, kamera, dan hasil kenangan yang bisa disimpan.</p>
+            <div class="template-actions">
+              <a href="templates/pasangan/deeptalk-template/index.html?id=demo-deeptalk" target="_blank" rel="noopener noreferrer" class="btn-preview">Preview</a>
+              <a href="order.html?template=deeptalk-template" class="btn-order">Gunakan <span>↗</span></a>
+            </div>
+          </div>
+        </article>
+
+        <article class="template-card pasangan reveal" data-card>
+          <div class="template-media">
+            <img src="assets/images/preview-semester.png" alt="Preview Semester Celebration">
+            <span class="template-number">04</span>
+          </div>
+          <div class="template-content">
+            <div class="template-meta"><span>Celebration</span><span>Password protected</span></div>
             <h3>Semester Celebration</h3>
-            <p>Desain manis dengan fitur pencapaian untuk merayakan kelulusan/semester.</p>
-            <div class="card-actions">
-              <!-- Ubah link pada tombol Preview -->
-              <a href="templates/pasangan/semester-celebration/index.html?id=preview-semester" class="btn-preview">Preview</a>
-              <a href="order.html?template=semester-celebration" class="btn-order">Gunakan</a>
+            <p>Fake academic loading yang berubah jadi surprise manis, lengkap dengan galeri, surat, reward, dan musik.</p>
+            <div class="template-actions">
+              <a href="templates/pasangan/semester-celebration/index.html?id=preview-semester" target="_blank" rel="noopener noreferrer" class="btn-preview">Preview</a>
+              <a href="order.html?template=semester-celebration" class="btn-order">Gunakan <span>↗</span></a>
             </div>
-            <p class="demo-hint">Demo 👉 User: <strong>123</strong> | Pass: <strong>123</strong></p>
+            <p class="demo-hint">Demo login: <strong>123</strong> / <strong>123</strong></p>
           </div>
-        </div>
+        </article>
 
-       <!-- KARTU 2: DEEPTALK NIGHT -->
-        <div class="template-card pasangan">
-          <div class="card-img" style="background-image: url('assets/images/preview-deeptalk.png'); background-size: cover; background-position: center;"></div>
-            <div class="card-body">
-            <span class="category-tag tag-blue">interaktif</span>
-            <h3>DeepTalk Night ✨ 🌙</h3>
-            <p>Kartu pertanyaan interaktif untuk sesi ngobrol dari hati ke hati bersama pasangan.</p>
-            
-            <div class="card-actions">
-              <a href="templates/pasangan/deeptalk-template/index.html?id=demo-deeptalk" target="_blank" class="btn-preview">Preview</a>
-              <a href="order.html?template=deeptalk-template" class="btn-order">Gunakan</a>
-            </div>
+        <article class="template-card custom custom-card reveal" data-card>
+          <div class="custom-visual">
+            <span class="custom-spark">✦</span>
+            <span class="custom-heart">♡</span>
+            <p>your idea<br><em>your own website</em></p>
           </div>
-        </div>
-
-       <!-- KARTU 3: BIRTHDAY -->
-        <div class="template-card pasangan">
-          <div class="card-img" style="background-image: url('assets/images/preview-birthdaycinema.png'); background-size: cover; background-position: center;"></div>
-            <div class="card-body">
-            <span class="category-tag tag-orange">Birthday</span>
-            <h3>Birthday Cinema 💕</h3>
-            <p>Rayakan ulang tahun pasanganmu lebih romantis</p>
-            
-            <div class="card-actions">
-              <a href="templates/pasangan/birthday-cinema/index.html?id=demo-birthdaycinema" target="_blank" class="btn-preview">Preview</a>
-              <a href="order.html?template=birthday-cinema" class="btn-order">Gunakan</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- KARTU: OUR STORY ANNIVERSARY -->
-        <div class="template-card pasangan">
-          <div class="card-img" style="background-image: url('assets/images/preview-ourstory.svg'); background-size: cover; background-position: center;"></div>
-            <div class="card-body">
-            <span class="category-tag tag-orange">Anniversary</span>
-            <h3>Our Story 📖❤️</h3>
-            <p>Jurnal kenangan digital interaktif dengan desain editorial premium dan kuis memori romantis.</p>
-            
-            <div class="card-actions">
-              <a href="templates/pasangan/our-story-anniversary/index.html?id=demo-ourstory" target="_blank" class="btn-preview">Preview</a>
-              <a href="order.html?template=our-story-anniversary" class="btn-order">Gunakan</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Item: Custom (WA) -->
-        <div class="template-card custom">
-          <div class="card-img" style="background-color: #e15f41;"></div>
-          <div class="card-body">
-            <span class="category-tag tag-orange">Premium</span>
+          <div class="template-content">
+            <div class="template-meta"><span>Custom</span><span>By request</span></div>
             <h3>Custom Design</h3>
-            <p>Punya ide spesifik? Tim kami siap membuatkan website eksklusif hanya untukmu.</p>
-            <div class="card-actions">
-              <a href="https://wa.me/+6282385827645?text=Halo%20saya%20mau%20pesan%20desain%20custom" target="_blank" class="btn-order wa-btn">Konsultasi via WhatsApp</a>
+            <p>Punya konsep yang nggak cocok dimasukin ke template? Ceritakan idenya, nanti dibahas lewat WhatsApp.</p>
+            <div class="template-actions single">
+              <a href="https://wa.me/6282385827645?text=Halo%20saya%20mau%20pesan%20desain%20custom" target="_blank" rel="noopener noreferrer" class="btn-order">Konsultasi via WhatsApp <span>↗</span></a>
             </div>
           </div>
-        </div>
-
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- Cara Pesan -->
-  <section id="cara-pesan" class="cara-pesan">
+  <section id="cara-pesan" class="process-section">
+    <div class="container process-grid">
+      <div class="process-copy reveal">
+        <span class="eyebrow">DARI IDE JADI LINK</span>
+        <h2>Pesannya simpel.<br><em>Hasilnya tetap personal.</em></h2>
+        <p>Nggak perlu ngerti coding. Kamu cukup isi cerita dan upload bahan yang dibutuhkan.</p>
+      </div>
+
+      <div class="process-steps">
+        <article class="process-step reveal">
+          <span>01</span>
+          <div><h3>Pilih template</h3><p>Preview dulu sampai nemu vibe yang paling cocok.</p></div>
+        </article>
+        <article class="process-step reveal">
+          <span>02</span>
+          <div><h3>Isi cerita & upload foto</h3><p>Masukkan nama, pesan, lagu, tanggal, dan foto sesuai template.</p></div>
+        </article>
+        <article class="process-step reveal">
+          <span>03</span>
+          <div><h3>Kirim order via WhatsApp</h3><p>Setelah form selesai, detail order dan link otomatis disiapkan untuk dikirim.</p></div>
+        </article>
+        <article class="process-step reveal">
+          <span>04</span>
+          <div><h3>Link diaktifkan</h3><p>Setelah pembayaran dikonfirmasi, admin mengaktifkan website dan link siap dibagikan.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="harga" class="pricing-section">
     <div class="container">
-      <div class="section-header">
-        <h2>Cara Kerja yang Sangat Mudah</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h4>Pilih Template</h4>
-          <p>Jelajahi galeri desain dan temukan yang paling pas.</p>
+      <div class="pricing-shell reveal">
+        <div class="pricing-copy">
+          <span class="eyebrow light">HARGA TEMPLATE</span>
+          <h2>Satu kado digital.<br><em>Satu link yang bisa disimpan.</em></h2>
+          <p>Untuk template siap pakai. Desain custom dibahas terpisah lewat WhatsApp.</p>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h4>Isi Form & Foto</h4>
-          <p>Masukkan pesan, nama, lagu, dan upload fotomu.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h4>Bayar via QRIS</h4>
-          <p>Selesaikan pembayaran aman dan otomatis.</p>
-        </div>
-        <div class="step">
-          <div class="step-number">4</div>
-          <h4>Web Selesai!</h4>
-          <p>Link unik langsung siap dikirimkan.</p>
+
+        <div class="pricing-card">
+          <span class="pricing-label">Mulai dari</span>
+          <div class="price-row"><span>Rp</span><strong>25.000</strong></div>
+          <ul>
+            <li><span>✓</span> Template interaktif pilihanmu</li>
+            <li><span>✓</span> Foto sesuai kapasitas template</li>
+            <li><span>✓</span> Musik background</li>
+            <li><span>✓</span> Link unik siap dibagikan</li>
+            <li><span>✓</span> Tanpa watermark</li>
+          </ul>
+          <a href="#katalog" class="btn btn-light">Pilih template sekarang</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Harga -->
-  <section id="harga" class="harga">
-    <div class="container">
-      <div class="pricing-card">
-        <h3>Paket Sekali Bayar</h3>
-        <div class="price">
-          <span class="coret">Rp 50.000</span>
-          <h2>Rp 25.000</h2>
-        </div>
-        <ul>
-          <li>✅ Upload hingga 6 Foto</li>
-          <li>✅ Custom Link (namamu.com/dia)</li>
-          <li>✅ Bebas Pilih Lagu Background</li>
-          <li>✅ Aktif selama 30 Hari</li>
-          <li>✅ Tanpa Watermark Logo Kami</li>
-        </ul>
-        <a href="#katalog" class="btn-primary" style="width: 100%; display: block; text-align: center; margin-top: 20px;">Mulai Sekarang</a>
+  <section id="faq" class="faq-section">
+    <div class="container faq-grid">
+      <div class="section-heading reveal">
+        <span class="eyebrow">SEBELUM PESAN</span>
+        <h2>Pertanyaan yang biasanya muncul.</h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item reveal">
+          <summary>Apakah harus install aplikasi?</summary>
+          <p>Nggak. Semua dibuka lewat browser dari satu link.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Bisa lihat demo dulu?</summary>
+          <p>Bisa. Setiap kartu template punya tombol Preview yang bisa dibuka sebelum pesan.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Bisa pakai foto dan lagu sendiri?</summary>
+          <p>Bisa. Form order menyesuaikan kebutuhan masing-masing template.</p>
+        </details>
+        <details class="faq-item reveal">
+          <summary>Kalau mau desain yang beda total?</summary>
+          <p>Pilih Custom Design dan kirim konsepnya lewat WhatsApp untuk dibahas terpisah.</p>
+        </details>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container footer-content">
-      <div class="brand">
-        <h2>Kado<span>Digital</span></h2>
-        <p>Mengubah kenangan dan karyamu menjadi pengalaman digital yang berkesan.</p>
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <a href="#hero" class="logo footer-logo">
+          <span class="logo-mark">K</span>
+          <span class="logo-text">KadoDigital</span>
+        </a>
+        <p>Mengubah foto, pesan, dan lagu jadi pengalaman digital yang terasa lebih personal.</p>
       </div>
-      <div class="copyright">
-        <p>&copy; 2026 KadoDigital. All rights reserved.</p>
+
+      <div class="footer-links">
+        <a href="#katalog">Template</a>
+        <a href="#cara-pesan">Cara pesan</a>
+        <a href="#harga">Harga</a>
       </div>
+
+      <p class="copyright">© <span id="currentYear">2026</span> KadoDigital</p>
     </div>
   </footer>
 
