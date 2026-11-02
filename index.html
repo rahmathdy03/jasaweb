@@ -23,12 +23,20 @@
   
       async function arahkanKado() {
       const { data, error } = await supabaseRouter
-        .from('pesanan')
-        .select('template')
-        .eq('id_kado', idKadoCek)
+        .rpc('get_kado_route_by_id', { p_id_kado: idKadoCek })
         .single();
 
-      if (data && data.template) {
+      if (error || !data) {
+        document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#ff4d4d; font-family:sans-serif;'>Kado tidak ditemukan 🥺</h2></div>");
+        return;
+      }
+
+      if (data.status !== 'active') {
+        document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#fff; font-family:sans-serif;'>Kado belum diaktifkan ⏳</h2></div>");
+        return;
+      }
+
+      if (data.template) {
         // 1. Set default folder (kebanyakan template ada di sini)
         let kategoriFolder = "pasangan"; 
 
