@@ -105,3 +105,16 @@ Final Surprise
 ```
 
 Form order Our Story membutuhkan minimal 3 dan maksimal 6 foto. Tiga foto pertama dipakai untuk Memory Quiz dan `caption_1` sampai `caption_3` menjadi jawaban yang benar.
+
+
+## Birthday Cinema
+
+Status: hardened dan siap dipakai.
+
+- Data customer tidak lagi dirender dengan `innerHTML`.
+- Tidak ada fallback data palsu ketika kado gagal dimuat.
+- Timeline, surat, alasan sayang, dan kupon memakai DOM API + `textContent`.
+- Asset hadiah menggunakan file lokal `assets/img/kado.png`.
+- Inline `onclick` / `onerror` di halaman utama sudah dihapus.
+- Upload Birthday Cinema dibatasi maksimal 4 foto.
+- DeepTalk Night divalidasi tepat 2 foto sesuai desain template.
