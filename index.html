@@ -7,6 +7,7 @@
 
     <!-- SCRIPT ROUTER LINK KADO PENDEK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js"></script>
   <script>
     // 1. Cek apakah ada '?id=' di URL
     const urlParamsRouter = new URLSearchParams(window.location.search);
@@ -17,9 +18,7 @@
       document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#fff; font-family:sans-serif;'>Membuka kado... 🎁</h2></div>");
   
       // 3. Tarik data template dari Supabase
-      const SUPABASE_URL = 'https://rvsrazqskmtpwyzjnnfm.supabase.co/'; 
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2c3JhenFza210cHd5empubmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTM2OTcsImV4cCI6MjEwMTQyOTY5N30.8pfXz_0ZTG8c2K5eP02kNHwg85MV2WEpBL1mpl0Ah9I';
-      const supabaseRouter = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const supabaseRouter = window.KadoDigital.createSupabaseClient();
   
       async function arahkanKado() {
       const { data, error } = await supabaseRouter
