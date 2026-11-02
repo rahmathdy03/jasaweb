@@ -33,10 +33,8 @@ async function initKado() {
 
   try {
     const { data, error } = await supabaseClient
-      .from('pesanan')
-      .select('*')
-      .eq('id_kado', idKado)
-      .single();
+      .rpc('get_kado_by_id', { p_id_kado: idKado })
+            .single();
 
     if (error) throw error;
     
