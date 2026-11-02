@@ -30,6 +30,71 @@ function cleanText(value, fallback = "") {
   return isUsable(value) ? String(value).trim() : fallback;
 }
 
+// Membaca rata-rata luminance foto background agar teks di atas foto
+// otomatis berganti antara tema terang dan gelap.
+function getAverageImageLuminance(imageUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 32;
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) throw new Error('Canvas tidak tersedia.');
+
+        ctx.drawImage(img, 0, 0, size, size);
+        const pixels = ctx.getImageData(0, 0, size, size).data;
+
+        let total = 0;
+        let count = 0;
+
+        for (let i = 0; i < pixels.length; i += 4) {
+          const alpha = pixels[i + 3] / 255;
+          if (alpha < 0.15) continue;
+
+          // Perceived luminance (0 = hitam, 1 = putih).
+          const r = pixels[i] / 255;
+          const g = pixels[i + 1] / 255;
+          const b = pixels[i + 2] / 255;
+          total += (0.2126 * r + 0.7152 * g + 0.0722 * b) * alpha;
+          count++;
+        }
+
+        if (!count) throw new Error('Foto tidak memiliki pixel yang bisa dianalisis.');
+        resolve(total / count);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    img.onerror = () => reject(new Error('Foto background gagal dianalisis.'));
+    img.src = imageUrl;
+  });
+}
+
+async function applyAdaptiveSceneContrast(imageUrl) {
+  document.body.classList.remove('scene-light', 'scene-dark');
+
+  try {
+    const luminance = await getAverageImageLuminance(imageUrl);
+
+    // 0.60 dipilih agak konservatif: foto yang cukup terang langsung
+    // menggunakan teks gelap agar tidak tenggelam pada area putih.
+    const isLight = luminance >= 0.60;
+    document.body.classList.add(isLight ? 'scene-light' : 'scene-dark');
+    document.body.dataset.backgroundLuminance = luminance.toFixed(3);
+  } catch (error) {
+    console.warn('Gagal membaca kontras background, memakai mode gelap:', error);
+    document.body.classList.add('scene-dark');
+  }
+}
+
 function showTemplateError(title, message) {
   const wrapper = document.createElement('main');
   wrapper.className = 'deeptalk-error-screen';
@@ -111,11 +176,19 @@ function terapkanDataKeTemplate() {
   }
 
   if (isUsable(dataKado.link_foto_2)) {
-    document.body.style.backgroundImage = `url("${String(dataKado.link_foto_2).trim()}")`;
+    const backgroundPhotoUrl = String(dataKado.link_foto_2).trim();
+
+    document.body.style.backgroundImage = `url("${backgroundPhotoUrl}")`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center center';
     document.body.style.backgroundRepeat = 'no-repeat';
     document.body.style.backgroundAttachment = 'fixed';
+
+    // Tidak perlu menunggu hasil analisis untuk merender template.
+    // Begitu foto selesai dibaca, warna teks diperbarui otomatis.
+    applyAdaptiveSceneContrast(backgroundPhotoUrl);
+  } else {
+    document.body.classList.add('scene-dark');
   }
 
   const namaPengirim = cleanText(dataKado.nama_pengirim, 'Aku');
