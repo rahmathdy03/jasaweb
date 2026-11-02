@@ -63,7 +63,7 @@
                 </div>
 
                 <!-- Tombol Lanjut -->
-                <button id="btn-next-letter" class="btn-next" style="opacity: 0; transition: opacity 1s ease;" onclick="nextScene('page-2-letter', 'page-3-timeline')">Lanjut Perjalanan →</button>
+                <button id="btn-next-letter" class="btn-next" style="opacity: 0; transition: opacity 1s ease;" >Lanjut Perjalanan →</button>
             </div>
         </div>
 
@@ -78,7 +78,7 @@
                 <!-- Polaroid akan dirender otomatis melalui app.js -->
             </div>
 
-            <button class="btn-next" onclick="nextScene('page-3-timeline', 'page-4-jar')">Lanjut Lagi →</button>
+            <button id="btn-next-timeline" class="btn-next" type="button">Lanjut Lagi →</button>
         </div>
 
 <!-- ========================================== -->
@@ -88,15 +88,15 @@
             <h2 class="title-gold">Alasan Kenapa Sayang</h2>
             <p class="subtitle">Sentuh toplesnya untuk melihat isi hatiku.</p>
             
-            <div class="jar-container glow-halo" onclick="pickReason()">
+            <div id="reason-jar" class="jar-container glow-halo" role="button" tabindex="0" aria-label="Buka alasan kenapa sayang">
                 <!-- Gunakan path lokal assets gambar toples kamu -->
-                <img src="assets/img/toples.png" alt="Toples Alasan" class="jar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3063/3063823.png'">
+                <img src="assets/img/toples.png" alt="Toples Alasan" class="jar-img">
             </div>
             <div class="instruction">Klik Toplesnya! 👆</div>
 
             <div id="reason-paper" class="paper-popup hidden"></div>
 
-            <button class="btn-next" onclick="nextScene('page-4-jar', 'page-5-gift')">Buka Hadiah Terakhir →</button>
+            <button id="btn-next-jar" class="btn-next" type="button">Buka Hadiah Terakhir →</button>
         </div>
 
         <!-- ========================================== -->
@@ -106,9 +106,9 @@
             <h2 class="title-gold">Hadiah Spesial Untukmu</h2>
             <p class="subtitle">Ketuk kotak kado di bawah ini.</p>
             
-            <div class="gift-container glow-halo" onclick="openGift()">
+            <div id="gift-box" class="gift-container glow-halo" role="button" tabindex="0" aria-label="Buka hadiah terakhir">
                 <!-- Gunakan path lokal assets gambar kado kamu -->
-                <img src="assets/img/kado.jpg" alt="Kotak Kado" class="gift-box-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4213/4213856.png'">
+                <img src="assets/img/kado.png" alt="Kotak Kado" class="gift-box-img">
             </div>
 
             <div id="gift-content" class="hidden">
