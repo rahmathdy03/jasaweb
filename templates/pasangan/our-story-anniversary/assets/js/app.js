@@ -275,7 +275,7 @@ function renderQuiz(data) {
 
     card.append(topLine, imageWrap, question, options, feedback);
     game.appendChild(card);
-    setupTiltCards(card);
+    setupTiltCards(game);
   };
 
   showRound();
@@ -304,6 +304,11 @@ function enterMainStory() {
 
   setupRevealObserver();
   setupTiltCards(document);
+
+  const floatingMusic = document.getElementById("floating-music");
+  if (document.getElementById("bgm").getAttribute("src")) {
+    floatingMusic.classList.remove("hidden");
+  }
 
   requestAnimationFrame(() => {
     document.querySelectorAll("#hero .reveal").forEach((element) => {
@@ -456,7 +461,6 @@ function setupMusic(data) {
   if (!musicUrl) return;
 
   section.classList.remove("hidden");
-  floating.classList.remove("hidden");
   audio.src = musicUrl;
   audio.volume = 0.55;
 
