@@ -111,9 +111,60 @@ function toggleModal(modalId) {
 // 4. FITUR MANAJEMEN PESANAN (Tarik, ACC, Hapus Data)
 // =========================================================================
 
+function clearElement(element) {
+    element.replaceChildren();
+}
+
+function appendTableMessage(tbody, message, { isError = false } = {}) {
+    clearElement(tbody);
+
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+
+    cell.colSpan = 5;
+    cell.textContent = message;
+    cell.style.textAlign = 'center';
+
+    if (isError) {
+        cell.style.color = 'var(--danger)';
+    }
+
+    row.appendChild(cell);
+    tbody.appendChild(row);
+}
+
+function createStatusBadge(status) {
+    const badge = document.createElement('span');
+    const isActive = status === 'active';
+
+    badge.className = `badge ${isActive ? 'badge-active' : 'badge-pending'}`;
+    badge.textContent = isActive ? 'Active' : 'Pending';
+
+    return badge;
+}
+
+function createActionButton(className, title, text, handler) {
+    const button = document.createElement('button');
+
+    button.type = 'button';
+    button.className = `btn-sm ${className}`;
+    button.title = title;
+    button.textContent = text;
+    button.addEventListener('click', handler);
+
+    return button;
+}
+
+function buildGiftUrl(template, idKado) {
+    const safeTemplate = encodeURIComponent(String(template ?? ''));
+    const safeIdKado = encodeURIComponent(String(idKado ?? ''));
+
+    return `/templates/pasangan/${safeTemplate}/index.html?id=${safeIdKado}`;
+}
+
 async function fetchPesanan() {
     const tbody = document.querySelector('#sec-pesanan tbody');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Mencari data pesanan... ⏳</td></tr>';
+    appendTableMessage(tbody, 'Mencari data pesanan... ⏳');
 
     try {
         const { data, error } = await supabaseClient
@@ -124,63 +175,101 @@ async function fetchPesanan() {
         if (error) throw error;
 
         renderTabelPesanan(data);
-        updateDashboardStats(data); 
+        updateDashboardStats(data);
 
     } catch (err) {
         console.error(err);
-        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger); text-align:center;">Gagal memuat data: ${err.message}</td></tr>`;
+        appendTableMessage(tbody, `Gagal memuat data: ${err.message}`, { isError: true });
     }
 }
 
-// B. Mencetak data ke tabel HTML
+// B. Mencetak data ke tabel HTML tanpa menyisipkan data user melalui innerHTML.
 function renderTabelPesanan(data) {
     const tbody = document.querySelector('#sec-pesanan tbody');
-    tbody.innerHTML = ''; 
-
-    // Tampilkan 5 pesanan terbaru di Ringkasan (Dashboard)
     const recentTable = document.querySelector('#sec-dashboard table');
-    recentTable.innerHTML = '';
+
+    clearElement(tbody);
+    clearElement(recentTable);
 
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk.</td></tr>';
+        appendTableMessage(tbody, 'Belum ada pesanan masuk.');
         return;
     }
 
     data.forEach((item, index) => {
-        // --- 1. Cetak ke Tabel Utama (Tab Pesanan) ---
-        const statusBadge = item.status === 'active' 
-            ? `<span class="badge badge-active">Active</span>` 
-            : `<span class="badge badge-pending">Pending</span>`;
+        // --- 1. Tabel utama ---
+        const row = document.createElement('tr');
 
-        const btnAcc = item.status !== 'active'
-            ? `<button class="btn-sm btn-acc" onclick="accPesanan('${item.id}')" title="Aktifkan">✔️ ACC</button>`
-            : '';
+        const idCell = document.createElement('td');
+        const idStrong = document.createElement('b');
+        idStrong.textContent = String(item.id_kado ?? '');
+        idCell.appendChild(idStrong);
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><b>${item.id_kado}</b></td>
-            <td>${item.nama_pengirim} & ${item.nama_penerima}</td>
-            <td style="text-transform: capitalize;">${item.template}</td>
-            <td>${statusBadge}</td>
-            <td>
-                ${btnAcc}
-                <a href="/templates/pasangan/${item.template}/index.html?id=${item.id_kado}" target="_blank">
-                    <button class="btn-sm btn-edit" title="Lihat Website Klien">👁️ View</button>
-                </a>
-                <button class="btn-sm btn-del" onclick="hapusPesanan('${item.id}')" title="Hapus Permanen">🗑️</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
+        const clientCell = document.createElement('td');
+        clientCell.textContent = `${String(item.nama_pengirim ?? '')} & ${String(item.nama_penerima ?? '')}`;
 
-        // --- 2. Cetak ke Tabel Aktivitas Terbaru (Dashboard) ---
+        const templateCell = document.createElement('td');
+        templateCell.textContent = String(item.template ?? '');
+        templateCell.style.textTransform = 'capitalize';
+
+        const statusCell = document.createElement('td');
+        statusCell.appendChild(createStatusBadge(item.status));
+
+        const actionCell = document.createElement('td');
+
+        if (item.status !== 'active') {
+            actionCell.appendChild(
+                createActionButton(
+                    'btn-acc',
+                    'Aktifkan',
+                    '✔️ ACC',
+                    () => accPesanan(item.id)
+                )
+            );
+        }
+
+        const viewLink = document.createElement('a');
+        viewLink.href = buildGiftUrl(item.template, item.id_kado);
+        viewLink.target = '_blank';
+        viewLink.rel = 'noopener noreferrer';
+
+        const viewButton = document.createElement('button');
+        viewButton.type = 'button';
+        viewButton.className = 'btn-sm btn-edit';
+        viewButton.title = 'Lihat Website Klien';
+        viewButton.textContent = '👁️ View';
+        viewLink.appendChild(viewButton);
+
+        actionCell.appendChild(viewLink);
+        actionCell.appendChild(
+            createActionButton(
+                'btn-del',
+                'Hapus Permanen',
+                '🗑️',
+                () => hapusPesanan(item.id)
+            )
+        );
+
+        row.append(idCell, clientCell, templateCell, statusCell, actionCell);
+        tbody.appendChild(row);
+
+        // --- 2. Aktivitas terbaru ---
         if (index < 5) {
-            const trRecent = document.createElement('tr');
-            trRecent.innerHTML = `
-                <td><b>${item.id_kado}</b></td>
-                <td>${item.nama_pengirim} & ${item.nama_penerima}</td>
-                <td>${statusBadge}</td>
-            `;
-            recentTable.appendChild(trRecent);
+            const recentRow = document.createElement('tr');
+
+            const recentId = document.createElement('td');
+            const recentIdStrong = document.createElement('b');
+            recentIdStrong.textContent = String(item.id_kado ?? '');
+            recentId.appendChild(recentIdStrong);
+
+            const recentClient = document.createElement('td');
+            recentClient.textContent = `${String(item.nama_pengirim ?? '')} & ${String(item.nama_penerima ?? '')}`;
+
+            const recentStatus = document.createElement('td');
+            recentStatus.appendChild(createStatusBadge(item.status));
+
+            recentRow.append(recentId, recentClient, recentStatus);
+            recentTable.appendChild(recentRow);
         }
     });
 }
