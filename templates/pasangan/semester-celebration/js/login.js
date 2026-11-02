@@ -50,43 +50,36 @@ form.addEventListener("submit", async (event) => {
   }
 
   const usernameInput = document.getElementById("username").value.trim().toLowerCase();
-  const passwordInput = document.getElementById("password").value.trim().toLowerCase();
+  const passwordInput = document.getElementById("password").value.trim();
 
   errorMessage.classList.remove("show");
   button.classList.add("loading");
   button.disabled = true;
 
   try {
-    // Mencari data di database berdasarkan ID yang ada di URL secara dinamis
     const { data, error } = await supabaseClient
-      .rpc('get_kado_by_id', { p_id_kado: orderId })
+      .rpc('verify_kado_login', {
+        p_id_kado: orderId,
+        p_username: usernameInput,
+        p_password: passwordInput
+      })
       .single();
 
-    if (error || !data) {
-      showError("Kado tidak ditemukan di sistem.");
+    if (error || !data?.success || !data?.access_token) {
+      showError("Username atau password salah, atau kado belum aktif.");
       return;
     }
 
-    if (data.status === 'pending') {
-      showError("Kado ini belum diaktifkan oleh Admin.");
-      return;
-    }
+    sessionStorage.setItem("semesterCelebrationAccessToken", data.access_token);
+    sessionStorage.setItem("semesterCelebrationOrderId", orderId);
+    sessionStorage.setItem("semesterCelebrationPlayMusic", "true");
 
-    // Mencocokkan input dengan nama pengirim dan penerima di baris data tersebut
-    if (usernameInput === data.nama_pengirim.toLowerCase() && 
-        passwordInput === data.nama_penerima.toLowerCase()) {
-      
-      localStorage.setItem("semesterCelebrationLoggedIn", "true");
-      localStorage.setItem("semesterCelebrationPlayMusic", "true");
-
-      setTimeout(() => {
-        window.location.href = `loading.html?id=${orderId}`; 
-      }, 1200);
-    } else {
-      showError("Username atau password salah."); 
-    }
+    setTimeout(() => {
+      window.location.href = `loading.html?id=${encodeURIComponent(orderId)}`;
+    }, 1200);
 
   } catch (err) {
+    console.error("Login kado gagal:", err);
     showError("Terjadi kesalahan jaringan.");
   }
 });
