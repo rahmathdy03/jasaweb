@@ -139,6 +139,32 @@ button {
   color: var(--burgundy);
 }
 
+.nav-menu .nav-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid rgba(111, 33, 56, .18);
+  border-radius: 999px;
+  color: var(--burgundy);
+  background: rgba(255, 253, 249, .62);
+}
+
+.nav-menu .nav-admin:hover {
+  color: var(--white);
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+}
+
+.nav-menu .nav-admin span {
+  font-size: .78rem;
+  transition: transform .2s ease;
+}
+
+.nav-menu .nav-admin:hover span {
+  transform: translate(2px, -2px);
+}
+
 .nav-cta {
   display: inline-flex;
   align-items: center;
@@ -1192,6 +1218,20 @@ button {
 
   .nav-menu a:hover {
     background: var(--cream);
+  }
+
+  .nav-menu .nav-admin {
+    margin-top: 5px;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--burgundy);
+    color: var(--white);
+    border-color: var(--burgundy);
+  }
+
+  .nav-menu .nav-admin:hover {
+    background: var(--burgundy-dark);
+    color: var(--white);
   }
 
   .hero {
