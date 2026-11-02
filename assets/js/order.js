@@ -222,6 +222,111 @@ const templateBlueprints = {
         <input type="url" id="linkMusikCustom" placeholder="https://website.com/lagu-favorit.mp3">
       </div>
     </div>
+  `,
+
+  // Template 5: Our Story Anniversary
+  "our-story-anniversary": `
+    <div class="form-card">
+      <div class="step-badge">Langkah 2</div>
+      <h3>Awal Cerita Kalian</h3>
+
+      <div class="input-group">
+        <label>Tanggal Jadian / Tanggal Spesial <span>*</span></label>
+        <input type="date" id="orderTanggal" required>
+        <small>Tanggal ini dipakai untuk relationship counter yang berjalan secara live.</small>
+      </div>
+
+      <div class="input-group">
+        <label>Kalimat Pembuka Anniversary <span>*</span></label>
+        <textarea id="teksHero" rows="3" maxlength="280" placeholder="Contoh: Kalau aku bisa mengulang semuanya, aku tetap akan memilih jalan yang membawaku ke kamu." required></textarea>
+      </div>
+
+      <div class="input-group">
+        <label>Surat Cinta <span>*</span></label>
+        <textarea id="teksSurat" rows="7" maxlength="3000" placeholder="Tulis surat yang nanti akan dibuka dari amplop digital..." required></textarea>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="step-badge">Langkah 3</div>
+      <h3>Memory Quiz & Galeri</h3>
+
+      <div class="input-group">
+        <label>Upload 3–6 Foto Kenangan <span>*</span></label>
+        <input type="file" id="fotoKado" accept="image/jpeg, image/png, image/webp" multiple required>
+        <small>3 foto pertama akan dipakai untuk game tebak foto blur. Maksimal 6 foto.</small>
+      </div>
+
+      <div class="input-group">
+        <label>Jawaban / Caption Foto 1 <span>*</span></label>
+        <input type="text" id="caption1" maxlength="90" placeholder="Contoh: Kencan pertama yang bikin deg-degan" required>
+      </div>
+
+      <div class="input-group">
+        <label>Jawaban / Caption Foto 2 <span>*</span></label>
+        <input type="text" id="caption2" maxlength="90" placeholder="Contoh: Hari kita ketawa tanpa alasan" required>
+      </div>
+
+      <div class="input-group">
+        <label>Jawaban / Caption Foto 3 <span>*</span></label>
+        <input type="text" id="caption3" maxlength="90" placeholder="Contoh: Petualangan kecil favorit kita" required>
+      </div>
+
+      <div class="input-group">
+        <label>Caption Foto 4 / Chapter Tambahan</label>
+        <input type="text" id="caption4" maxlength="90" placeholder="Contoh: Foto yang selalu bikin aku senyum">
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="step-badge">Langkah 4</div>
+      <h3>Hal-Hal yang Kamu Sayang</h3>
+
+      <div class="input-group">
+        <label>Why I Love You <span>*</span></label>
+        <textarea id="alasanSayang" rows="6" maxlength="1600" placeholder="Tulis satu alasan per baris.&#10;Karena kamu membuat rumah terasa seperti seseorang.&#10;Karena aku bisa jadi diriku sendiri di dekatmu.&#10;Karena kamu selalu tahu cara membuatku tertawa." required></textarea>
+        <small>Satu baris akan menjadi satu kartu alasan.</small>
+      </div>
+
+      <div class="input-row" style="display:flex; gap:10px;">
+        <div class="input-group" style="flex:1;">
+          <label>Judul Love Coupon</label>
+          <input type="text" id="kuponJudul" maxlength="70" placeholder="One Unlimited Hug">
+        </div>
+        <div class="input-group" style="flex:1;">
+          <label>Deskripsi Coupon</label>
+          <input type="text" id="kuponDeskripsi" maxlength="160" placeholder="Bisa ditukar kapan saja.">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Pesan Terakhir <span>*</span></label>
+        <textarea id="pesanPenutup" rows="3" maxlength="500" placeholder="Pesan yang muncul di final surprise..." required></textarea>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="step-badge">Langkah 5</div>
+      <h3>Our Song</h3>
+
+      <div class="input-group">
+        <label for="selectMusik">Pilih Lagu Background</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <select id="selectMusik" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:white; font-family:inherit; font-size:14px; color:var(--text-dark);">
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kasihputih.mp3">🎵 Preset 1: Kasih Putih</option>
+            <option value="https://rvsrazqskmtpwyzjnnfm.supabase.co/storage/v1/object/public/musik-kado/kotainitaksamatanpamu.mp3">🎵 Preset 2: Kota Ini Tak Sama Tanpamu</option>
+            <option value="custom">🔗 Masukkan Link Musik Sendiri (Custom)</option>
+          </select>
+          <button type="button" id="btnPreviewMusik" style="padding:10px; border-radius:12px; border:none; background:var(--primary); color:white; cursor:pointer; font-size:18px; display:flex; justify-content:center; align-items:center; width:48px; height:48px;" title="Dengarkan Lagu">▶️</button>
+        </div>
+        <audio id="audioPreview" style="display:none;"></audio>
+      </div>
+
+      <div class="input-group" id="wrapperCustomMusik" style="display:none; margin-top:10px;">
+        <label for="linkMusikCustom">Link Audio (.mp3)</label>
+        <input type="url" id="linkMusikCustom" placeholder="https://website.com/lagu-favorit.mp3">
+      </div>
+    </div>
   `
 };
 
@@ -369,6 +474,15 @@ if(form) {
 
       if (fotoInput && fotoInput.files.length > 0) {
         const files = fotoInput.files;
+
+        if (templateName === 'our-story-anniversary') {
+          if (files.length < 3) {
+            throw new Error("Our Story membutuhkan minimal 3 foto untuk Memory Quiz.");
+          }
+          if (files.length > 6) {
+            throw new Error("Our Story maksimal menggunakan 6 foto.");
+          }
+        }
         
         // Pengaturan Kompresi
         const opsiKompresi = {
