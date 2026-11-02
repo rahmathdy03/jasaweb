@@ -331,52 +331,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT UNTUK NAVIGASI UI (Tanpa Database Dulu) -->
-    <script>
-        // Simulasi Login Sementara
-        function handleLogin(e) {
-            e.preventDefault();
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('adminLayout').style.display = 'flex';
-        }
-
-        // Fungsi Logout
-        function handleLogout() {
-            document.getElementById('adminLayout').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'flex';
-            document.getElementById('adminLoginForm').reset();
-        }
-
-        // Fungsi Pindah-pindah Menu (Tab)
-        function switchMenu(menuId) {
-            // Hapus status aktif dari semua tombol menu
-            const menuItems = document.querySelectorAll('.sidebar-menu li');
-            menuItems.forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-
-            // Sembunyikan semua section
-            const sections = document.querySelectorAll('.admin-section');
-            sections.forEach(sec => sec.classList.remove('active'));
-
-            // Tampilkan section yang dipilih
-            document.getElementById('sec-' + menuId).classList.add('active');
-
-            // Ubah Judul Halaman
-            const titles = {
-                'dashboard': 'Dashboard Ringkasan',
-                'pesanan': 'Manajemen Pesanan',
-                'template': 'Katalog Template',
-                'media': 'Penyimpanan File'
-            };
-            document.getElementById('pageTitle').innerText = titles[menuId];
-        }
-
-        // Fungsi Buka Tutup Modal (Pop-up Form)
-        function toggleModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.toggle('active');
-        }
-    </script>
+    <!-- Logic autentikasi dan dashboard ada di assets/js/admin.js -->
 <!-- PASANG MESIN SUPABASE & ADMIN.JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/admin.js"></script>
