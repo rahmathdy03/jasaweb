@@ -52,7 +52,7 @@ Jangan membuat nama alias baru di database. Nilai kolom `pesanan.template` harus
 - [x] Slug template distandarkan
 - [x] Password Semester Celebration disimpan sebagai bcrypt hash
 - [x] Konten Semester Celebration dilindungi token sesi
-- [ ] Audit dan penyelesaian penuh Our Story Anniversary
+- [x] Our Story Anniversary: memory quiz, counter, timeline, gallery, reasons, music, love letter, coupon, dan final surprise
 
 ## Alur deployment
 
@@ -74,3 +74,34 @@ Perubahan sebaiknya dibuat di branch, dites lewat Vercel Preview, lalu di-merge 
 - Jangan menaruh service-role key Supabase di frontend.
 - Jangan mematikan RLS untuk membuat fitur bekerja.
 - Saat menambah template baru, samakan slug katalog, query `order.html?template=...`, nilai database, dan nama folder template.
+
+
+## Our Story Anniversary
+
+Preview demo menggunakan `id=demo-ourstory`.
+
+Alur template:
+
+```text
+Memory Quiz (3 foto blur)
+        ↓
+Hero Anniversary
+        ↓
+Relationship Counter
+        ↓
+Story Timeline
+        ↓
+3D Memory Gallery
+        ↓
+Why I Love You
+        ↓
+Our Song
+        ↓
+Love Letter
+        ↓
+Love Coupon
+        ↓
+Final Surprise
+```
+
+Form order Our Story membutuhkan minimal 3 dan maksimal 6 foto. Tiga foto pertama dipakai untuk Memory Quiz dan `caption_1` sampai `caption_3` menjadi jawaban yang benar.

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8f1e8"/>
+      <stop offset="1" stop-color="#e8b2b8"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffdf9"/>
+      <stop offset="1" stop-color="#f5e8e0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#4d1828" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="100" cy="120" r="170" fill="#bf6678" opacity=".12"/>
+  <circle cx="1090" cy="710" r="240" fill="#879883" opacity=".12"/>
+  <g opacity=".72" fill="none" stroke="#74263b" stroke-width="3">
+    <path d="M80 620 C160 500 210 690 300 560 S440 590 500 500" stroke-dasharray="10 12"/>
+    <path d="M920 90 C850 190 1040 220 930 340" stroke-dasharray="10 12"/>
+  </g>
+  <g filter="url(#shadow)" transform="translate(205 125) rotate(-6 270 250)">
+    <rect width="540" height="500" rx="22" fill="url(#card)"/>
+    <rect x="34" y="34" width="472" height="360" rx="14" fill="#74263b"/>
+    <circle cx="180" cy="180" r="78" fill="#e4a9b2"/>
+    <circle cx="350" cy="175" r="96" fill="#efb08f" opacity=".88"/>
+    <path d="M120 320 C190 230 260 370 330 270 C380 200 450 270 475 330 L475 394 L68 394 L68 352 Z" fill="#f8f1e8" opacity=".8"/>
+    <text x="270" y="450" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="34" fill="#74263b">our favorite memory</text>
+  </g>
+  <g filter="url(#shadow)" transform="translate(655 210) rotate(8 175 185)">
+    <rect width="350" height="370" rx="18" fill="#fffdf9"/>
+    <rect x="24" y="24" width="302" height="245" rx="12" fill="#aa8ba7"/>
+    <circle cx="175" cy="146" r="82" fill="#e7c0c5" opacity=".86"/>
+    <path d="M92 245 C120 175 190 280 260 205 L326 269 L24 269 Z" fill="#f8f1e8" opacity=".8"/>
+    <text x="175" y="322" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="25" fill="#74263b">little moments</text>
+  </g>
+  <g fill="#74263b">
+    <text x="77" y="90" font-family="Georgia,serif" font-size="54" font-weight="700">Our Story</text>
+    <text x="80" y="132" font-family="Arial,sans-serif" font-size="19" letter-spacing="5" fill="#bf6678">ANNIVERSARY EDITION</text>
+  </g>
+  <g transform="translate(965 125)" fill="#bf6678">
+    <text font-family="Georgia,serif" font-size="62">♥</text>
+  </g>
+  <g transform="translate(95 680)" fill="#74263b" opacity=".8">
+    <text font-family="Georgia,serif" font-size="50">✿</text>
+  </g>
+  <g transform="translate(1050 615)" fill="#c69a58" opacity=".9">
+    <text font-family="Georgia,serif" font-size="58">✦</text>
+  </g>
+</svg>
