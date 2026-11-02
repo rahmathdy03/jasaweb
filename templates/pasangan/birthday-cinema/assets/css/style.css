@@ -330,3 +330,52 @@ body {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     #ambient-fx { display: none; }
 }
+
+/* Accessibility & safe text rendering */
+#typewriter-text {
+    white-space: pre-line;
+}
+
+.jar-container:focus-visible,
+.gift-container:focus-visible {
+    outline: 2px solid #ffd678;
+    outline-offset: 8px;
+    border-radius: 14px;
+}
+
+.template-error-screen {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: radial-gradient(circle at top, #241a49, #0a0a16 65%);
+    color: #f8fafc;
+    text-align: center;
+}
+
+.template-error-card {
+    max-width: 560px;
+    padding: 42px 32px;
+    border: 1px solid rgba(255, 214, 120, .28);
+    border-radius: 24px;
+    background: rgba(255,255,255,.04);
+    box-shadow: 0 25px 70px rgba(0,0,0,.35);
+}
+
+.template-error-icon {
+    color: #ffd678;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.template-error-card h1 {
+    color: #ffd678;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 10px;
+}
+
+.template-error-card p {
+    color: #cbd5e1;
+    line-height: 1.7;
+}
