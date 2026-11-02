@@ -37,17 +37,24 @@
       }
 
       if (data.template) {
+        const templateAliases = {
+          "default-template": "semester-celebration",
+          "deeptalk": "deeptalk-template",
+          "birthday": "birthday-cinema"
+        };
+        const templateSlug = templateAliases[data.template] || data.template;
+
         // 1. Set default folder (kebanyakan template ada di sini)
         let kategoriFolder = "pasangan"; 
 
         // 2. Buat pengecualian untuk template yang beda folder
         // Jika nanti ada template baru di folder lain, tambahkan di sini
-        if (data.template === "modern-resume") {
+        if (templateSlug === "modern-resume") {
             kategoriFolder = "portofolio"; // Arahkan ke folder portofolio
         }
 
         // 3. Arahkan secara instan ke folder kategori yang tepat
-        window.location.replace(`/templates/${kategoriFolder}/${data.template}/index.html?id=${idKadoCek}`);
+        window.location.replace(`/templates/${kategoriFolder}/${templateSlug}/index.html?id=${idKadoCek}`);
       } else {
         document.write("<div style='position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1a2e; display:flex; justify-content:center; align-items:center; z-index:99999;'><h2 style='color:#ff4d4d; font-family:sans-serif;'>Kado tidak ditemukan 🥺</h2></div>");
       }
@@ -173,7 +180,7 @@
             
             <div class="card-actions">
               <a href="templates/pasangan/deeptalk-template/index.html?id=demo-deeptalk" target="_blank" class="btn-preview">Preview</a>
-              <a href="order.html?template=deeptalk" class="btn-order">Gunakan</a>
+              <a href="order.html?template=deeptalk-template" class="btn-order">Gunakan</a>
             </div>
           </div>
         </div>
