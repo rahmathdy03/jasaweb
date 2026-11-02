@@ -19,7 +19,7 @@
     <div class="modal-content">
       <h3 style="color: #fbbf24; font-family: 'Playfair Display', serif; margin-bottom: 10px;">✨ Waktunya Jeda Sejenak</h3>
       <p id="modalActionText" style="font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></p>
-      <button onclick="closeModalAndProceed(event)" class="btn-primary" style="width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);">Udahh dilakuinn 💕</button>
+      <button id="btn-modal-done" type="button" class="btn-primary" style="width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);">Udahh dilakuinn 💕</button>
     </div>
   </div>
   <!-- Audio Background -->
@@ -34,7 +34,7 @@
 <div id="hero-particles"></div>
 
 <!-- Tombol Audio Pojok Kanan Atas -->
-<button id="btn-audio" onclick="toggleAudio()" class="audio-toggle">
+<button id="btn-audio" type="button" class="audio-toggle" aria-label="Putar atau jeda musik">
   <span id="audio-icon">🎵</span>
 </button>
 
@@ -51,7 +51,7 @@
       <div class="duration" id="heroDuration">Menghitung waktu...</div>
     </div>
 
-    <button class="btn-premium" onclick="startPremiumGame(event)">
+    <button id="btn-start-game" type="button" class="btn-premium">
       <span>Tekan sayanggg ✨</span>
     </button>
   </div>
@@ -62,13 +62,18 @@
 </div>
   </section>
 
+  <!-- TRANSISI ANTAR BAB -->
+  <section id="screen-transition" class="screen hidden" aria-hidden="true">
+    <p class="transition-text">Sekarang, waktunya saling mendengar...</p>
+  </section>
+
   <!-- SCREEN 2: MAIN GAME (KARTU) -->
   <section id="screen-game" class="screen hidden">
     <div class="container text-center">
       <h2 class="title-serif text-sm">Sesi DeepTalk</h2>
       <div id="counter" class="counter-text">Pertanyaan 1 dari 10</div>
 
-      <div class="card-container" onclick="flipCard()">
+      <div id="question-card" class="card-container" role="button" tabindex="0" aria-label="Buka kartu pertanyaan">
         <div class="card" id="activeCard">
           <div class="card-face front glass-panel">
             <span class="icon">✨</span>
@@ -81,7 +86,7 @@
       </div>
       
       <div class="nav-buttons">
-        <button id="btnNext" class="btn-outline" onclick="nextCard()">Kartu Selanjutnya ➔</button>
+        <button id="btnNext" type="button" class="btn-outline">Kartu Selanjutnya ➔</button>
       </div>
     </div>
     <div class="clock" id="clock">00:00</div>
@@ -102,7 +107,7 @@
         <textarea id="wishFinka" placeholder="Tulis harapanmu di sini..."></textarea>
       </div>
 
-      <button class="btn-primary w-100" onclick="startCamera()">Simpan Kenangan 📸</button>
+      <button id="btn-open-camera" type="button" class="btn-primary w-100">Simpan Kenangan 📸</button>
     </div>
   </section>
 
@@ -112,7 +117,7 @@
     <div class="camera-wrapper glass-panel">
       <video id="videoElement" autoplay playsinline></video>
     </div>
-    <button class="btn-primary mt-2" onclick="takePhoto()">Jepret! 🤍</button>
+    <button id="btn-take-photo" type="button" class="btn-primary mt-2">Jepret! 🤍</button>
   </section>
 
   <section id="screen-result" class="screen hidden text-center">
