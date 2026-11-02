@@ -483,6 +483,14 @@ if(form) {
             throw new Error("Our Story maksimal menggunakan 6 foto.");
           }
         }
+
+        if (templateName === 'birthday-cinema' && files.length > 4) {
+          throw new Error("Birthday Cinema maksimal menggunakan 4 foto.");
+        }
+
+        if (templateName === 'deeptalk-template' && files.length !== 2) {
+          throw new Error("DeepTalk Night membutuhkan tepat 2 foto.");
+        }
         
         // Pengaturan Kompresi
         const opsiKompresi = {

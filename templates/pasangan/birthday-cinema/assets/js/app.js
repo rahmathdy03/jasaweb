@@ -10,84 +10,99 @@ try {
 
 let dataKado = null;
 
-const fallbackData = {
-    nama_penerima: "Sayang",
-    nama_pengirim: "rahmat",
-    teks_hero: "Happy Birthday",
-    teks_surat: "Terima kasih sudah hadir dan membawa warna terindah dalam setiap perjalanan ini. Semoga hari-hari ke depan senantiasa dipenuhi kebahagiaan untukmu.",
-    link_foto_1: "https://images.unsplash.com/photo-1518199268839-0f6667ec363f?w=400&q=80",
-    link_foto_2: "https://images.unsplash.com/photo-1516589178581-6cd785311b51?w=400&q=80",
-    link_foto_3: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&q=80",
-    link_foto_4: "https://images.unsplash.com/photo-1494774112187-5c2f82ad306f?w=400&q=80",
-    caption_1: "Awal cerita kita",
-    caption_2: "Hari yang menyenangkan",
-    caption_3: "Tawamu favoritku",
-    caption_4: "Selamanya",
-    alasan_sayang: "Karena kamu selalu tahu cara membuatku tersenyum.\nKetulusan hatimu yang selalu membuatku kagum.",
-    kupon_judul: "Kejutan Spesial",
-    kupon_deskripsi: "Bisa diklaim untuk 1 keinginan bebas.",
-    pesan_penutup: "Mari buat lebih banyak kenangan bersama.",
-    latitude: "0.5071", // Titik Lintang Pekanbaru/Indonesia
-    longitude: "101.4451" // Titik Bujur Pekanbaru/Indonesia
-};
+function isUsable(value) {
+    if (value === null || value === undefined) return false;
+    const text = String(value).trim();
+    return text !== "" && text.toLowerCase() !== "null" && text.toLowerCase() !== "undefined";
+}
+
+function cleanText(value, fallback = "") {
+    return isUsable(value) ? String(value).trim() : fallback;
+}
 
 function getSafeData() {
-    return dataKado || fallbackData;
+    return dataKado;
+}
+
+function showBirthdayError(title, message) {
+    const wrapper = document.createElement('main');
+    wrapper.className = 'template-error-screen';
+
+    const card = document.createElement('section');
+    card.className = 'template-error-card';
+
+    const icon = document.createElement('div');
+    icon.className = 'template-error-icon';
+    icon.textContent = '♡';
+
+    const heading = document.createElement('h1');
+    heading.textContent = title;
+
+    const copy = document.createElement('p');
+    copy.textContent = message;
+
+    card.append(icon, heading, copy);
+    wrapper.appendChild(card);
+    document.body.replaceChildren(wrapper);
 }
 
 async function fetchDataPesanan() {
-    if (!supabaseClient) return;
+    if (!supabaseClient) {
+        showBirthdayError('Koneksi belum siap.', 'Supabase gagal diinisialisasi.');
+        return false;
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const idKado = urlParams.get('id');
+    const idKado = cleanText(urlParams.get('id')).toLowerCase();
 
-    if (!idKado) return;
+    if (!idKado) {
+        showBirthdayError('Link kado tidak valid.', 'ID kado tidak ditemukan di URL.');
+        return false;
+    }
 
     try {
         const { data, error } = await supabaseClient
             .rpc('get_kado_by_id', { p_id_kado: idKado })
             .single();
 
-        if (error) throw error;
-        
-        if (data.status === 'pending') {
-            document.body.innerHTML = "<h2 style='text-align:center; margin-top:40vh; color:white; z-index:999; position:relative;'>Kado ini belum diaktifkan. Silakan hubungi admin.</h2>";
-            return;
+        if (error || !data) {
+            throw error || new Error('Data kado tidak ditemukan.');
+        }
+
+        if (data.template !== 'birthday-cinema') {
+            showBirthdayError('Template tidak cocok.', 'Link ini bukan untuk Birthday Cinema.');
+            return false;
         }
 
         dataKado = data;
 
-        // ==========================================
-        // GANTI JUDUL PEMBUKA (HERO) DARI DATABASE
-        // ==========================================
+        const receiver = cleanText(data.nama_penerima, 'Sayang');
         const heroTitle = document.querySelector('.opening-content .title-gold');
-        if (heroTitle && data.teks_hero) {
-            heroTitle.innerText = data.teks_hero;
+        if (heroTitle) {
+            heroTitle.textContent = cleanText(data.teks_hero, `Happy Birthday, ${receiver}`);
         }
 
-        // ==========================================
-        // SETTING AUDIO DARI SUPABASE (link_musik)
-        // ==========================================
         const bgm = document.getElementById('bgm');
-        if (bgm && data.link_musik) {
-            bgm.src = data.link_musik;
+        if (bgm && isUsable(data.link_musik)) {
+            bgm.src = String(data.link_musik).trim();
             bgm.load();
         }
 
-        // ==========================================
-        // PRELOAD GAMBAR POLAROID (ANTI-LEMOT)
-        // ==========================================
-        // Mengambil link dari Supabase, lalu memaksa browser mendownloadnya di balik layar
-        const fotoUrls = [data.link_foto_1, data.link_foto_2, data.link_foto_3, data.link_foto_4];
-        fotoUrls.forEach(url => {
-            if (url && url !== 'null' && url.trim() !== '') {
-                const img = new Image(); // Membuat elemen gambar virtual
-                img.src = url;           // Browser otomatis mengunduh & menyimpan ke cache
-            }
-        });
+        [data.link_foto_1, data.link_foto_2, data.link_foto_3, data.link_foto_4]
+            .filter(isUsable)
+            .forEach((url) => {
+                const img = new Image();
+                img.src = String(url).trim();
+            });
 
+        return true;
     } catch (err) {
-        console.error("Gagal menarik data:", err);
+        console.error('Gagal menarik data Birthday Cinema:', err);
+        showBirthdayError(
+            'Kado belum bisa dibuka.',
+            'Pastikan link benar dan kado sudah diaktifkan oleh admin.'
+        );
+        return false;
     }
 }
 
@@ -105,25 +120,40 @@ function playSceneEntrance(sceneEl) {
 
 function renderTimelinePolaroids() {
     const container = document.getElementById('polaroid-container');
-    if (!container) return;
-    container.innerHTML = '<div class="line"></div>'; 
-
     const activeData = getSafeData();
+    if (!container || !activeData) return;
+
+    container.replaceChildren();
+
+    const line = document.createElement('div');
+    line.className = 'line';
+    container.appendChild(line);
+
     const cards = [];
-    const fallbackImage = "https://images.unsplash.com/photo-1518199268839-0f6667ec363f?w=400&q=80";
 
     for (let i = 1; i <= 4; i++) {
-        let fotoUrl = activeData[`link_foto_${i}`] || fallbackImage;
-        const caption = activeData[`caption_${i}`] || "Kenangan Indah";
-        
+        const fotoUrl = activeData[`link_foto_${i}`];
+        if (!isUsable(fotoUrl)) continue;
+
+        const caption = cleanText(activeData[`caption_${i}`], `Kenangan ${i}`);
+
         const polaroidCard = document.createElement('div');
         polaroidCard.className = 'polaroid-card';
 
-        polaroidCard.innerHTML = `
-            <div class="pin"></div>
-            <img src="${fotoUrl}" alt="Kenangan ${i}" onerror="this.src='${fallbackImage}'">
-            <p class="caption">${caption}</p>
-        `;
+        const pin = document.createElement('div');
+        pin.className = 'pin';
+
+        const image = document.createElement('img');
+        image.src = String(fotoUrl).trim();
+        image.alt = `Kenangan ${i}`;
+        image.loading = 'eager';
+        image.addEventListener('error', () => polaroidCard.remove(), { once: true });
+
+        const captionEl = document.createElement('p');
+        captionEl.className = 'caption';
+        captionEl.textContent = caption;
+
+        polaroidCard.append(pin, image, captionEl);
         container.appendChild(polaroidCard);
         cards.push(polaroidCard);
     }
@@ -150,7 +180,7 @@ function triggerLetterScene(activeData) {
     const signature = document.querySelector('.signature');
     if (signature) {
         const nameEl = signature.querySelector('.name');
-        if (nameEl) nameEl.innerText = `Dari: ${activeData.nama_pengirim || 'rahmat'}`;
+        if (nameEl) nameEl.textContent = `Dari: ${cleanText(activeData.nama_pengirim, 'Aku')}`;
         signature.style.opacity = '0';
     }
 
@@ -185,7 +215,7 @@ function revealLoveLetter(activeData) {
     
     // 5. Mulai ngetik setelah kertas muncul sepenuhnya
     setTimeout(() => {
-        const isiPesan = activeData.teks_surat || activeData.pesan_utama || activeData.isi_surat || "Terima kasih sudah hadir dan membawa warna terindah dalam setiap perjalanan ini.";
+        const isiPesan = cleanText(activeData.teks_surat, "Terima kasih sudah hadir dan membawa warna indah dalam perjalanan ini.");
         
         playTypewriterEffect('typewriter-text', isiPesan, 45, () => {
             // JIKA NGETIK SELESAI: Munculkan tanda tangan dan tombol lanjut
@@ -204,35 +234,27 @@ function revealLoveLetter(activeData) {
 function playTypewriterEffect(elementId, text, speed = 45, onComplete) {
     const container = document.getElementById(elementId);
     if (!container) return;
-    
-    container.innerHTML = "";
+
+    container.replaceChildren();
     let i = 0;
-    let currentHTML = "";
-    
+
     const cursor = document.createElement('span');
     cursor.className = 'typewriter-cursor';
-    
+
     function type() {
         if (i < text.length) {
-            // Tangani pemisahan baris (enter) dari database
-            if (text.charAt(i) === '\n') {
-                currentHTML += "<br>";
-            } else {
-                currentHTML += text.charAt(i);
-            }
-            
-            container.innerHTML = currentHTML;
+            i += 1;
+            container.textContent = text.slice(0, i);
             container.appendChild(cursor);
-            i++;
             setTimeout(type, speed);
         } else {
-            // Hilangkan kursor dan jalankan animasi berikutnya (tombol & ttd)
             setTimeout(() => {
                 cursor.remove();
                 if (typeof onComplete === 'function') onComplete();
-            }, 1000);
+            }, 700);
         }
     }
+
     type();
 }
 
@@ -257,24 +279,30 @@ function nextScene(currentSceneId, nextSceneId) {
 
 function pickReason() {
     const activeData = getSafeData();
-    let reasonsArray = activeData.alasan_sayang 
-        ? activeData.alasan_sayang.split('\n').filter(r => r.trim() !== '')
-        : ["Karena kamu istimewa."];
-        
+    if (!activeData) return;
+
+    const rawReasons = cleanText(activeData.alasan_sayang);
+    const reasonsArray = rawReasons
+        ? rawReasons.split(/\r?\n/).map((reason) => reason.trim()).filter(Boolean)
+        : ['Karena kamu istimewa.'];
+
     const paperElement = document.getElementById('reason-paper');
     if (!paperElement) return;
 
     const randomIndex = Math.floor(Math.random() * reasonsArray.length);
     const selectedReason = reasonsArray[randomIndex];
 
-    paperElement.innerHTML = `<div class="paper-note">${selectedReason}</div>`;
+    const note = document.createElement('div');
+    note.className = 'paper-note';
+    note.textContent = selectedReason;
+    paperElement.replaceChildren(note);
     paperElement.classList.remove('hidden');
-    
-    paperElement.classList.remove('pop-up-anim'); 
-    void paperElement.offsetWidth; 
+
+    paperElement.classList.remove('pop-up-anim');
+    void paperElement.offsetWidth;
     paperElement.classList.add('pop-up-anim');
 
-    const jar = document.querySelector('.jar-container');
+    const jar = document.getElementById('reason-jar');
     if (jar) {
         const rect = jar.getBoundingClientRect();
         burstParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 8, ['✦', '✧', '❤']);
@@ -283,10 +311,10 @@ function pickReason() {
 
 function openGift() {
     const activeData = getSafeData();
-    const giftBox = document.querySelector('.gift-container');
+    const giftBox = document.getElementById('gift-box');
     const giftContent = document.getElementById('gift-content');
-    
-    if(!giftBox || !giftContent) return;
+
+    if (!activeData || !giftBox || !giftContent) return;
 
     const rect = giftBox.getBoundingClientRect();
     burstParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 12, ['✦', '✧', '❤', '♥']);
@@ -294,55 +322,75 @@ function openGift() {
     giftBox.style.transform = 'scale(0) rotate(180deg)';
     giftBox.style.opacity = '0';
     giftBox.style.transition = 'transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease';
-    
+
     setTimeout(() => {
         giftBox.style.display = 'none';
         giftContent.classList.remove('hidden');
-        
+
         const voucherCard = document.querySelector('.voucher-card');
         const closingMsg = document.querySelector('.closing-message');
-        
-        voucherCard.innerHTML = `
-            <div class="love-coupon">
-                <div class="coupon-left">
-                    <span>LOVE<br>TICKET</span>
-                </div>
-                <div class="coupon-right">
-                    <h3>${activeData.kupon_judul || "Kejutan"}</h3>
-                    <p>${activeData.kupon_deskripsi || "Berlaku seumur hidup!"}</p>
-                    <button id="btn-claim" onclick="claimCoupon(event)">Klaim Sekarang ✨</button>
-                </div>
-            </div>
-        `;
-        
-        closingMsg.innerText = activeData.pesan_penutup || "Mari buat lebih banyak kenangan bersama.";
+        if (!voucherCard || !closingMsg) return;
+
+        const coupon = document.createElement('div');
+        coupon.className = 'love-coupon';
+
+        const left = document.createElement('div');
+        left.className = 'coupon-left';
+        const ticket = document.createElement('span');
+        ticket.textContent = 'LOVE TICKET';
+        left.appendChild(ticket);
+
+        const right = document.createElement('div');
+        right.className = 'coupon-right';
+
+        const title = document.createElement('h3');
+        title.textContent = cleanText(activeData.kupon_judul, 'Kejutan');
+
+        const description = document.createElement('p');
+        description.textContent = cleanText(activeData.kupon_deskripsi, 'Berlaku seumur hidup!');
+
+        const claimButton = document.createElement('button');
+        claimButton.id = 'btn-claim';
+        claimButton.type = 'button';
+        claimButton.textContent = 'Klaim Sekarang ✨';
+        claimButton.addEventListener('click', claimCoupon);
+
+        right.append(title, description, claimButton);
+        coupon.append(left, right);
+        voucherCard.replaceChildren(coupon);
+
+        closingMsg.textContent = cleanText(
+            activeData.pesan_penutup,
+            'Mari buat lebih banyak kenangan bersama.'
+        );
         giftContent.classList.add('show-gift-anim');
     }, 600);
 }
 
 function claimCoupon(event) {
-    const btn = event.target;
-    btn.innerHTML = "Sudah Diklaim 💕";
+    const btn = event.currentTarget;
+    btn.textContent = 'Sudah Diklaim 💕';
     btn.classList.add('claimed');
     btn.disabled = true;
-    
-    for(let i=0; i<5; i++) {
+
+    for (let i = 0; i < 5; i++) {
         setTimeout(() => createHeartRipple(event), i * 150);
     }
 }
 
-function createHeartRipple(e) {
+function createHeartRipple(event) {
     const heart = document.createElement('div');
-    heart.innerHTML = '❤️';
+    heart.textContent = '❤️';
     heart.className = 'ripple-heart';
-    
-    const x = e.clientX || e.target.getBoundingClientRect().left + 50;
-    const y = e.clientY || e.target.getBoundingClientRect().top;
-    
+
+    const rect = event.currentTarget?.getBoundingClientRect();
+    const x = event.clientX || (rect ? rect.left + rect.width / 2 : window.innerWidth / 2);
+    const y = event.clientY || (rect ? rect.top : window.innerHeight / 2);
+
     const randomX = (Math.random() - 0.5) * 50;
     heart.style.left = `${x + randomX}px`;
     heart.style.top = `${y}px`;
-    
+
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 1500);
 }
@@ -485,12 +533,8 @@ function startCinematicZoom() {
     const openingContent = document.querySelector('.opening-content');
     const overlay = document.getElementById('zoom-overlay');
     
-    let activeData = {};
-    try {
-        activeData = getSafeData() || {};
-    } catch (e) {
-        activeData = {};
-    }
+    const activeData = getSafeData();
+    if (!activeData) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (typeof THREE === 'undefined' || typeof gsap === 'undefined' || prefersReducedMotion) {
@@ -587,10 +631,48 @@ function startCinematicZoom() {
 // ==========================================
 // 4. INIT: JALANKAN SAAT WEB DIBUKA
 // ==========================================
+function bindKeyboardAction(element, action) {
+    if (!element) return;
+    element.addEventListener('click', action);
+    element.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            action(event);
+        }
+    });
+}
+
+function setupBirthdayControls() {
+    document.getElementById('btn-start')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        startCinematicZoom();
+    });
+
+    document.getElementById('btn-next-letter')?.addEventListener('click', () => {
+        nextScene('page-2-letter', 'page-3-timeline');
+    });
+
+    document.getElementById('btn-next-timeline')?.addEventListener('click', () => {
+        nextScene('page-3-timeline', 'page-4-jar');
+    });
+
+    document.getElementById('btn-next-jar')?.addEventListener('click', () => {
+        nextScene('page-4-jar', 'page-5-gift');
+    });
+
+    bindKeyboardAction(document.getElementById('reason-jar'), pickReason);
+    bindKeyboardAction(document.getElementById('gift-box'), openGift);
+}
+
 async function initApp() {
-    await fetchDataPesanan();
+    const loaded = await fetchDataPesanan();
+    if (!loaded) return;
+
+    setupBirthdayControls();
+
     const firstScene = document.getElementById('page-1-opening');
     if (firstScene) playSceneEntrance(firstScene);
+
     startAmbientParticles();
 }
 
@@ -599,13 +681,3 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const btnStart = document.getElementById('btn-start');
-    if (btnStart) {
-        btnStart.addEventListener('click', (e) => {
-            e.preventDefault();
-            startCinematicZoom();
-        });
-    }
-});
