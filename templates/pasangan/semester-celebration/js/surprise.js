@@ -279,10 +279,8 @@ async function init() {
   } else {
     try {
       const { data: kado, error } = await supabaseClient
-        .from('pesanan')
-        .select('*')
-        .eq('id_kado', orderId)
-        .single();
+        .rpc('get_kado_by_id', { p_id_kado: orderId })
+            .single();
 
       if (error) throw error;
 

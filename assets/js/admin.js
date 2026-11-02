@@ -12,20 +12,32 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // 2. SISTEM OTENTIKASI REAL (Login, Logout, Cek Sesi)
 // =========================================================================
 
-async function checkLoginStatus() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (session) {
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("adminLayout").style.display = "flex"; 
-        fetchPesanan(); 
-    }
+function isAdminUser(user) {
+    return user?.app_metadata?.role === 'admin';
 }
-checkLoginStatus(); 
+
+async function checkLoginStatus() {
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+    if (!error && isAdminUser(user)) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("adminLayout").style.display = "flex";
+        fetchPesanan();
+        return;
+    }
+
+    document.getElementById("adminLayout").style.display = "none";
+    document.getElementById("loginSection").style.display = "flex";
+
+    // Jika ada sesi user biasa, keluarkan agar dashboard tidak terlihat sebagai admin.
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) await supabaseClient.auth.signOut();
+}
+checkLoginStatus();
 
 async function handleLogin(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById("adminEmail").value;
     const pass = document.getElementById("adminPass").value;
     const btnLogin = document.querySelector("#adminLoginForm button");
@@ -36,22 +48,27 @@ async function handleLogin(e) {
     errorMsg.style.display = "none";
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
+        email,
         password: pass,
     });
 
-    if (error) {
-        errorMsg.textContent = "Gagal login: " + error.message;
+    if (error || !isAdminUser(data.user)) {
+        if (!error) await supabaseClient.auth.signOut();
+
+        errorMsg.textContent = error
+            ? "Gagal login: " + error.message
+            : "Akun ini tidak memiliki akses admin.";
         errorMsg.style.display = "block";
         btnLogin.textContent = "Masuk Dashboard";
         btnLogin.disabled = false;
-    } else {
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("adminLayout").style.display = "flex";
-        btnLogin.textContent = "Masuk Dashboard";
-        btnLogin.disabled = false;
-        fetchPesanan(); 
+        return;
     }
+
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminLayout").style.display = "flex";
+    btnLogin.textContent = "Masuk Dashboard";
+    btnLogin.disabled = false;
+    fetchPesanan();
 }
 
 async function handleLogout() {
