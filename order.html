@@ -74,7 +74,13 @@
     const urlParams = new URLSearchParams(window.location.search);
     const templateName = urlParams.get('template');
     if(templateName) {
-      document.getElementById('templateNameDisplay').innerText = templateName.replace('-', ' ').toUpperCase();
+      const templateAliases = {
+        'default-template': 'semester-celebration',
+        'deeptalk': 'deeptalk-template',
+        'birthday': 'birthday-cinema'
+      };
+      const canonicalTemplate = templateAliases[templateName] || templateName;
+      document.getElementById('templateNameDisplay').innerText = canonicalTemplate.replaceAll('-', ' ').toUpperCase();
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -6,6 +6,20 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Slug canonical yang harus sama dengan nama folder template.
+const TEMPLATE_SLUG_ALIASES = Object.freeze({
+  'default-template': 'semester-celebration',
+  'deeptalk': 'deeptalk-template',
+  'birthday': 'birthday-cinema'
+});
+
+function normalizeTemplateSlug(slug) {
+  if (!slug) return null;
+
+  const normalized = String(slug).trim().toLowerCase();
+  return TEMPLATE_SLUG_ALIASES[normalized] || normalized;
+}
+
 // =========================================================================
 // 2. BLUEPRINT FORM DINAMIS (TEMPLATE-SPECIFIC FIELDS)
 // =========================================================================
@@ -63,7 +77,7 @@ const templateBlueprints = {
   `,
 
   // Template 2: DeepTalk Night
-  "deeptalk": `
+  "deeptalk-template": `
     <div class="form-card">
       <div class="step-badge">Langkah 2</div>
       <h3>Atur Suasana DeepTalk</h3>
@@ -219,7 +233,7 @@ const templateBlueprints = {
 // =========================================================================
 function renderFormSesuaiTemplate() {
   const urlParams = new URLSearchParams(window.location.search);
-  const templateDipilih = urlParams.get('template');
+  const templateDipilih = normalizeTemplateSlug(urlParams.get('template'));
   const wadah = document.getElementById("wadahFormDinamis");
 
   if (templateDipilih && templateBlueprints[templateDipilih]) {
@@ -296,7 +310,11 @@ if(form) {
 
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const templateName = urlParams.get('template') || 'default-template';
+      const templateName = normalizeTemplateSlug(urlParams.get('template'));
+
+      if (!templateName || !templateBlueprints[templateName]) {
+        throw new Error("Template tidak valid. Silakan pilih template dari katalog.");
+      }
 
       // Data Dasar
       const idKado = document.getElementById('orderId')?.value.trim().toLowerCase();
