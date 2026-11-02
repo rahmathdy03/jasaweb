@@ -3,6 +3,14 @@
   --color-accent: #fbbf24; /* Emas lembut */
   --glass-bg: rgba(15, 23, 42, 0.4);
   --glass-border: rgba(255, 255, 255, 0.1);
+
+  /* Warna adaptif untuk teks yang langsung berada di atas foto background */
+  --scene-text: #ffffff;
+  --scene-muted: rgba(255, 255, 255, 0.82);
+  --scene-accent: #fbbf24;
+  --scene-control-bg: rgba(8, 10, 18, 0.28);
+  --scene-control-border: rgba(255, 255, 255, 0.48);
+  --scene-text-shadow: 0 2px 14px rgba(0, 0, 0, 0.78);
 }
 
 * {
@@ -43,6 +51,84 @@ body {
   font-size: 0.9rem;
   opacity: 0.8;
   margin-bottom: 24px;
+}
+
+
+
+/* ==========================================================
+   ADAPTIVE CONTRAST UNTUK FOTO BACKGROUND DEEPTALK
+   JS membaca luminance foto kedua dan memilih mode light/dark.
+   ========================================================== */
+body.scene-light {
+  --scene-text: #21171c;
+  --scene-muted: rgba(33, 23, 28, 0.78);
+  --scene-accent: #7a2945;
+  --scene-control-bg: rgba(255, 255, 255, 0.68);
+  --scene-control-border: rgba(47, 29, 36, 0.34);
+  --scene-text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 2px 12px rgba(255, 255, 255, 0.72);
+}
+
+body.scene-dark {
+  --scene-text: #ffffff;
+  --scene-muted: rgba(255, 255, 255, 0.84);
+  --scene-accent: #fbbf24;
+  --scene-control-bg: rgba(8, 10, 18, 0.34);
+  --scene-control-border: rgba(255, 255, 255, 0.48);
+  --scene-text-shadow: 0 2px 14px rgba(0, 0, 0, 0.82);
+}
+
+/* Teks yang berada langsung di atas foto harus mengikuti kontras foto. */
+#screen-game {
+  color: var(--scene-text);
+}
+
+#screen-game .title-serif {
+  color: var(--scene-accent);
+  text-shadow: var(--scene-text-shadow);
+  transition: color .35s ease, text-shadow .35s ease;
+}
+
+#screen-game .counter-text,
+#screen-game .clock {
+  color: var(--scene-muted);
+  text-shadow: var(--scene-text-shadow);
+  transition: color .35s ease, text-shadow .35s ease;
+}
+
+#screen-game .btn-outline {
+  color: var(--scene-text);
+  border-color: var(--scene-control-border);
+  background: var(--scene-control-bg);
+  text-shadow: var(--scene-text-shadow);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    color .35s ease,
+    border-color .35s ease,
+    background .35s ease,
+    transform .2s ease;
+}
+
+#screen-game .btn-outline:hover {
+  transform: translateY(-2px);
+}
+
+/* Isi kartu tetap punya kontras sendiri, terlepas dari terang/gelap fotonya. */
+#screen-game .card-face.front,
+#screen-game .card-face.back {
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .72);
+}
+
+#screen-game .card-face.front {
+  background: rgba(10, 14, 25, .48);
+}
+
+#screen-game .card-face.back {
+  background: rgba(0, 0, 0, .64);
 }
 
 /* --- SYSTEM SCREEN --- */
