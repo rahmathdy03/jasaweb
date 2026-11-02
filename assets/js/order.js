@@ -50,9 +50,9 @@ const templateBlueprints = {
       <div class="step-badge">Langkah 3</div>
       <h3>Kenangan & Suasana</h3>
       <div class="input-group">
-        <label>Upload Foto Kenangan (6 Foto) <span>*</span></label>
+        <label>Upload Foto Kenangan (3–6 Foto) <span>*</span></label>
         <input type="file" id="fotoKado" accept="image/jpeg, image/png, image/webp" multiple required>
-        <small>Pilih maksimal 6 foto sekaligus dari galerimu.</small>
+        <small>Pilih minimal 3 dan maksimal 6 foto sekaligus dari galerimu.</small>
       </div>
       <div class="input-group">
         <label for="selectMusik">Pilih Lagu Background</label>
@@ -490,6 +490,12 @@ if(form) {
 
         if (templateName === 'deeptalk-template' && files.length !== 2) {
           throw new Error("DeepTalk Night membutuhkan tepat 2 foto.");
+        }
+
+        if (templateName === 'semester-celebration') {
+          if (files.length < 3 || files.length > 6) {
+            throw new Error("Semester Celebration membutuhkan 3 sampai 6 foto.");
+          }
         }
         
         // Pengaturan Kompresi

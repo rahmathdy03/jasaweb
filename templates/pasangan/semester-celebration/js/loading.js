@@ -1,6 +1,6 @@
 const steps = [
   "Menghubungkan ke Server Akademik…",
-  "Auntentikasi User…",
+  "Autentikasi User…",
   "Scan Kartu Hasil Ujian…",
   "Mencari Mahasiswa...",
   "Mahasiswa Ditemukan ✓",
@@ -118,10 +118,7 @@ async function showTruth() {
 
   await sleep(3200);
   
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderId = urlParams.get('id');
-  
-  window.location.href = `surprise.html?id=${orderId}`;
+  window.location.href = `surprise.html?id=${encodeURIComponent(sessionOrderId)}`;
 }
 
 // Confetti sederhana tanpa library.

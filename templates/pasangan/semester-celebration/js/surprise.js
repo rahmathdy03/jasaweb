@@ -10,6 +10,7 @@ const bgMusic = document.getElementById("bgMusic");
 const playMusic = document.getElementById("playMusic");
 const pauseMusic = document.getElementById("pauseMusic");
 const volumeMusic = document.getElementById("volumeMusic");
+const musicState = document.getElementById("musicState");
 
 const surpriseParams = new URLSearchParams(window.location.search);
 const surpriseOrderId = surpriseParams.get("id")?.trim().toLowerCase() || "";
@@ -23,11 +24,23 @@ if (!surpriseOrderId || !semesterAccessToken || semesterStoredOrderId !== surpri
   window.location.replace(loginTarget);
 }
 
-// Konfigurasi Supabase Client
 const supabaseClient = window.KadoDigital.createSupabaseClient();
 
 let heroText = "";
 let loveLetter = "";
+let carouselTimer = null;
+let currentPhoto = 0;
+let startX = 0;
+
+function isUsable(value) {
+  if (value === null || value === undefined) return false;
+  const text = String(value).trim();
+  return text !== "" && text.toLowerCase() !== "null" && text.toLowerCase() !== "undefined";
+}
+
+function cleanText(value, fallback = "") {
+  return isUsable(value) ? String(value).trim() : fallback;
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -35,14 +48,20 @@ function sleep(ms) {
 
 function typeText(element, text, speed = 38) {
   return new Promise(resolve => {
+    const content = String(text || "");
     element.textContent = "";
+
+    if (!content) {
+      resolve();
+      return;
+    }
+
     let index = 0;
-
     const timer = setInterval(() => {
-      element.textContent += text[index];
-      index++;
+      element.textContent += content[index] || "";
+      index += 1;
 
-      if (index >= text.length) {
+      if (index >= content.length) {
         clearInterval(timer);
         resolve();
       }
@@ -50,10 +69,39 @@ function typeText(element, text, speed = 38) {
   });
 }
 
+function showSurpriseError(title, message) {
+  const wrapper = document.createElement("main");
+  wrapper.className = "semester-error-screen";
+
+  const card = document.createElement("section");
+  card.className = "semester-error-card";
+
+  const icon = document.createElement("div");
+  icon.className = "semester-error-icon";
+  icon.textContent = "♡";
+
+  const heading = document.createElement("h1");
+  heading.textContent = title;
+
+  const copy = document.createElement("p");
+  copy.textContent = message;
+
+  const retry = document.createElement("button");
+  retry.type = "button";
+  retry.textContent = "Coba lagi";
+  retry.addEventListener("click", () => window.location.reload());
+
+  card.append(icon, heading, copy, retry);
+  wrapper.appendChild(card);
+  document.body.replaceChildren(wrapper);
+}
+
 function createMagicBackground() {
+  if (!magicLayer) return;
+
   const symbols = ["♡", "♥", "💕", "🌸", "✨"];
 
-  for (let i = 0; i < 38; i++) {
+  for (let i = 0; i < 38; i += 1) {
     const item = document.createElement("span");
     item.className = "magic-item";
     item.textContent = symbols[Math.floor(Math.random() * symbols.length)];
@@ -64,7 +112,7 @@ function createMagicBackground() {
     magicLayer.appendChild(item);
   }
 
-  for (let i = 0; i < 55; i++) {
+  for (let i = 0; i < 55; i += 1) {
     const sparkle = document.createElement("span");
     sparkle.className = "sparkle";
     sparkle.style.left = `${Math.random() * 100}%`;
@@ -73,7 +121,7 @@ function createMagicBackground() {
     magicLayer.appendChild(sparkle);
   }
 
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 24; i += 1) {
     const bubble = document.createElement("span");
     const size = Math.random() * 68 + 20;
     bubble.className = "bubble";
@@ -88,16 +136,22 @@ function createMagicBackground() {
 }
 
 function revealOnScroll() {
+  const items = document.querySelectorAll(".section-reveal");
+
+  if (!("IntersectionObserver" in window)) {
+    items.forEach(element => element.classList.add("visible"));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("visible");
+      observer.unobserve(entry.target);
     });
   }, { threshold: 0.14 });
 
-  document.querySelectorAll(".section-reveal").forEach((element, index) => {
+  items.forEach((element, index) => {
     element.style.transitionDelay = `${Math.min(index * 70, 300)}ms`;
     observer.observe(element);
   });
@@ -105,6 +159,9 @@ function revealOnScroll() {
 
 function setupParallax() {
   const heroGlass = document.querySelector(".hero-glass");
+  if (!heroGlass || window.matchMedia("(pointer: coarse), (prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
 
   document.addEventListener("mousemove", (event) => {
     const x = (event.clientX / window.innerWidth - 0.5) * 8;
@@ -117,48 +174,87 @@ function setupParallax() {
   });
 }
 
-// Carousel foto auto slide dan manual.
 const track = document.getElementById("carouselTrack");
-const photos = Array.from(track.children);
 const prevPhoto = document.getElementById("prevPhoto");
 const nextPhoto = document.getElementById("nextPhoto");
-let currentPhoto = 0;
-let carouselTimer;
+
+function getPhotos() {
+  return track ? Array.from(track.querySelectorAll("img")) : [];
+}
 
 function updateCarousel() {
+  const photos = getPhotos();
+  if (!track || photos.length === 0) return;
+
+  currentPhoto = Math.min(currentPhoto, photos.length - 1);
   track.style.transform = `translateX(-${currentPhoto * 100}%)`;
 }
 
 function goNext() {
+  const photos = getPhotos();
+  if (photos.length <= 1) return;
   currentPhoto = (currentPhoto + 1) % photos.length;
   updateCarousel();
 }
 
 function goPrev() {
+  const photos = getPhotos();
+  if (photos.length <= 1) return;
   currentPhoto = (currentPhoto - 1 + photos.length) % photos.length;
   updateCarousel();
 }
 
 function startCarousel() {
   clearInterval(carouselTimer);
-  carouselTimer = setInterval(goNext, 3300);
+  const photos = getPhotos();
+
+  const multiple = photos.length > 1;
+  if (prevPhoto) prevPhoto.disabled = !multiple;
+  if (nextPhoto) nextPhoto.disabled = !multiple;
+
+  if (multiple) {
+    carouselTimer = setInterval(goNext, 3300);
+  }
 }
 
-nextPhoto.addEventListener("click", () => {
+function renderGallery(photoUrls) {
+  if (!track) return;
+
+  track.replaceChildren();
+  currentPhoto = 0;
+
+  photoUrls.filter(isUsable).slice(0, 6).forEach((url, index) => {
+    const image = document.createElement("img");
+    image.src = String(url).trim();
+    image.alt = `Foto kenangan ${index + 1}`;
+    image.loading = index < 2 ? "eager" : "lazy";
+    image.addEventListener("error", () => {
+      image.remove();
+      updateCarousel();
+      startCarousel();
+    }, { once: true });
+    track.appendChild(image);
+  });
+
+  updateCarousel();
+  startCarousel();
+}
+
+nextPhoto?.addEventListener("click", () => {
   goNext();
   startCarousel();
 });
 
-prevPhoto.addEventListener("click", () => {
+prevPhoto?.addEventListener("click", () => {
   goPrev();
   startCarousel();
 });
 
-let startX = 0;
-track.addEventListener("pointerdown", (event) => {
+track?.addEventListener("pointerdown", (event) => {
   startX = event.clientX;
 });
-track.addEventListener("pointerup", (event) => {
+
+track?.addEventListener("pointerup", (event) => {
   const distance = event.clientX - startX;
   if (Math.abs(distance) > 45) {
     distance < 0 ? goNext() : goPrev();
@@ -166,9 +262,8 @@ track.addEventListener("pointerup", (event) => {
   }
 });
 
-// Amplop digital.
 let letterOpened = false;
-envelope.addEventListener("click", async () => {
+envelope?.addEventListener("click", async () => {
   if (letterOpened) return;
   letterOpened = true;
 
@@ -176,32 +271,36 @@ envelope.addEventListener("click", async () => {
 
   envelope.classList.add("open");
   await sleep(720);
-  letterPaper.classList.add("show");
+  letterPaper?.classList.add("show");
   await sleep(350);
-  
   await typeText(letterTyping, loveLetter, 24);
 });
 
-// Popup reward dan efek hati berjatuhan.
-rewardButton.addEventListener("click", () => {
-  rewardPopup.classList.add("show");
-  rewardPopup.setAttribute("aria-hidden", "false");
+rewardButton?.addEventListener("click", () => {
+  rewardPopup?.classList.add("show");
+  rewardPopup?.setAttribute("aria-hidden", "false");
   launchConfetti(180);
   rainHearts();
 });
 
 function closeRewardPopup() {
-  rewardPopup.classList.remove("show");
-  rewardPopup.setAttribute("aria-hidden", "true");
+  rewardPopup?.classList.remove("show");
+  rewardPopup?.setAttribute("aria-hidden", "true");
 }
 
-closePopup.addEventListener("click", closeRewardPopup);
-rewardPopup.addEventListener("click", (event) => {
+closePopup?.addEventListener("click", closeRewardPopup);
+rewardPopup?.addEventListener("click", (event) => {
   if (event.target === rewardPopup) closeRewardPopup();
 });
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && rewardPopup?.classList.contains("show")) {
+    closeRewardPopup();
+  }
+});
+
 function rainHearts() {
-  for (let i = 0; i < 45; i++) {
+  for (let i = 0; i < 45; i += 1) {
     setTimeout(() => {
       const heart = document.createElement("span");
       heart.className = "falling-heart";
@@ -215,32 +314,61 @@ function rainHearts() {
   }
 }
 
-// Music player.
-bgMusic.volume = Number(volumeMusic.value);
+function syncMusicUi() {
+  if (!bgMusic || !playMusic || !pauseMusic || !musicState) return;
 
-async function tryPlayMusic() {
-  try {
-    await bgMusic.play();
-  } catch (error) {}
+  const hasMusic = Boolean(bgMusic.getAttribute("src"));
+  playMusic.disabled = !hasMusic || !bgMusic.paused;
+  pauseMusic.disabled = !hasMusic || bgMusic.paused;
+  volumeMusic.disabled = !hasMusic;
+
+  if (!hasMusic) {
+    musicState.textContent = "musik tidak tersedia";
+  } else {
+    musicState.textContent = bgMusic.paused ? "paused" : "playing";
+  }
 }
 
-playMusic.addEventListener("click", tryPlayMusic);
-pauseMusic.addEventListener("click", () => bgMusic.pause());
-volumeMusic.addEventListener("input", () => {
+if (bgMusic && volumeMusic) {
+  bgMusic.volume = Number(volumeMusic.value);
+}
+
+async function tryPlayMusic() {
+  if (!bgMusic?.getAttribute("src")) return;
+
+  try {
+    await bgMusic.play();
+  } catch (error) {
+    console.warn("Musik belum bisa diputar otomatis:", error);
+  }
+
+  syncMusicUi();
+}
+
+playMusic?.addEventListener("click", tryPlayMusic);
+pauseMusic?.addEventListener("click", () => {
+  bgMusic.pause();
+  syncMusicUi();
+});
+volumeMusic?.addEventListener("input", () => {
   bgMusic.volume = Number(volumeMusic.value);
 });
+bgMusic?.addEventListener("play", syncMusicUi);
+bgMusic?.addEventListener("pause", syncMusicUi);
 
-// Confetti sederhana.
 const canvas = document.getElementById("confettiCanvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas?.getContext("2d");
 let confettiPieces = [];
 
 function resizeCanvas() {
+  if (!canvas) return;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 
 function launchConfetti(count = 120) {
+  if (!canvas) return;
+
   const colors = ["#ff8db8", "#ffd6e7", "#ffe5cf", "#eadfff", "#ffffff", "#d94f83"];
   confettiPieces = Array.from({ length: count }, () => ({
     x: Math.random() * canvas.width,
@@ -254,6 +382,8 @@ function launchConfetti(count = 120) {
 }
 
 function animateConfetti() {
+  if (!canvas || !ctx) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   confettiPieces.forEach(piece => {
@@ -276,59 +406,54 @@ function animateConfetti() {
 window.addEventListener("resize", resizeCanvas);
 
 async function init() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderId = urlParams.get('id');
+  try {
+    const { data: kado, error } = await supabaseClient
+      .rpc("get_semester_kado", {
+        p_id_kado: surpriseOrderId,
+        p_access_token: semesterAccessToken
+      })
+      .single();
 
-  if (!orderId) {
-    heroText = "Selamat Sayang ❤️";
-    loveLetter = "Link kado tidak valid.";
-  } else {
-    try {
-      const { data: kado, error } = await supabaseClient
-        .rpc('get_semester_kado', {
-          p_id_kado: orderId,
-          p_access_token: semesterAccessToken
-        })
-        .single();
-
-      if (error || !kado) {
-        sessionStorage.removeItem("semesterCelebrationAccessToken");
-        sessionStorage.removeItem("semesterCelebrationOrderId");
-        window.location.replace(`index.html?id=${encodeURIComponent(orderId)}`);
-        return;
-      }
-
-      if (kado) {
-        // Mengambil data teks dengan fleksibel dari kolom database
-        heroText = kado.teks_hero || kado.pesan || kado.ucapan || "🎉 Selamat Sayang ❤️";
-        loveLetter = kado.teks_surat || kado.surat || kado.pesan_surat || "Terima kasih sudah berjuang sejauh ini ya sayangku.";
-
-        // Menarik foto-foto dari database
-        const fotoList = [
-          kado.link_foto_1 || kado.foto_1,
-          kado.link_foto_2 || kado.foto_2,
-          kado.link_foto_3 || kado.foto_3,
-          kado.link_foto_4 || kado.foto_4,
-          kado.link_foto_5 || kado.foto_5,
-          kado.link_foto_6 || kado.foto_6
-        ];
-
-        fotoList.forEach((linkFoto, index) => {
-          const imgEl = document.getElementById(`foto${index + 1}`);
-          if (imgEl && linkFoto) {
-            imgEl.src = linkFoto;
-          }
-        });
-
-        if (kado.link_musik || kado.musik) {
-          bgMusic.src = kado.link_musik || kado.musik;
-        }
-      }
-    } catch (err) {
-      console.error("Gagal mengambil data:", err.message);
-      heroText = "🎉 Selamat Sayang ❤️";
-      loveLetter = "Tetap semangat ya sayang, aku selalu bangga sama kamu!";
+    if (error || !kado) {
+      sessionStorage.removeItem("semesterCelebrationAccessToken");
+      sessionStorage.removeItem("semesterCelebrationOrderId");
+      sessionStorage.removeItem("semesterCelebrationPlayMusic");
+      window.location.replace(`index.html?id=${encodeURIComponent(surpriseOrderId)}`);
+      return;
     }
+
+    if (kado.template !== "semester-celebration") {
+      throw new Error("Template kado tidak cocok.");
+    }
+
+    heroText = cleanText(kado.teks_hero, "🎉 Selamat Sayang ❤️");
+    loveLetter = cleanText(
+      kado.teks_surat,
+      "Terima kasih sudah berjuang sejauh ini. Aku selalu bangga sama kamu."
+    );
+
+    renderGallery([
+      kado.link_foto_1,
+      kado.link_foto_2,
+      kado.link_foto_3,
+      kado.link_foto_4,
+      kado.link_foto_5,
+      kado.link_foto_6
+    ]);
+
+    if (isUsable(kado.link_musik)) {
+      bgMusic.src = String(kado.link_musik).trim();
+      bgMusic.load();
+    }
+
+    syncMusicUi();
+  } catch (error) {
+    console.error("Gagal memuat surprise Semester Celebration:", error);
+    showSurpriseError(
+      "Surprise belum bisa dimuat.",
+      "Ada gangguan saat mengambil data. Coba muat ulang halaman."
+    );
+    return;
   }
 
   createMagicBackground();
@@ -337,8 +462,7 @@ async function init() {
   resizeCanvas();
   animateConfetti();
   launchConfetti(110);
-  startCarousel();
-  
+
   await typeText(heroTyping, heroText, 42);
 
   if (sessionStorage.getItem("semesterCelebrationPlayMusic") === "true") {

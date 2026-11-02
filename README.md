@@ -135,3 +135,20 @@ Status: hardened dan siap dipakai.
 - Kamera memakai `getUserMedia` dengan error handling.
 - Wishlist pada hasil foto dibungkus ke beberapa baris agar tidak mudah terpotong.
 - Form order mewajibkan tepat 2 foto untuk DeepTalk Night.
+
+
+## Semester Celebration
+
+Status: hardened dan siap dipakai.
+
+- Login tetap dilindungi bcrypt + token sesi 6 jam.
+- Loading flow hanya berjalan setelah sesi valid.
+- Redirect ke surprise membawa ID yang sudah di-encode.
+- Gallery dirender dinamis dari 3 sampai 6 foto, tanpa slide kosong.
+- Foto ke-6 sekarang didukung penuh.
+- Music player memakai `link_musik` Supabase dan punya state play/pause yang sinkron.
+- Surprise tidak memakai fallback kolom lama atau data palsu.
+- Error runtime memiliki state yang jelas.
+- Parallax dinonaktifkan pada coarse pointer / reduced motion.
+- Reward popup bisa ditutup dengan tombol Escape.
+- Form order Semester Celebration divalidasi 3–6 foto.

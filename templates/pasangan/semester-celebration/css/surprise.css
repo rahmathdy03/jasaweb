@@ -726,3 +726,82 @@ section:has(.envelope-area) .section-title {
 .envelope {
   margin-top: 20px;
 }
+
+
+/* Semester Celebration polish */
+.music-player button:disabled,
+.music-player input:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.music-state {
+  min-width: 58px;
+  font-size: .72rem;
+  color: #8f6172;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.carousel-track:empty::before {
+  content: "Belum ada foto kenangan.";
+  min-width: 100%;
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  color: #8f6172;
+  font-size: .9rem;
+}
+
+.nav:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.semester-error-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(150deg, #fff1f6, #ffe1ed 55%, #f5eaff);
+  color: #51263a;
+  text-align: center;
+}
+
+.semester-error-card {
+  width: min(560px, 100%);
+  padding: 42px 30px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(217,79,131,.16);
+  border-radius: 28px;
+  box-shadow: 0 24px 70px rgba(124,53,81,.16);
+  backdrop-filter: blur(14px);
+}
+
+.semester-error-icon {
+  color: #d94f83;
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.semester-error-card h1 {
+  color: #a43763;
+  margin-bottom: 12px;
+}
+
+.semester-error-card p {
+  color: #80566a;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+
+.semester-error-card button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 22px;
+  background: #d94f83;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}

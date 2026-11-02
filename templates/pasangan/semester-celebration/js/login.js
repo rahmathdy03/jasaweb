@@ -5,7 +5,6 @@ const supabaseClient = window.KadoDigital.createSupabaseClient();
 const urlParams = new URLSearchParams(window.location.search);
 const orderId = urlParams.get('id') ? urlParams.get('id').trim().toLowerCase() : '';
 
-console.log("ID Bersih yang terbaca:", orderId);
 
 const form = document.getElementById("loginForm");
 const card = document.getElementById("loginCard");
@@ -28,7 +27,7 @@ function createLoginBackground() {
 }
 
 function showError(pesan) {
-  errorMessage.innerText = pesan;
+  errorMessage.textContent = pesan;
   errorMessage.classList.add("show");
   card.classList.remove("shake");
   void card.offsetWidth;
