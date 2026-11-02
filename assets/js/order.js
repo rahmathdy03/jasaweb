@@ -32,11 +32,11 @@ const templateBlueprints = {
       <div class="input-row" style="display:flex; gap:10px;">
         <div class="input-group" style="flex:1;">
           <label>Username (Untuk Login) <span>*</span></label>
-          <input type="text" id="orderUser" placeholder="Misal: sayang" required>
+          <input type="text" id="orderUser" placeholder="Misal: sayang" minlength="3" maxlength="50" autocomplete="off" required>
         </div>
         <div class="input-group" style="flex:1;">
           <label>Password Login <span>*</span></label>
-          <input type="text" id="orderPass" placeholder="Misal: 12345" required>
+          <input type="password" id="orderPass" placeholder="Minimal 3 karakter" minlength="3" maxlength="72" autocomplete="new-password" required>
         </div>
       </div>
       <div class="input-group">

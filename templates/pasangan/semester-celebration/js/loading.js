@@ -23,8 +23,16 @@ const truthTyping = document.getElementById("truthTyping");
 const pinkSky = document.getElementById("pinkSky");
 const codeRain = document.getElementById("codeRain");
 
-if (localStorage.getItem("semesterCelebrationLoggedIn") !== "true") {
-  window.location.href = "index.html";
+const sessionParams = new URLSearchParams(window.location.search);
+const sessionOrderId = sessionParams.get("id")?.trim().toLowerCase() || "";
+const sessionToken = sessionStorage.getItem("semesterCelebrationAccessToken");
+const sessionStoredOrderId = sessionStorage.getItem("semesterCelebrationOrderId");
+
+if (!sessionOrderId || !sessionToken || sessionStoredOrderId !== sessionOrderId) {
+  const loginTarget = sessionOrderId
+    ? `index.html?id=${encodeURIComponent(sessionOrderId)}`
+    : "index.html";
+  window.location.replace(loginTarget);
 }
 
 function createCodeRain() {

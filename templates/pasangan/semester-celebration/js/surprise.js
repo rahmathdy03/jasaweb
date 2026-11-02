@@ -11,8 +11,16 @@ const playMusic = document.getElementById("playMusic");
 const pauseMusic = document.getElementById("pauseMusic");
 const volumeMusic = document.getElementById("volumeMusic");
 
-if (localStorage.getItem("semesterCelebrationLoggedIn") !== "true") {
-  window.location.href = "index.html";
+const surpriseParams = new URLSearchParams(window.location.search);
+const surpriseOrderId = surpriseParams.get("id")?.trim().toLowerCase() || "";
+const semesterAccessToken = sessionStorage.getItem("semesterCelebrationAccessToken");
+const semesterStoredOrderId = sessionStorage.getItem("semesterCelebrationOrderId");
+
+if (!surpriseOrderId || !semesterAccessToken || semesterStoredOrderId !== surpriseOrderId) {
+  const loginTarget = surpriseOrderId
+    ? `index.html?id=${encodeURIComponent(surpriseOrderId)}`
+    : "index.html";
+  window.location.replace(loginTarget);
 }
 
 // Konfigurasi Supabase Client
@@ -279,10 +287,18 @@ async function init() {
   } else {
     try {
       const { data: kado, error } = await supabaseClient
-        .rpc('get_kado_by_id', { p_id_kado: orderId })
-            .single();
+        .rpc('get_semester_kado', {
+          p_id_kado: orderId,
+          p_access_token: semesterAccessToken
+        })
+        .single();
 
-      if (error) throw error;
+      if (error || !kado) {
+        sessionStorage.removeItem("semesterCelebrationAccessToken");
+        sessionStorage.removeItem("semesterCelebrationOrderId");
+        window.location.replace(`index.html?id=${encodeURIComponent(orderId)}`);
+        return;
+      }
 
       if (kado) {
         // Mengambil data teks dengan fleksibel dari kolom database
@@ -327,8 +343,8 @@ async function init() {
   
   await typeText(heroTyping, heroText, 42);
 
-  if (localStorage.getItem("semesterCelebrationPlayMusic") === "true") {
-    localStorage.removeItem("semesterCelebrationPlayMusic");
+  if (sessionStorage.getItem("semesterCelebrationPlayMusic") === "true") {
+    sessionStorage.removeItem("semesterCelebrationPlayMusic");
     tryPlayMusic();
   }
 }
