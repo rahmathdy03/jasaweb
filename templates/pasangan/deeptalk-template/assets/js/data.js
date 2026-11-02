@@ -12,5 +12,3 @@ const deepQuestions = [
   { text: "Satu harapan jujur untuk kita tahun depan?", action: "🫂 Peluk erat!" }
 ];
 
-// Konfigurasi Audio (bisa disambungkan ke Supabase nanti)
-const audioLink = "assets/audio/romantic.mp3";
