@@ -74,6 +74,7 @@ async function fetchDataPesanan() {
             return false;
         }
 
+        await window.KadoDigital.hydratePrivatePhotos(supabaseClient, data);
         dataKado = data;
 
         const receiver = cleanText(data.nama_penerima, 'Sayang');
