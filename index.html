@@ -18,11 +18,12 @@
       const supabaseRouter = window.KadoDigital.createSupabaseClient();
 
       async function arahkanKado() {
-        const { data, error } = await supabaseRouter
-          .rpc('get_kado_route_by_id', { p_id_kado: idKadoCek })
-          .single();
+        const { data, error } = await supabaseRouter.functions.invoke(
+          'get-kado-route',
+          { body: { id_kado: idKadoCek.trim().toLowerCase() } }
+        );
 
-        if (error || !data) {
+        if (error || !data?.template || !data?.status) {
           document.write("<div style='position:fixed;inset:0;background:#24151b;display:grid;place-items:center;z-index:99999;color:#fff7f2;font-family:system-ui,sans-serif;text-align:center;padding:24px'><div><div style='font-size:42px;margin-bottom:12px'>🥺</div><h2 style='margin:0 0 8px'>Kado tidak ditemukan</h2><p style='margin:0;color:#d9bfc7'>Cek lagi link yang kamu buka ya.</p></div></div>");
           return;
         }
