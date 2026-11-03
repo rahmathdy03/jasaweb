@@ -53,16 +53,36 @@ form.addEventListener("submit", async (event) => {
   button.disabled = true;
 
   try {
-    const { data, error } = await supabaseClient
-      .rpc('verify_kado_login', {
-        p_id_kado: orderId,
-        p_username: usernameInput,
-        p_password: passwordInput
-      })
-      .single();
+    const { data, error } = await supabaseClient.functions.invoke(
+      'verify-kado-login',
+      {
+        body: {
+          id_kado: orderId,
+          username: usernameInput,
+          password: passwordInput
+        }
+      }
+    );
 
-    if (error || !data?.success || !data?.access_token) {
-      showError("Username atau password salah, atau kado belum aktif.");
+    if (error) {
+      let message = "Username atau password salah, atau kado belum aktif.";
+
+      try {
+        const context = error.context;
+        if (context && typeof context.clone === "function") {
+          const payload = await context.clone().json();
+          if (payload?.error) message = String(payload.error);
+        }
+      } catch (_) {
+        // Gunakan pesan aman/generik bila response error tidak bisa dibaca.
+      }
+
+      showError(message);
+      return;
+    }
+
+    if (data?.error || !data?.success || !data?.access_token) {
+      showError(data?.error || "Username atau password salah, atau kado belum aktif.");
       return;
     }
 
