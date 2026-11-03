@@ -17,6 +17,71 @@ function normalizeTemplateSlug(slug) {
   return TEMPLATE_SLUG_ALIASES[normalized] || normalized;
 }
 
+const ALLOWED_PHOTO_MIME_TYPES = Object.freeze([
+  'image/jpeg',
+  'image/png',
+  'image/webp'
+]);
+
+const MAX_PRIVATE_PHOTO_SIZE = 2 * 1024 * 1024;
+
+function isAllowedPhoto(file) {
+  return Boolean(file && ALLOWED_PHOTO_MIME_TYPES.includes(file.type));
+}
+
+async function uploadPrivatePhoto({ file, idKado, templateName }) {
+  if (!isAllowedPhoto(file)) {
+    throw new Error("Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.");
+  }
+
+  if (file.size > MAX_PRIVATE_PHOTO_SIZE) {
+    throw new Error("Ukuran foto setelah kompresi masih lebih dari 2 MB.");
+  }
+
+  const { data: uploadAuth, error: authError } = await supabaseClient.functions.invoke(
+    'create-kado-upload',
+    {
+      body: {
+        id_kado: idKado,
+        template: templateName,
+        mime_type: file.type,
+        file_size: file.size
+      }
+    }
+  );
+
+  if (authError) {
+    let detail = "Izin upload foto ditolak oleh server.";
+
+    try {
+      const context = authError.context;
+      if (context && typeof context.clone === 'function') {
+        const payload = await context.clone().json();
+        if (payload?.error) detail = String(payload.error);
+      }
+    } catch (_) {
+      // Gunakan pesan generik bila response error tidak bisa dibaca.
+    }
+
+    throw new Error(detail);
+  }
+
+  if (!uploadAuth?.path || !uploadAuth?.token) {
+    throw new Error(uploadAuth?.error || "Server tidak memberikan token upload.");
+  }
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from('foto_kado')
+    .uploadToSignedUrl(uploadAuth.path, uploadAuth.token, file);
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  // Database hanya menyimpan path privat. URL akses dibuat sementara saat kado dibuka.
+  return uploadAuth.path;
+}
+
 // =========================================================================
 // 2. BLUEPRINT FORM DINAMIS (TEMPLATE-SPECIFIC FIELDS)
 // =========================================================================
@@ -506,34 +571,42 @@ if(form) {
         };
 
         for (let i = 0; i < files.length && i < 6; i++) {
-          let fileAsli = files[i];
-          let fileSiapUpload = fileAsli; // Default jika gagal kompresi
+          const fileAsli = files[i];
+          let fileSiapUpload = fileAsli;
 
           try {
+            if (!isAllowedPhoto(fileAsli)) {
+              throw new Error("Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.");
+            }
+
             // Cek apakah library kompresi sudah terpasang di HTML
             if (typeof imageCompression === 'function') {
-                btnSubmit.innerHTML = `Mengompres Foto ${i+1}... ⏳`;
-                // Proses kompresi file
-                fileSiapUpload = await imageCompression(fileAsli, opsiKompresi);
+              btnSubmit.innerHTML = `Mengompres Foto ${i+1}... ⏳`;
+              fileSiapUpload = await imageCompression(fileAsli, opsiKompresi);
             }
-            
+
+            // Beberapa library/browser bisa kehilangan MIME type setelah kompresi.
+            // Bila kosong, bungkus ulang Blob memakai tipe asli yang sudah tervalidasi.
+            if (!fileSiapUpload.type && fileAsli.type) {
+              fileSiapUpload = new File(
+                [fileSiapUpload],
+                fileSiapUpload.name || `foto-${i+1}.jpg`,
+                { type: fileAsli.type }
+              );
+            }
+
             btnSubmit.innerHTML = `Mengupload Foto ${i+1}... 🚀`;
 
-            // Ekstensi nama file (Hasil kompresi biasanya tetap mempertahankan ekstensi)
-            const fileExt = fileSiapUpload.name.split('.').pop() || 'jpg';
-            const fileName = `${idKado}-${Date.now()}-${i}.${fileExt}`;
-
-            // Upload ke Supabase
-            const { error: uploadError } = await supabaseClient.storage.from('foto_kado').upload(fileName, fileSiapUpload);
-            if (uploadError) throw uploadError;
-
-            // Dapatkan Link Publik
-            const { data: publicUrlData } = supabaseClient.storage.from('foto_kado').getPublicUrl(fileName);
-            linkFotos[i] = publicUrlData.publicUrl;
+            linkFotos[i] = await uploadPrivatePhoto({
+              file: fileSiapUpload,
+              idKado,
+              templateName
+            });
 
           } catch (compErr) {
             console.error("Gagal memproses/mengupload foto:", compErr);
-            throw new Error(`Gagal memproses foto ke-${i+1}. Pastikan format gambar valid.`);
+            const detail = compErr?.message || "Pastikan format gambar valid.";
+            throw new Error(`Foto ke-${i+1}: ${detail}`);
           }
         }
       }
