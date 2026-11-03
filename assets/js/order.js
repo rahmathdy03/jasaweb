@@ -29,7 +29,7 @@ function isAllowedPhoto(file) {
   return Boolean(file && ALLOWED_PHOTO_MIME_TYPES.includes(file.type));
 }
 
-async function uploadPrivatePhoto({ file, idKado, templateName }) {
+async function uploadPrivatePhoto({ file, idKado, templateName, uploadSession }) {
   if (!isAllowedPhoto(file)) {
     throw new Error("Format foto tidak didukung. Gunakan JPG, PNG, atau WebP.");
   }
@@ -45,7 +45,8 @@ async function uploadPrivatePhoto({ file, idKado, templateName }) {
         id_kado: idKado,
         template: templateName,
         mime_type: file.type,
-        file_size: file.size
+        file_size: file.size,
+        upload_session: uploadSession
       }
     }
   );
@@ -487,6 +488,7 @@ if(form) {
       const idKado = document.getElementById('orderId')?.value.trim().toLowerCase();
       const namaPengirim = document.getElementById('namaPengirim')?.value.trim();
       const namaPenerima = document.getElementById('namaPenerima')?.value.trim();
+      const uploadSession = crypto.randomUUID();
       
       // Data Spesifik Template Lain
       const tanggalJadian = document.getElementById('orderTanggal')?.value || null;
@@ -600,7 +602,8 @@ if(form) {
             linkFotos[i] = await uploadPrivatePhoto({
               file: fileSiapUpload,
               idKado,
-              templateName
+              templateName,
+              uploadSession
             });
 
           } catch (compErr) {
@@ -611,40 +614,58 @@ if(form) {
         }
       }
 
-      // Simpan Semua Data ke Supabase (Otomatis menyesuaikan kolom, jika tidak diisi akan Null)
-      const { error } = await supabaseClient.from('pesanan').insert([{
-        id_kado: idKado,
-        template: templateName,
-        nama_pengirim: namaPengirim,
-        nama_penerima: namaPenerima,
-        tanggal_jadian: tanggalJadian,
-        username: username, 
-        password: password,
-        teks_hero: teksHero,
-        teks_surat: teksSurat,
-        alasan_sayang: alasanSayang,
-        caption_1: caption1,
-        caption_2: caption2,
-        caption_3: caption3,
-        caption_4: caption4,
-        kupon_judul: kuponJudul,
-        kupon_deskripsi: kuponDeskripsi,
-        pesan_penutup: pesanPenutup,
-        latitude: latBumi,
-        longitude: lonBumi,
-        link_musik: linkMusikFinal,
-        link_foto_1: linkFotos[0],
-        link_foto_2: linkFotos[1],
-        link_foto_3: linkFotos[2],
-        link_foto_4: linkFotos[3],
-        link_foto_5: linkFotos[4],
-        link_foto_6: linkFotos[5],
-        status: 'pending' // Ganti menjadi 'aktif' jika mau langsung terputar tanpa campur tangan admin
-      }]);
+      // Pembuatan order sekarang hanya lewat backend terkontrol.
+      // Browser tidak menentukan status dan tidak bisa INSERT langsung ke tabel pesanan.
+      btnSubmit.innerHTML = 'Memvalidasi & Menyimpan Order... 🔒';
 
-      if (error) {
-        if(error.code === '23505') throw new Error("URL Kado ini sudah dipakai orang lain.");
-        throw error;
+      const { data: orderResult, error: orderError } = await supabaseClient.functions.invoke(
+        'create-kado-order',
+        {
+          body: {
+            upload_session: uploadSession,
+            id_kado: idKado,
+            template: templateName,
+            nama_pengirim: namaPengirim,
+            nama_penerima: namaPenerima,
+            tanggal_jadian: tanggalJadian,
+            username,
+            password,
+            teks_hero: teksHero,
+            teks_surat: teksSurat,
+            alasan_sayang: alasanSayang,
+            caption_1: caption1,
+            caption_2: caption2,
+            caption_3: caption3,
+            caption_4: caption4,
+            kupon_judul: kuponJudul,
+            kupon_deskripsi: kuponDeskripsi,
+            pesan_penutup: pesanPenutup,
+            latitude: latBumi,
+            longitude: lonBumi,
+            link_musik: linkMusikFinal,
+            photos: linkFotos.filter(Boolean)
+          }
+        }
+      );
+
+      if (orderError) {
+        let detail = "Order belum bisa disimpan.";
+
+        try {
+          const context = orderError.context;
+          if (context && typeof context.clone === 'function') {
+            const payload = await context.clone().json();
+            if (payload?.error) detail = String(payload.error);
+          }
+        } catch (_) {
+          // Gunakan pesan aman bila response error tidak bisa dibaca.
+        }
+
+        throw new Error(detail);
+      }
+
+      if (!orderResult?.success) {
+        throw new Error(orderResult?.error || "Order belum bisa disimpan.");
       }
 
 // ===================================================
