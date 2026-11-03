@@ -426,6 +426,12 @@ async function init() {
       throw new Error("Template kado tidak cocok.");
     }
 
+    await window.KadoDigital.hydratePrivatePhotos(
+      supabaseClient,
+      kado,
+      semesterAccessToken
+    );
+
     heroText = cleanText(kado.teks_hero, "🎉 Selamat Sayang ❤️");
     loveLetter = cleanText(
       kado.teks_surat,
