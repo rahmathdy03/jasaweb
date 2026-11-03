@@ -107,6 +107,7 @@ async function fetchDataPesanan() {
       return;
     }
 
+    await window.KadoDigital.hydratePrivatePhotos(supabaseClient, data);
     dataKado = data;
     renderStory(data);
     setupAmbientDecorations();
