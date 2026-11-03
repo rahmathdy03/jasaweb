@@ -14,9 +14,38 @@
     return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 
+  async function hydratePrivatePhotos(client, record, accessToken = '') {
+    if (!client || !record || !record.id_kado) return record;
+
+    const body = {
+      id_kado: String(record.id_kado).trim().toLowerCase()
+    };
+
+    if (accessToken) {
+      body.access_token = String(accessToken).trim();
+    }
+
+    const { data, error } = await client.functions.invoke('get-kado-media', { body });
+
+    if (error) {
+      throw new Error('Foto privat belum bisa disiapkan.');
+    }
+
+    if (data?.error) {
+      throw new Error(String(data.error));
+    }
+
+    if (data?.photos && typeof data.photos === 'object') {
+      Object.assign(record, data.photos);
+    }
+
+    return record;
+  }
+
   window.KadoDigital = Object.freeze({
     supabaseUrl: SUPABASE_URL,
     supabaseAnonKey: SUPABASE_ANON_KEY,
-    createSupabaseClient
+    createSupabaseClient,
+    hydratePrivatePhotos
   });
 })();
