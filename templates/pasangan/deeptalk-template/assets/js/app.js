@@ -150,6 +150,7 @@ async function initKado() {
       return false;
     }
 
+    await window.KadoDigital.hydratePrivatePhotos(supabaseClient, data);
     dataKado = data;
     terapkanDataKeTemplate();
     return true;
