@@ -61,9 +61,11 @@ async function fetchDataPesanan() {
     }
 
     try {
-        const { data, error } = await supabaseClient
-            .rpc('get_kado_by_id', { p_id_kado: idKado })
-            .single();
+        const { data: response, error } = await supabaseClient.functions.invoke(
+            'get-public-kado',
+            { body: { id_kado: idKado } }
+        );
+        const data = response?.kado;
 
         if (error || !data) {
             throw error || new Error('Data kado tidak ditemukan.');
