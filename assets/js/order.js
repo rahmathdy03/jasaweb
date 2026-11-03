@@ -98,7 +98,7 @@ const templateBlueprints = {
         </div>
         <div class="input-group" style="flex:1;">
           <label>Password Login <span>*</span></label>
-          <input type="password" id="orderPass" placeholder="Minimal 3 karakter" minlength="3" maxlength="72" autocomplete="new-password" required>
+          <input type="password" id="orderPass" placeholder="Minimal 8 karakter" minlength="8" maxlength="72" autocomplete="new-password" required>
         </div>
       </div>
       <div class="input-group">
