@@ -407,12 +407,16 @@ window.addEventListener("resize", resizeCanvas);
 
 async function init() {
   try {
-    const { data: kado, error } = await supabaseClient
-      .rpc("get_semester_kado", {
-        p_id_kado: surpriseOrderId,
-        p_access_token: semesterAccessToken
-      })
-      .single();
+    const { data: response, error } = await supabaseClient.functions.invoke(
+      "get-semester-kado-data",
+      {
+        body: {
+          id_kado: surpriseOrderId,
+          access_token: semesterAccessToken
+        }
+      }
+    );
+    const kado = response?.kado;
 
     if (error || !kado) {
       sessionStorage.removeItem("semesterCelebrationAccessToken");
