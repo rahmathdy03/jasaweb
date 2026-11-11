@@ -214,6 +214,12 @@
             padding-top: 16px;
             border-top: 1px solid #f0f0f0;
         }
+        .detail-actions a {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         .btn-secondary {
             background: #f1f2f6;
             color: var(--text-dark);
@@ -471,9 +477,7 @@
             <div id="orderDetailBody" class="detail-grid"></div>
             <div class="detail-actions">
                 <button type="button" class="btn-secondary" id="closeOrderDetailFooter">Tutup</button>
-                <a id="detailWebsiteLink" href="#" target="_blank" rel="noopener noreferrer">
-                    <button type="button" class="btn-primary">Buka Website ↗</button>
-                </a>
+                <a id="detailWebsiteLink" class="btn-primary" href="#" target="_blank" rel="noopener noreferrer">Buka Website ↗</a>
             </div>
         </div>
     </div>
