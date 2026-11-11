@@ -105,10 +105,15 @@
         /* Badges & Buttons */
         .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-checking { background: #dbeafe; color: #1d4ed8; }
         .badge-active { background: #d4edda; color: #155724; }
+        .badge-rejected { background: #ffe4e6; color: #be123c; }
         
         .btn-sm { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
         .btn-acc { background: var(--success); color: white; }
+        .btn-check { background: #3b82f6; color: white; }
+        .btn-reject { background: #fb7185; color: white; }
+        .btn-pause { background: #64748b; color: white; }
         .btn-edit { background: var(--warning); color: #333; }
         .btn-del { background: var(--danger); color: white; }
         .btn-primary { background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
@@ -174,6 +179,17 @@
         .order-actions a { text-decoration: none; }
         .order-date { white-space: nowrap; color: var(--text-gray); font-size: .85rem; }
         .badge-unknown { background: #eceff1; color: #455a64; }
+        .status-guide {
+            margin: -4px 0 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #edf0f2;
+            color: var(--text-gray);
+            font-size: .8rem;
+            line-height: 1.7;
+        }
+        .status-guide strong { color: var(--text-dark); }
 
         .modal-content.modal-lg { max-width: 760px; max-height: 88vh; overflow-y: auto; }
         .detail-grid {
@@ -334,7 +350,7 @@
                         <h3>1,204</h3>
                     </div>
                     <div class="stat-card warning">
-                        <p>Order Pending</p>
+                        <p>Perlu Diproses</p>
                         <h3>12</h3>
                     </div>
                     <div class="stat-card success">
@@ -361,7 +377,7 @@
                 <div class="section-header">
                     <div>
                         <h2>Manajemen Pesanan</h2>
-                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">Cari, periksa detail, lalu aktifkan website kado pelanggan.</p>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">Cek bukti pembayaran dari WhatsApp, lalu ubah status pesanan secara bertahap.</p>
                     </div>
                 </div>
 
@@ -376,12 +392,19 @@
                     <select id="statusFilter" class="order-control" aria-label="Filter status">
                         <option value="all">Semua Status</option>
                         <option value="pending">Pending</option>
+                        <option value="checking">Checking</option>
                         <option value="active">Active</option>
+                        <option value="rejected">Rejected</option>
                     </select>
                     <select id="templateFilter" class="order-control" aria-label="Filter template">
                         <option value="all">Semua Template</option>
                     </select>
                     <button type="button" class="btn-primary" id="refreshOrdersBtn">🔄 Refresh</button>
+                </div>
+
+                <div class="status-guide">
+                    <strong>Alur status:</strong>
+                    Pending = bukti belum diperiksa · Checking = bukti sedang diverifikasi · Active = link kado aktif · Rejected = bukti bermasalah/perlu dikirim ulang.
                 </div>
 
                 <div class="card-table">
