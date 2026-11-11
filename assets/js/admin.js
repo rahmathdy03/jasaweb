@@ -185,20 +185,27 @@ function normalizeStatus(status) {
     return cleanOptionalValue(status).toLowerCase() || 'pending';
 }
 
-function createStatusBadge(status) {
+const ORDER_STATUS_META = Object.freeze({
+    pending: Object.freeze({ label: 'Pending', badgeClass: 'badge-pending' }),
+    checking: Object.freeze({ label: 'Checking', badgeClass: 'badge-checking' }),
+    active: Object.freeze({ label: 'Active', badgeClass: 'badge-active' }),
+    rejected: Object.freeze({ label: 'Rejected', badgeClass: 'badge-rejected' })
+});
+
+function getStatusMeta(status) {
     const normalized = normalizeStatus(status);
+    return ORDER_STATUS_META[normalized] || {
+        label: normalized || 'Unknown',
+        badgeClass: 'badge-unknown'
+    };
+}
+
+function createStatusBadge(status) {
+    const meta = getStatusMeta(status);
     const badge = document.createElement('span');
 
-    if (normalized === 'active') {
-        badge.className = 'badge badge-active';
-        badge.textContent = 'Active';
-    } else if (normalized === 'pending') {
-        badge.className = 'badge badge-pending';
-        badge.textContent = 'Pending';
-    } else {
-        badge.className = 'badge badge-unknown';
-        badge.textContent = normalized || 'Unknown';
-    }
+    badge.className = `badge ${meta.badgeClass}`;
+    badge.textContent = meta.label;
 
     return badge;
 }
@@ -367,7 +374,7 @@ function openOrderDetail(item) {
     appendDetail(body, 'Pengirim', item.nama_pengirim || '-');
     appendDetail(body, 'Penerima', item.nama_penerima || '-');
     appendDetail(body, 'Template', formatTemplateLabel(item.template));
-    appendDetail(body, 'Status', normalizeStatus(item.status));
+    appendDetail(body, 'Status', getStatusMeta(item.status).label);
     appendDetail(body, 'Tanggal Order', formatOrderDate(item.created_at));
     appendDetail(body, 'Tanggal Jadian / Acara', item.tanggal_jadian);
     appendDetail(body, 'Username Template', item.username);
@@ -548,16 +555,7 @@ function renderTabelPesanan(data) {
             )
         );
 
-        if (normalizeStatus(item.status) !== 'active') {
-            actionCell.appendChild(
-                createActionButton(
-                    'btn-acc',
-                    'Aktifkan pesanan',
-                    '✔️ ACC',
-                    event => accPesanan(item, event.currentTarget)
-                )
-            );
-        }
+        appendOrderStatusActions(actionCell, item);
 
         const viewLink = document.createElement('a');
         viewLink.href = buildGiftUrl(item.template, item.id_kado);
@@ -622,11 +620,115 @@ function renderRecentOrders(data) {
     });
 }
 
-async function accPesanan(item, button) {
-    const confirmed = await requestConfirmation({
+function appendOrderStatusActions(actionCell, item) {
+    const status = normalizeStatus(item.status);
+
+    if (status === 'pending') {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-check',
+                'Tandai bukti pembayaran sedang diperiksa',
+                '🔎 Cek Bukti',
+                event => changeOrderStatus(item, 'checking', event.currentTarget)
+            )
+        );
+        return;
+    }
+
+    if (status === 'checking') {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-acc',
+                'Pembayaran valid dan aktifkan website',
+                '✔️ Aktifkan',
+                event => changeOrderStatus(item, 'active', event.currentTarget)
+            )
+        );
+        actionCell.appendChild(
+            createActionButton(
+                'btn-reject',
+                'Tolak bukti pembayaran',
+                '✖️ Tolak',
+                event => changeOrderStatus(item, 'rejected', event.currentTarget)
+            )
+        );
+        return;
+    }
+
+    if (status === 'rejected') {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-check',
+                'Periksa ulang bukti pembayaran baru',
+                '↩️ Periksa Lagi',
+                event => changeOrderStatus(item, 'checking', event.currentTarget)
+            )
+        );
+        return;
+    }
+
+    if (status === 'active') {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-pause',
+                'Nonaktifkan website dan kembalikan ke pending',
+                '⏸️ Nonaktifkan',
+                event => changeOrderStatus(item, 'pending', event.currentTarget)
+            )
+        );
+    }
+}
+
+const STATUS_CHANGE_COPY = Object.freeze({
+    'pending:checking': Object.freeze({
+        title: 'Periksa Bukti Pembayaran?',
+        message: 'Tandai pesanan sebagai Checking karena bukti pembayaran sedang kamu periksa di WhatsApp.',
+        confirmText: 'Mulai Periksa',
+        toast: 'Status diubah menjadi Checking.'
+    }),
+    'checking:active': Object.freeze({
         title: 'Aktifkan Pesanan?',
-        message: `Aktifkan pesanan ${item.id_kado}?\n\nSetelah diaktifkan, website kado pelanggan dapat diakses.`,
-        confirmText: 'Aktifkan Pesanan'
+        message: 'Pastikan pembayaran sudah valid. Setelah diaktifkan, website kado pelanggan dapat diakses.',
+        confirmText: 'Aktifkan Pesanan',
+        toast: 'Pembayaran disetujui dan website berhasil diaktifkan.'
+    }),
+    'checking:rejected': Object.freeze({
+        title: 'Tolak Bukti Pembayaran?',
+        message: 'Gunakan status Rejected jika bukti pembayaran tidak valid, nominal salah, atau pelanggan perlu mengirim bukti ulang.',
+        confirmText: 'Tolak Bukti',
+        toast: 'Bukti pembayaran ditandai Rejected.',
+        danger: true
+    }),
+    'rejected:checking': Object.freeze({
+        title: 'Periksa Bukti Baru?',
+        message: 'Kembalikan pesanan ke Checking setelah pelanggan mengirim bukti pembayaran baru.',
+        confirmText: 'Periksa Lagi',
+        toast: 'Pesanan kembali diperiksa.'
+    }),
+    'active:pending': Object.freeze({
+        title: 'Nonaktifkan Website?',
+        message: 'Website kado akan berhenti dapat diakses sampai pesanan diaktifkan kembali.',
+        confirmText: 'Nonaktifkan',
+        toast: 'Website dinonaktifkan dan status kembali Pending.',
+        danger: true
+    })
+});
+
+async function changeOrderStatus(item, nextStatus, button) {
+    const currentStatus = normalizeStatus(item.status);
+    const transitionKey = `${currentStatus}:${nextStatus}`;
+    const copy = STATUS_CHANGE_COPY[transitionKey];
+
+    if (!copy) {
+        showToast('Perubahan status ini tidak diizinkan dari dashboard.', 'error');
+        return;
+    }
+
+    const confirmed = await requestConfirmation({
+        title: copy.title,
+        message: `${copy.message}\n\nOrder: ${item.id_kado}`,
+        confirmText: copy.confirmText,
+        danger: Boolean(copy.danger)
     });
 
     if (!confirmed) return;
@@ -634,18 +736,25 @@ async function accPesanan(item, button) {
     setButtonBusy(button, true, 'Memproses...');
 
     try {
-        const { error } = await supabaseClient
+        const { data, error } = await supabaseClient
             .from('pesanan')
-            .update({ status: 'active' })
-            .eq('id', item.id);
+            .update({ status: nextStatus })
+            .eq('id', item.id)
+            .eq('status', currentStatus)
+            .select('id,status')
+            .maybeSingle();
 
         if (error) throw error;
 
-        showToast(`Pesanan ${item.id_kado} berhasil diaktifkan.`, 'success');
+        if (!data) {
+            throw new Error('Status pesanan sudah berubah. Refresh data lalu coba lagi.');
+        }
+
+        showToast(`${item.id_kado}: ${copy.toast}`, nextStatus === 'rejected' ? 'warning' : 'success');
         await fetchPesanan();
 
     } catch (err) {
-        showToast(`Gagal mengaktifkan pesanan: ${err.message}`, 'error');
+        showToast(`Gagal mengubah status: ${err.message}`, 'error');
     } finally {
         setButtonBusy(button, false);
     }
