@@ -171,8 +171,18 @@ function appendTableMessage(tbody, message, { isError = false } = {}) {
     tbody.appendChild(row);
 }
 
+function cleanOptionalValue(value) {
+    if (value === null || value === undefined) return '';
+
+    const text = String(value).trim();
+    const lowered = text.toLowerCase();
+
+    if (!text || lowered === 'null' || lowered === 'undefined') return '';
+    return text;
+}
+
 function normalizeStatus(status) {
-    return String(status || 'pending').trim().toLowerCase();
+    return cleanOptionalValue(status).toLowerCase() || 'pending';
 }
 
 function createStatusBadge(status) {
@@ -312,14 +322,15 @@ function countPrivatePhotos(item) {
     let total = 0;
 
     for (let i = 1; i <= 6; i += 1) {
-        if (item[`link_foto_${i}`]) total += 1;
+        if (cleanOptionalValue(item[`link_foto_${i}`])) total += 1;
     }
 
     return total;
 }
 
 function createDetailItem(label, value, { full = false } = {}) {
-    if (value === null || value === undefined || String(value).trim() === '') return null;
+    const cleanedValue = cleanOptionalValue(value);
+    if (!cleanedValue) return null;
 
     const wrapper = document.createElement('div');
     wrapper.className = `detail-item${full ? ' full' : ''}`;
@@ -330,7 +341,7 @@ function createDetailItem(label, value, { full = false } = {}) {
 
     const valueElement = document.createElement('div');
     valueElement.className = 'detail-value';
-    valueElement.textContent = String(value);
+    valueElement.textContent = cleanedValue;
 
     wrapper.append(labelElement, valueElement);
     return wrapper;
@@ -366,19 +377,21 @@ function openOrderDetail(item) {
     appendDetail(body, 'Alasan Sayang', item.alasan_sayang, { full: true });
 
     const captions = [item.caption_1, item.caption_2, item.caption_3, item.caption_4]
-        .filter(value => value && String(value).trim())
+        .map(cleanOptionalValue)
+        .filter(Boolean)
         .map((value, index) => `${index + 1}. ${value}`)
         .join('\n');
 
     appendDetail(body, 'Caption / Jawaban Foto', captions, { full: true });
 
     const coupon = [item.kupon_judul, item.kupon_deskripsi]
-        .filter(value => value && String(value).trim())
+        .map(cleanOptionalValue)
+        .filter(Boolean)
         .join('\n');
 
     appendDetail(body, 'Kupon', coupon, { full: true });
     appendDetail(body, 'Pesan Penutup', item.pesan_penutup, { full: true });
-    appendDetail(body, 'Musik', item.link_musik ? 'Tautan musik tersedia' : 'Tidak ada musik');
+    appendDetail(body, 'Musik', cleanOptionalValue(item.link_musik) ? 'Tautan musik tersedia' : 'Tidak ada musik');
 
     websiteLink.href = buildGiftUrl(item.template, item.id_kado);
 
@@ -550,13 +563,9 @@ function renderTabelPesanan(data) {
         viewLink.href = buildGiftUrl(item.template, item.id_kado);
         viewLink.target = '_blank';
         viewLink.rel = 'noopener noreferrer';
-
-        const viewButton = document.createElement('button');
-        viewButton.type = 'button';
-        viewButton.className = 'btn-sm btn-primary';
-        viewButton.title = 'Buka website klien';
-        viewButton.textContent = '↗ Website';
-        viewLink.appendChild(viewButton);
+        viewLink.className = 'btn-sm btn-primary';
+        viewLink.title = 'Buka website klien';
+        viewLink.textContent = '↗ Website';
 
         actionCell.appendChild(viewLink);
         actionCell.appendChild(
