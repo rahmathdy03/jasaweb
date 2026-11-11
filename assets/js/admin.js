@@ -104,20 +104,62 @@ function toggleModal(modalId) {
 
 
 // =========================================================================
-// 4. FITUR MANAJEMEN PESANAN (Tarik, ACC, Hapus Data)
+// 4. FITUR MANAJEMEN PESANAN
 // =========================================================================
 
+const ORDER_SELECT_COLUMNS = [
+    'id',
+    'created_at',
+    'id_kado',
+    'template',
+    'nama_pengirim',
+    'nama_penerima',
+    'status',
+    'username',
+    'tanggal_jadian',
+    'teks_hero',
+    'teks_surat',
+    'link_musik',
+    'link_foto_1',
+    'link_foto_2',
+    'link_foto_3',
+    'link_foto_4',
+    'link_foto_5',
+    'link_foto_6',
+    'caption_1',
+    'caption_2',
+    'caption_3',
+    'caption_4',
+    'alasan_sayang',
+    'kupon_judul',
+    'kupon_deskripsi',
+    'pesan_penutup'
+].join(',');
+
+const adminOrderState = {
+    orders: [],
+    filters: {
+        search: '',
+        status: 'all',
+        template: 'all'
+    }
+};
+
+let confirmResolver = null;
+
 function clearElement(element) {
-    element.replaceChildren();
+    if (element) element.replaceChildren();
 }
 
 function appendTableMessage(tbody, message, { isError = false } = {}) {
+    if (!tbody) return;
+
     clearElement(tbody);
 
     const row = document.createElement('tr');
     const cell = document.createElement('td');
 
-    cell.colSpan = 5;
+    cell.colSpan = 6;
     cell.textContent = message;
     cell.style.textAlign = 'center';
 
@@ -129,12 +171,24 @@ function appendTableMessage(tbody, message, { isError = false } = {}) {
     tbody.appendChild(row);
 }
 
-function createStatusBadge(status) {
-    const badge = document.createElement('span');
-    const isActive = status === 'active';
+function normalizeStatus(status) {
+    return String(status || 'pending').trim().toLowerCase();
+}
 
-    badge.className = `badge ${isActive ? 'badge-active' : 'badge-pending'}`;
-    badge.textContent = isActive ? 'Active' : 'Pending';
+function createStatusBadge(status) {
+    const normalized = normalizeStatus(status);
+    const badge = document.createElement('span');
+
+    if (normalized === 'active') {
+        badge.className = 'badge badge-active';
+        badge.textContent = 'Active';
+    } else if (normalized === 'pending') {
+        badge.className = 'badge badge-pending';
+        badge.textContent = 'Pending';
+    } else {
+        badge.className = 'badge badge-unknown';
+        badge.textContent = normalized || 'Unknown';
+    }
 
     return badge;
 }
@@ -158,68 +212,336 @@ function buildGiftUrl(template, idKado) {
     return `/templates/pasangan/${safeTemplate}/index.html?id=${safeIdKado}`;
 }
 
+function formatOrderDate(value) {
+    if (!value) return '-';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+
+    return new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
+}
+
+function formatTemplateLabel(slug) {
+    return String(slug || '-')
+        .split('-')
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    window.setTimeout(() => {
+        toast.remove();
+    }, 3800);
+}
+
+function setButtonBusy(button, busy, busyText) {
+    if (!button) return;
+
+    if (busy) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = busyText;
+        button.disabled = true;
+        return;
+    }
+
+    button.textContent = button.dataset.originalText || button.textContent;
+    button.disabled = false;
+    delete button.dataset.originalText;
+}
+
+function requestConfirmation({ title, message, confirmText = 'Lanjutkan', danger = false }) {
+    const modal = document.getElementById('modal-confirm-action');
+    const titleElement = document.getElementById('confirmActionTitle');
+    const messageElement = document.getElementById('confirmActionMessage');
+    const confirmButton = document.getElementById('confirmActionButton');
+
+    if (!modal || !titleElement || !messageElement || !confirmButton) {
+        return Promise.resolve(false);
+    }
+
+    if (confirmResolver) {
+        confirmResolver(false);
+        confirmResolver = null;
+    }
+
+    titleElement.textContent = title;
+    messageElement.textContent = message;
+    confirmButton.textContent = confirmText;
+    confirmButton.className = danger ? 'btn-danger-outline' : 'btn-primary';
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    confirmButton.focus();
+
+    return new Promise(resolve => {
+        confirmResolver = resolve;
+    });
+}
+
+function closeConfirmation(result) {
+    const modal = document.getElementById('modal-confirm-action');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (confirmResolver) {
+        const resolve = confirmResolver;
+        confirmResolver = null;
+        resolve(result);
+    }
+}
+
+function countPrivatePhotos(item) {
+    let total = 0;
+
+    for (let i = 1; i <= 6; i += 1) {
+        if (item[`link_foto_${i}`]) total += 1;
+    }
+
+    return total;
+}
+
+function createDetailItem(label, value, { full = false } = {}) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `detail-item${full ? ' full' : ''}`;
+
+    const labelElement = document.createElement('span');
+    labelElement.className = 'detail-label';
+    labelElement.textContent = label;
+
+    const valueElement = document.createElement('div');
+    valueElement.className = 'detail-value';
+    valueElement.textContent = String(value);
+
+    wrapper.append(labelElement, valueElement);
+    return wrapper;
+}
+
+function appendDetail(container, label, value, options = {}) {
+    const item = createDetailItem(label, value, options);
+    if (item) container.appendChild(item);
+}
+
+function openOrderDetail(item) {
+    const modal = document.getElementById('modal-order-detail');
+    const body = document.getElementById('orderDetailBody');
+    const subtitle = document.getElementById('orderDetailSubtitle');
+    const websiteLink = document.getElementById('detailWebsiteLink');
+
+    if (!modal || !body || !subtitle || !websiteLink) return;
+
+    clearElement(body);
+
+    subtitle.textContent = `ID kado: ${String(item.id_kado || '-')}`;
+
+    appendDetail(body, 'Pengirim', item.nama_pengirim || '-');
+    appendDetail(body, 'Penerima', item.nama_penerima || '-');
+    appendDetail(body, 'Template', formatTemplateLabel(item.template));
+    appendDetail(body, 'Status', normalizeStatus(item.status));
+    appendDetail(body, 'Tanggal Order', formatOrderDate(item.created_at));
+    appendDetail(body, 'Tanggal Jadian / Acara', item.tanggal_jadian);
+    appendDetail(body, 'Username Template', item.username);
+    appendDetail(body, 'Foto Privat', `${countPrivatePhotos(item)} foto tersimpan`);
+    appendDetail(body, 'Kalimat Pembuka', item.teks_hero, { full: true });
+    appendDetail(body, 'Surat / Pesan', item.teks_surat, { full: true });
+    appendDetail(body, 'Alasan Sayang', item.alasan_sayang, { full: true });
+
+    const captions = [item.caption_1, item.caption_2, item.caption_3, item.caption_4]
+        .filter(value => value && String(value).trim())
+        .map((value, index) => `${index + 1}. ${value}`)
+        .join('\n');
+
+    appendDetail(body, 'Caption / Jawaban Foto', captions, { full: true });
+
+    const coupon = [item.kupon_judul, item.kupon_deskripsi]
+        .filter(value => value && String(value).trim())
+        .join('\n');
+
+    appendDetail(body, 'Kupon', coupon, { full: true });
+    appendDetail(body, 'Pesan Penutup', item.pesan_penutup, { full: true });
+    appendDetail(body, 'Musik', item.link_musik ? 'Tautan musik tersedia' : 'Tidak ada musik');
+
+    websiteLink.href = buildGiftUrl(item.template, item.id_kado);
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeOrderDetail() {
+    const modal = document.getElementById('modal-order-detail');
+    if (!modal) return;
+
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+function populateTemplateFilter(data) {
+    const select = document.getElementById('templateFilter');
+    if (!select) return;
+
+    const previousValue = select.value || adminOrderState.filters.template;
+    const templates = [...new Set(
+        data
+            .map(item => String(item.template || '').trim())
+            .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'id'));
+
+    clearElement(select);
+
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'Semua Template';
+    select.appendChild(allOption);
+
+    templates.forEach(template => {
+        const option = document.createElement('option');
+        option.value = template;
+        option.textContent = formatTemplateLabel(template);
+        select.appendChild(option);
+    });
+
+    select.value = templates.includes(previousValue) ? previousValue : 'all';
+    adminOrderState.filters.template = select.value;
+}
+
+function getFilteredOrders() {
+    const search = adminOrderState.filters.search.trim().toLowerCase();
+    const status = adminOrderState.filters.status;
+    const template = adminOrderState.filters.template;
+
+    return adminOrderState.orders.filter(item => {
+        const itemStatus = normalizeStatus(item.status);
+
+        if (status !== 'all' && itemStatus !== status) return false;
+        if (template !== 'all' && String(item.template || '') !== template) return false;
+
+        if (!search) return true;
+
+        const haystack = [
+            item.id_kado,
+            item.nama_pengirim,
+            item.nama_penerima,
+            item.template
+        ]
+            .map(value => String(value || '').toLowerCase())
+            .join(' ');
+
+        return haystack.includes(search);
+    });
+}
+
+function applyOrderFilters() {
+    renderTabelPesanan(getFilteredOrders());
+}
+
 async function fetchPesanan() {
-    const tbody = document.querySelector('#sec-pesanan tbody');
+    const tbody = document.getElementById('ordersTableBody');
+    const refreshButton = document.getElementById('refreshOrdersBtn');
+
     appendTableMessage(tbody, 'Mencari data pesanan... ⏳');
+    setButtonBusy(refreshButton, true, 'Memuat...');
 
     try {
         const { data, error } = await supabaseClient
             .from('pesanan')
-            .select('*')
+            .select(ORDER_SELECT_COLUMNS)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        renderTabelPesanan(data);
-        updateDashboardStats(data);
+        adminOrderState.orders = Array.isArray(data) ? data : [];
+        populateTemplateFilter(adminOrderState.orders);
+        applyOrderFilters();
+        renderRecentOrders(adminOrderState.orders);
+        updateDashboardStats(adminOrderState.orders);
 
     } catch (err) {
         console.error(err);
         appendTableMessage(tbody, `Gagal memuat data: ${err.message}`, { isError: true });
+        showToast('Pesanan gagal dimuat. Coba refresh kembali.', 'error');
+    } finally {
+        setButtonBusy(refreshButton, false);
     }
 }
 
-// B. Mencetak data ke tabel HTML tanpa menyisipkan data user melalui innerHTML.
 function renderTabelPesanan(data) {
-    const tbody = document.querySelector('#sec-pesanan tbody');
-    const recentTable = document.querySelector('#sec-dashboard table');
+    const tbody = document.getElementById('ordersTableBody');
+    const resultCount = document.getElementById('orderResultCount');
+
+    if (!tbody) return;
 
     clearElement(tbody);
-    clearElement(recentTable);
+
+    if (resultCount) {
+        resultCount.textContent = `${data.length} pesanan ditampilkan`;
+    }
 
     if (data.length === 0) {
-        appendTableMessage(tbody, 'Belum ada pesanan masuk.');
+        appendTableMessage(tbody, 'Tidak ada pesanan yang cocok dengan filter.');
         return;
     }
 
-    data.forEach((item, index) => {
-        // --- 1. Tabel utama ---
+    data.forEach(item => {
         const row = document.createElement('tr');
 
         const idCell = document.createElement('td');
         const idStrong = document.createElement('b');
-        idStrong.textContent = String(item.id_kado ?? '');
+        idStrong.textContent = String(item.id_kado || '-');
         idCell.appendChild(idStrong);
 
         const clientCell = document.createElement('td');
-        clientCell.textContent = `${String(item.nama_pengirim ?? '')} & ${String(item.nama_penerima ?? '')}`;
+        const sender = String(item.nama_pengirim || '-');
+        const receiver = String(item.nama_penerima || '-');
+        clientCell.textContent = `${sender} → ${receiver}`;
 
         const templateCell = document.createElement('td');
-        templateCell.textContent = String(item.template ?? '');
-        templateCell.style.textTransform = 'capitalize';
+        templateCell.textContent = formatTemplateLabel(item.template);
 
         const statusCell = document.createElement('td');
         statusCell.appendChild(createStatusBadge(item.status));
 
-        const actionCell = document.createElement('td');
+        const dateCell = document.createElement('td');
+        dateCell.className = 'order-date';
+        dateCell.textContent = formatOrderDate(item.created_at);
 
-        if (item.status !== 'active') {
+        const actionCell = document.createElement('td');
+        actionCell.className = 'order-actions';
+
+        actionCell.appendChild(
+            createActionButton(
+                'btn-edit',
+                'Lihat detail pesanan',
+                '👁️ Detail',
+                () => openOrderDetail(item)
+            )
+        );
+
+        if (normalizeStatus(item.status) !== 'active') {
             actionCell.appendChild(
                 createActionButton(
                     'btn-acc',
-                    'Aktifkan',
+                    'Aktifkan pesanan',
                     '✔️ ACC',
-                    () => accPesanan(item.id)
+                    event => accPesanan(item, event.currentTarget)
                 )
             );
         }
@@ -231,90 +553,204 @@ function renderTabelPesanan(data) {
 
         const viewButton = document.createElement('button');
         viewButton.type = 'button';
-        viewButton.className = 'btn-sm btn-edit';
-        viewButton.title = 'Lihat Website Klien';
-        viewButton.textContent = '👁️ View';
+        viewButton.className = 'btn-sm btn-primary';
+        viewButton.title = 'Buka website klien';
+        viewButton.textContent = '↗ Website';
         viewLink.appendChild(viewButton);
 
         actionCell.appendChild(viewLink);
         actionCell.appendChild(
             createActionButton(
                 'btn-del',
-                'Hapus Permanen',
+                'Hapus permanen',
                 '🗑️',
-                () => hapusPesanan(item.id)
+                event => hapusPesanan(item, event.currentTarget)
             )
         );
 
-        row.append(idCell, clientCell, templateCell, statusCell, actionCell);
+        row.append(idCell, clientCell, templateCell, statusCell, dateCell, actionCell);
         tbody.appendChild(row);
-
-        // --- 2. Aktivitas terbaru ---
-        if (index < 5) {
-            const recentRow = document.createElement('tr');
-
-            const recentId = document.createElement('td');
-            const recentIdStrong = document.createElement('b');
-            recentIdStrong.textContent = String(item.id_kado ?? '');
-            recentId.appendChild(recentIdStrong);
-
-            const recentClient = document.createElement('td');
-            recentClient.textContent = `${String(item.nama_pengirim ?? '')} & ${String(item.nama_penerima ?? '')}`;
-
-            const recentStatus = document.createElement('td');
-            recentStatus.appendChild(createStatusBadge(item.status));
-
-            recentRow.append(recentId, recentClient, recentStatus);
-            recentTable.appendChild(recentRow);
-        }
     });
 }
 
-async function accPesanan(id) {
-    if (!confirm(`Yakin ingin ACC pesanan ${id}? Website klien akan bisa diakses.`)) return;
+function renderRecentOrders(data) {
+    const recentTable = document.querySelector('#sec-dashboard table');
+    if (!recentTable) return;
+
+    clearElement(recentTable);
+
+    if (data.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 4;
+        cell.textContent = 'Belum ada pesanan masuk.';
+        cell.style.textAlign = 'center';
+        row.appendChild(cell);
+        recentTable.appendChild(row);
+        return;
+    }
+
+    data.slice(0, 5).forEach(item => {
+        const row = document.createElement('tr');
+
+        const idCell = document.createElement('td');
+        const idStrong = document.createElement('b');
+        idStrong.textContent = String(item.id_kado || '-');
+        idCell.appendChild(idStrong);
+
+        const clientCell = document.createElement('td');
+        clientCell.textContent = `${String(item.nama_pengirim || '-')} → ${String(item.nama_penerima || '-')}`;
+
+        const statusCell = document.createElement('td');
+        statusCell.appendChild(createStatusBadge(item.status));
+
+        const dateCell = document.createElement('td');
+        dateCell.className = 'order-date';
+        dateCell.textContent = formatOrderDate(item.created_at);
+
+        row.append(idCell, clientCell, statusCell, dateCell);
+        recentTable.appendChild(row);
+    });
+}
+
+async function accPesanan(item, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Aktifkan Pesanan?',
+        message: `Aktifkan pesanan ${item.id_kado}?\n\nSetelah diaktifkan, website kado pelanggan dapat diakses.`,
+        confirmText: 'Aktifkan Pesanan'
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Memproses...');
 
     try {
         const { error } = await supabaseClient
             .from('pesanan')
             .update({ status: 'active' })
-            .eq('id', id);
+            .eq('id', item.id);
 
         if (error) throw error;
-        alert('✅ Pesanan berhasil diaktifkan!');
-        fetchPesanan(); 
+
+        showToast(`Pesanan ${item.id_kado} berhasil diaktifkan.`, 'success');
+        await fetchPesanan();
 
     } catch (err) {
-        alert('Gagal mengaktifkan pesanan: ' + err.message);
+        showToast(`Gagal mengaktifkan pesanan: ${err.message}`, 'error');
+    } finally {
+        setButtonBusy(button, false);
     }
 }
 
-async function hapusPesanan(id) {
-    if (!confirm(`TINDAKAN PERMANEN!\nYakin ingin menghapus seluruh data kado milik ${id}?`)) return;
+async function hapusPesanan(item, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Hapus Pesanan Permanen?',
+        message: `Pesanan ${item.id_kado} akan dihapus dari database. Tindakan ini tidak bisa dibatalkan.\n\nPengelolaan file Storage akan dibenahi pada tahap File & Media.`,
+        confirmText: 'Hapus Permanen',
+        danger: true
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Menghapus...');
 
     try {
         const { error } = await supabaseClient
             .from('pesanan')
             .delete()
-            .eq('id', id);
+            .eq('id', item.id);
 
         if (error) throw error;
-        alert('🗑️ Data berhasil dihapus permanen!');
-        fetchPesanan(); 
+
+        showToast(`Pesanan ${item.id_kado} berhasil dihapus.`, 'warning');
+        await fetchPesanan();
 
     } catch (err) {
-        alert('Gagal menghapus data: ' + err.message);
+        showToast(`Gagal menghapus pesanan: ${err.message}`, 'error');
+    } finally {
+        setButtonBusy(button, false);
     }
 }
 
 function updateDashboardStats(data) {
     const totalOrder = data.length;
-    const activeOrder = data.filter(d => d.status === 'active').length;
-    const pendingOrder = data.filter(d => d.status !== 'active').length;
+    const activeOrder = data.filter(item => normalizeStatus(item.status) === 'active').length;
+    const pendingOrder = data.filter(item => normalizeStatus(item.status) !== 'active').length;
 
     const statCards = document.querySelectorAll('.stat-card h3');
-    if(statCards.length >= 3) {
-        statCards[0].innerText = totalOrder;
-        statCards[1].innerText = pendingOrder;
-        statCards[2].innerText = activeOrder;
+    if (statCards.length >= 3) {
+        statCards[0].textContent = totalOrder;
+        statCards[1].textContent = pendingOrder;
+        statCards[2].textContent = activeOrder;
     }
 }
+
+
+// =========================================================================
+// 5. EVENT LISTENERS KHUSUS MANAJEMEN PESANAN
+// =========================================================================
+
+const orderSearchInput = document.getElementById('orderSearch');
+const statusFilter = document.getElementById('statusFilter');
+const templateFilter = document.getElementById('templateFilter');
+const refreshOrdersButton = document.getElementById('refreshOrdersBtn');
+const closeOrderDetailButton = document.getElementById('closeOrderDetail');
+const closeOrderDetailFooterButton = document.getElementById('closeOrderDetailFooter');
+const cancelConfirmButton = document.getElementById('cancelConfirmAction');
+const confirmActionButton = document.getElementById('confirmActionButton');
+
+if (orderSearchInput) {
+    orderSearchInput.addEventListener('input', event => {
+        adminOrderState.filters.search = event.target.value || '';
+        applyOrderFilters();
+    });
+}
+
+if (statusFilter) {
+    statusFilter.addEventListener('change', event => {
+        adminOrderState.filters.status = event.target.value || 'all';
+        applyOrderFilters();
+    });
+}
+
+if (templateFilter) {
+    templateFilter.addEventListener('change', event => {
+        adminOrderState.filters.template = event.target.value || 'all';
+        applyOrderFilters();
+    });
+}
+
+if (refreshOrdersButton) {
+    refreshOrdersButton.addEventListener('click', fetchPesanan);
+}
+
+if (closeOrderDetailButton) {
+    closeOrderDetailButton.addEventListener('click', closeOrderDetail);
+}
+
+if (closeOrderDetailFooterButton) {
+    closeOrderDetailFooterButton.addEventListener('click', closeOrderDetail);
+}
+
+if (cancelConfirmButton) {
+    cancelConfirmButton.addEventListener('click', () => closeConfirmation(false));
+}
+
+if (confirmActionButton) {
+    confirmActionButton.addEventListener('click', () => closeConfirmation(true));
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+
+    closeOrderDetail();
+    closeConfirmation(false);
+});
+
+document.getElementById('modal-order-detail')?.addEventListener('click', event => {
+    if (event.target.id === 'modal-order-detail') closeOrderDetail();
+});
+
+document.getElementById('modal-confirm-action')?.addEventListener('click', event => {
+    if (event.target.id === 'modal-confirm-action') closeConfirmation(false);
+});
