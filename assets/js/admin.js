@@ -8,8 +8,30 @@ const supabaseClient = window.KadoDigital.createSupabaseClient();
 // 2. SISTEM OTENTIKASI REAL (Login, Logout, Cek Sesi)
 // =========================================================================
 
+let dashboardRefreshTimer = null;
+
 function isAdminUser(user) {
     return user?.app_metadata?.role === 'admin';
+}
+
+function stopDashboardAutoRefresh() {
+    if (!dashboardRefreshTimer) return;
+
+    window.clearInterval(dashboardRefreshTimer);
+    dashboardRefreshTimer = null;
+}
+
+function startDashboardAutoRefresh() {
+    stopDashboardAutoRefresh();
+
+    dashboardRefreshTimer = window.setInterval(() => {
+        const layout = document.getElementById('adminLayout');
+        const adminVisible = layout && layout.style.display !== 'none';
+
+        if (document.visibilityState === 'visible' && adminVisible) {
+            fetchPesanan();
+        }
+    }, 60 * 1000);
 }
 
 async function checkLoginStatus() {
@@ -19,6 +41,7 @@ async function checkLoginStatus() {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminLayout").style.display = "flex";
         fetchPesanan();
+        startDashboardAutoRefresh();
         return;
     }
 
@@ -65,11 +88,13 @@ async function handleLogin(e) {
     btnLogin.textContent = "Masuk Dashboard";
     btnLogin.disabled = false;
     fetchPesanan();
+    startDashboardAutoRefresh();
 }
 
 async function handleLogout() {
     const { error } = await supabaseClient.auth.signOut();
     if (!error) {
+        stopDashboardAutoRefresh();
         document.getElementById("adminLayout").style.display = "none";
         document.getElementById("loginSection").style.display = "flex"; 
         document.getElementById("adminLoginForm").reset();
