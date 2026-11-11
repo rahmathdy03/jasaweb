@@ -42,6 +42,7 @@ async function checkLoginStatus() {
         document.getElementById("adminLayout").style.display = "flex";
         fetchPesanan();
         fetchTemplates();
+        fetchStorageSnapshot();
         startDashboardAutoRefresh();
         return;
     }
@@ -90,6 +91,7 @@ async function handleLogin(e) {
     btnLogin.disabled = false;
     fetchPesanan();
     fetchTemplates();
+    fetchStorageSnapshot();
     startDashboardAutoRefresh();
 }
 
@@ -202,6 +204,15 @@ const TEMPLATE_SELECT_COLUMNS = [
 const adminTemplateState = {
     templates: [],
     editingSlug: null
+};
+
+const adminStorageState = {
+    files: [],
+    summary: null,
+    filters: {
+        search: '',
+        status: 'all'
+    }
 };
 
 let confirmResolver = null;
@@ -1480,6 +1491,339 @@ async function deleteTemplate(item, button) {
 
 
 // =========================================================================
+// 6. MEDIA & STORAGE MANAGER
+// =========================================================================
+
+function formatBytes(value) {
+    const bytes = Number(value || 0);
+    if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex += 1;
+    }
+
+    const digits = unitIndex === 0 ? 0 : size >= 10 ? 1 : 2;
+    return `${size.toFixed(digits)} ${units[unitIndex]}`;
+}
+
+function appendStorageTableMessage(message, { isError = false } = {}) {
+    const tbody = document.getElementById('storageTableBody');
+    if (!tbody) return;
+
+    clearElement(tbody);
+
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 7;
+    cell.textContent = message;
+    cell.style.textAlign = 'center';
+
+    if (isError) cell.style.color = 'var(--danger)';
+
+    row.appendChild(cell);
+    tbody.appendChild(row);
+}
+
+function storageStatusMeta(file) {
+    const status = String(file?.status || '');
+
+    const map = {
+        used: { label: 'Dipakai', className: 'used' },
+        used_legacy: { label: 'Legacy · Dipakai', className: 'used' },
+        orphan: { label: 'Orphan', className: 'orphan' },
+        legacy_protected: { label: 'Legacy Protected', className: 'legacy' },
+        protected_unknown: { label: 'Protected', className: 'protected' },
+        order_protected: { label: 'Order Protected', className: 'protected' },
+        uploading: { label: 'Upload Aktif', className: 'uploading' },
+        music_protected: { label: 'Musik Protected', className: 'music' }
+    };
+
+    return map[status] || { label: 'Protected', className: 'protected' };
+}
+
+function storageMatchesFilter(file) {
+    const search = adminStorageState.filters.search.trim().toLowerCase();
+    const filter = adminStorageState.filters.status;
+    const meta = storageStatusMeta(file);
+
+    if (filter === 'orphan' && file.status !== 'orphan') return false;
+    if (
+        filter === 'used' &&
+        !['used', 'used_legacy', 'order_protected'].includes(file.status)
+    ) return false;
+    if (
+        filter === 'legacy' &&
+        file.kind !== 'legacy' &&
+        !['protected_unknown', 'order_protected'].includes(file.status)
+    ) return false;
+    if (filter === 'music' && file.kind !== 'music') return false;
+    if (filter === 'uploading' && file.status !== 'uploading') return false;
+
+    if (!search) return true;
+
+    const orderText = Array.isArray(file.orders)
+        ? file.orders
+            .map(order => `${order.id_kado || ''} ${order.status || ''}`)
+            .join(' ')
+        : '';
+
+    const haystack = [
+        file.bucket,
+        file.path,
+        file.name,
+        file.owner_id,
+        file.reason,
+        meta.label,
+        orderText
+    ]
+        .map(value => String(value || '').toLowerCase())
+        .join(' ');
+
+    return haystack.includes(search);
+}
+
+function updateStorageSummary(summary) {
+    const safe = summary || {};
+
+    const values = {
+        storageTotalSize: formatBytes(safe.total_bytes),
+        storagePhotoSize: formatBytes(safe.photo_bytes),
+        storageMusicSize: formatBytes(safe.music_bytes),
+        storageOrphanSize: formatBytes(safe.orphan_bytes),
+        storageTotalFiles: `${Number(safe.total_files || 0)} file`,
+        storagePhotoFiles: `${Number(safe.photo_files || 0)} file`,
+        storageMusicFiles: `${Number(safe.music_files || 0)} file · protected`,
+        storageOrphanFiles: `${Number(safe.orphan_files || 0)} file`
+    };
+
+    Object.entries(values).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    });
+
+    const scanNote = document.getElementById('storageScanNote');
+    if (scanNote) {
+        scanNote.textContent = safe.truncated
+            ? 'Daftar dibatasi demi keamanan; sebagian file belum ditampilkan.'
+            : `${Number(safe.legacy_files || 0)} file legacy dilindungi`;
+    }
+}
+
+function renderStorageFiles() {
+    const tbody = document.getElementById('storageTableBody');
+    const resultCount = document.getElementById('storageResultCount');
+    if (!tbody) return;
+
+    const files = adminStorageState.files
+        .filter(storageMatchesFilter)
+        .sort((a, b) => {
+            const priority = { orphan: 0, uploading: 1, used: 2, used_legacy: 2 };
+            const aPriority = priority[a.status] ?? 3;
+            const bPriority = priority[b.status] ?? 3;
+
+            if (aPriority !== bPriority) return aPriority - bPriority;
+            return String(a.path || '').localeCompare(String(b.path || ''));
+        });
+
+    clearElement(tbody);
+
+    if (resultCount) {
+        resultCount.textContent = `${files.length} dari ${adminStorageState.files.length} file`;
+    }
+
+    if (!files.length) {
+        appendStorageTableMessage('Tidak ada file yang cocok dengan filter.');
+        return;
+    }
+
+    files.forEach(file => {
+        const row = document.createElement('tr');
+
+        const bucketCell = document.createElement('td');
+        bucketCell.textContent = String(file.bucket || '-');
+
+        const pathCell = document.createElement('td');
+        const path = document.createElement('div');
+        path.className = 'storage-path';
+        path.textContent = String(file.path || '-');
+
+        const type = document.createElement('small');
+        type.textContent = [
+            cleanOptionalValue(file.mime_type),
+            file.kind === 'legacy' ? 'legacy root' : cleanOptionalValue(file.owner_id)
+        ]
+            .filter(Boolean)
+            .join(' · ');
+        path.appendChild(type);
+        pathCell.appendChild(path);
+
+        const sizeCell = document.createElement('td');
+        sizeCell.textContent = formatBytes(file.size);
+
+        const statusCell = document.createElement('td');
+        const meta = storageStatusMeta(file);
+        const badge = document.createElement('span');
+        badge.className = `storage-status ${meta.className}`;
+        badge.textContent = meta.label;
+        statusCell.appendChild(badge);
+
+        const infoCell = document.createElement('td');
+        const orders = Array.isArray(file.orders) ? file.orders : [];
+
+        if (orders.length) {
+            const uniqueOrders = [
+                ...new Map(
+                    orders.map(order => [
+                        order.id_kado,
+                        `${order.id_kado} · ${order.status}`
+                    ])
+                ).values()
+            ];
+            infoCell.textContent = uniqueOrders.join(', ');
+        } else if (file.owner_id) {
+            infoCell.textContent = String(file.owner_id);
+        } else {
+            infoCell.textContent = '-';
+        }
+
+        const reason = document.createElement('small');
+        reason.style.display = 'block';
+        reason.style.marginTop = '4px';
+        reason.style.color = 'var(--text-gray)';
+        reason.textContent = String(file.reason || '');
+        infoCell.appendChild(reason);
+
+        const dateCell = document.createElement('td');
+        dateCell.className = 'order-date';
+        dateCell.textContent = file.updated_at
+            ? formatOrderDate(file.updated_at)
+            : file.created_at
+                ? formatOrderDate(file.created_at)
+                : '-';
+
+        const actionCell = document.createElement('td');
+        actionCell.className = 'order-actions';
+
+        if (file.deletable === true && file.status === 'orphan') {
+            actionCell.appendChild(
+                createActionButton(
+                    'btn-del',
+                    'Hapus file orphan yang sudah lolos safety check',
+                    '🗑️ Hapus Orphan',
+                    event => deleteOrphanStorageFile(file, event.currentTarget)
+                )
+            );
+        } else {
+            const protectedLabel = document.createElement('span');
+            protectedLabel.style.color = 'var(--text-gray)';
+            protectedLabel.style.fontSize = '.76rem';
+            protectedLabel.textContent = '🔒 Protected';
+            actionCell.appendChild(protectedLabel);
+        }
+
+        row.append(
+            bucketCell,
+            pathCell,
+            sizeCell,
+            statusCell,
+            infoCell,
+            dateCell,
+            actionCell
+        );
+        tbody.appendChild(row);
+    });
+}
+
+async function invokeStorageManager(action, payload = {}) {
+    const { data, error } = await supabaseClient.functions.invoke(
+        'admin-storage-manager',
+        {
+            body: { action, ...payload }
+        }
+    );
+
+    if (error) {
+        throw new Error(
+            await readFunctionError(error, 'Storage Manager gagal dijalankan.')
+        );
+    }
+
+    if (!data?.success) {
+        throw new Error(data?.error || 'Storage Manager gagal dijalankan.');
+    }
+
+    return data;
+}
+
+async function fetchStorageSnapshot() {
+    const refreshButton = document.getElementById('refreshStorageButton');
+
+    appendStorageTableMessage('Memindai Supabase Storage... ⏳');
+    setButtonBusy(refreshButton, true, 'Memindai...');
+
+    try {
+        const data = await invokeStorageManager('list');
+
+        adminStorageState.files = Array.isArray(data.files) ? data.files : [];
+        adminStorageState.summary = data.summary || null;
+
+        updateStorageSummary(adminStorageState.summary);
+        renderStorageFiles();
+    } catch (error) {
+        console.error(error);
+        appendStorageTableMessage(
+            `Gagal memuat Storage: ${error.message}`,
+            { isError: true }
+        );
+        showToast('Storage Manager gagal dimuat.', 'error');
+    } finally {
+        setButtonBusy(refreshButton, false);
+    }
+}
+
+async function deleteOrphanStorageFile(file, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Hapus File Orphan?',
+        message: `File ${file.path} akan dihapus permanen dari bucket foto_kado.\n\nBackend akan memeriksa ulang order dan grant upload sebelum penghapusan dilakukan.`,
+        confirmText: 'Hapus Orphan',
+        danger: true
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Menghapus...');
+
+    try {
+        await invokeStorageManager('delete_orphan', { path: file.path });
+        showToast(`File orphan ${file.path} berhasil dihapus.`, 'success');
+        await fetchStorageSnapshot();
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
+}
+
+function resetStorageFilters() {
+    adminStorageState.filters.search = '';
+    adminStorageState.filters.status = 'all';
+
+    const search = document.getElementById('storageSearch');
+    const status = document.getElementById('storageStatusFilter');
+
+    if (search) search.value = '';
+    if (status) status.value = 'all';
+
+    renderStorageFiles();
+}
+
+
+// =========================================================================
 // 5. EVENT LISTENERS KHUSUS MANAJEMEN PESANAN
 // =========================================================================
 
@@ -1496,6 +1840,10 @@ const refreshTemplatesButton = document.getElementById('refreshTemplatesButton')
 const templateForm = document.getElementById('templateForm');
 const closeTemplateModalButton = document.getElementById('closeTemplateModal');
 const cancelTemplateButton = document.getElementById('cancelTemplateButton');
+const refreshStorageButton = document.getElementById('refreshStorageButton');
+const storageSearchInput = document.getElementById('storageSearch');
+const storageStatusFilter = document.getElementById('storageStatusFilter');
+const storageClearFilterButton = document.getElementById('storageClearFilterButton');
 
 if (orderSearchInput) {
     orderSearchInput.addEventListener('input', event => {
@@ -1563,6 +1911,28 @@ if (cancelTemplateButton) {
 document.getElementById('modal-template')?.addEventListener('click', event => {
     if (event.target.id === 'modal-template') closeTemplateModal();
 });
+
+if (refreshStorageButton) {
+    refreshStorageButton.addEventListener('click', fetchStorageSnapshot);
+}
+
+if (storageSearchInput) {
+    storageSearchInput.addEventListener('input', event => {
+        adminStorageState.filters.search = event.target.value || '';
+        renderStorageFiles();
+    });
+}
+
+if (storageStatusFilter) {
+    storageStatusFilter.addEventListener('change', event => {
+        adminStorageState.filters.status = event.target.value || 'all';
+        renderStorageFiles();
+    });
+}
+
+if (storageClearFilterButton) {
+    storageClearFilterButton.addEventListener('click', resetStorageFilters);
+}
 
 document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;

@@ -223,10 +223,79 @@
             color: var(--text-gray);
         }
 
-        /* Media Grid */
-        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
-        .media-card { border: 1px solid #eee; border-radius: 10px; padding: 10px; text-align: center; }
-        .media-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 5px; margin-bottom: 10px; }
+        /* Storage Manager */
+        .storage-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .storage-summary-card {
+            background: var(--bg-white);
+            border: 1px solid #edf0f2;
+            border-radius: 14px;
+            padding: 18px;
+        }
+        .storage-summary-card p {
+            margin: 0 0 6px;
+            color: var(--text-gray);
+            font-size: .8rem;
+            font-weight: 600;
+        }
+        .storage-summary-card strong {
+            display: block;
+            color: var(--text-dark);
+            font-size: 1.45rem;
+            line-height: 1.2;
+        }
+        .storage-summary-card small {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-gray);
+            font-size: .72rem;
+        }
+        .storage-toolbar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(180px, .55fr) auto;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .storage-path {
+            max-width: 300px;
+            overflow-wrap: anywhere;
+            font-size: .78rem;
+            color: var(--text-dark);
+        }
+        .storage-path small {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-gray);
+        }
+        .storage-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .storage-status.used { background: #dcfce7; color: #166534; }
+        .storage-status.orphan { background: #fee2e2; color: #b91c1c; }
+        .storage-status.legacy { background: #f1f5f9; color: #475569; }
+        .storage-status.uploading { background: #dbeafe; color: #1d4ed8; }
+        .storage-status.protected { background: #fef3c7; color: #92400e; }
+        .storage-status.music { background: #f3e8ff; color: #7e22ce; }
+        .storage-note {
+            margin: 0 0 18px;
+            padding: 12px 14px;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            background: #fffbeb;
+            color: #92400e;
+            font-size: .82rem;
+            line-height: 1.55;
+        }
 
         /* =========================================================================
            ORDER MANAGEMENT
@@ -393,6 +462,9 @@
             .dashboard-status-strip { grid-template-columns: 1fr; }
             .template-form-grid { grid-template-columns: 1fr; }
             .template-form-grid .full { grid-column: auto; }
+            .storage-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .storage-toolbar { grid-template-columns: 1fr 1fr; }
+            .storage-toolbar .btn-primary { grid-column: 1 / -1; }
             .order-toolbar { grid-template-columns: 1fr 1fr; }
             .order-toolbar .btn-primary { width: 100%; }
             .detail-grid { grid-template-columns: 1fr; }
@@ -577,28 +649,83 @@
                 </div>
             </section>
 
-            <!-- TAB: MEDIA & STORAGE (HAPUS FOTO/MUSIK) -->
+            <!-- TAB: MEDIA & STORAGE -->
             <section id="sec-media" class="admin-section">
                 <div class="section-header">
                     <div>
-                        <h2>Penyimpanan Server (Supabase)</h2>
-                        <p style="color: var(--text-gray); font-size: 0.9rem;">Kelola foto dan musik klien untuk menghemat ruang.</p>
+                        <h2>Media & Storage Manager</h2>
+                        <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 4px;">Pantau file Supabase Storage. Penghapusan hanya tersedia untuk orphan private yang lolos pemeriksaan keamanan.</p>
+                    </div>
+                    <button type="button" class="btn-primary" id="refreshStorageButton">🔄 Refresh Storage</button>
+                </div>
+
+                <div class="storage-summary-grid">
+                    <div class="storage-summary-card">
+                        <p>Total Storage</p>
+                        <strong id="storageTotalSize">—</strong>
+                        <small id="storageTotalFiles">— file</small>
+                    </div>
+                    <div class="storage-summary-card">
+                        <p>Foto Kado</p>
+                        <strong id="storagePhotoSize">—</strong>
+                        <small id="storagePhotoFiles">— file</small>
+                    </div>
+                    <div class="storage-summary-card">
+                        <p>Musik Preset</p>
+                        <strong id="storageMusicSize">—</strong>
+                        <small id="storageMusicFiles">— file · protected</small>
+                    </div>
+                    <div class="storage-summary-card">
+                        <p>Orphan Aman Dihapus</p>
+                        <strong id="storageOrphanSize">—</strong>
+                        <small id="storageOrphanFiles">— file</small>
                     </div>
                 </div>
+
+                <p class="storage-note">
+                    🔒 File legacy/root dan preset musik bersifat protected. File private modern hanya dapat dihapus bila tidak direferensikan order, tidak punya order dengan ID yang sama, dan tidak memiliki grant upload aktif.
+                </p>
+
+                <div class="storage-toolbar" aria-label="Filter Storage">
+                    <input
+                        type="search"
+                        id="storageSearch"
+                        class="order-control"
+                        placeholder="Cari nama file, path, atau ID kado..."
+                        autocomplete="off"
+                    >
+                    <select id="storageStatusFilter" class="order-control" aria-label="Filter status file">
+                        <option value="all">Semua File</option>
+                        <option value="orphan">Orphan</option>
+                        <option value="used">Dipakai</option>
+                        <option value="legacy">Legacy / Protected</option>
+                        <option value="music">Musik Protected</option>
+                        <option value="uploading">Upload Aktif</option>
+                    </select>
+                    <button type="button" class="btn-secondary" id="storageClearFilterButton">Reset Filter</button>
+                </div>
+
                 <div class="card-table">
-                    <div class="media-grid">
-                        <!-- Contoh Media Card -->
-                        <div class="media-card">
-                            <img src="https://via.placeholder.com/100" alt="Foto">
-                            <p style="font-size: 0.7rem; color: var(--text-gray); margin-bottom: 5px;">#KD-992-foto1.jpg</p>
-                            <button class="btn-sm btn-del" style="width: 100%;">Hapus</button>
-                        </div>
-                        <div class="media-card">
-                            <div style="height: 80px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 10px;">🎵</div>
-                            <p style="font-size: 0.7rem; color: var(--text-gray); margin-bottom: 5px;">#KD-991-bgm.mp3</p>
-                            <button class="btn-sm btn-del" style="width: 100%;">Hapus</button>
-                        </div>
+                    <div class="table-meta">
+                        <span id="storageResultCount">0 file</span>
+                        <span id="storageScanNote"></span>
                     </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bucket</th>
+                                <th>File / Path</th>
+                                <th>Ukuran</th>
+                                <th>Status</th>
+                                <th>Order / Keterangan</th>
+                                <th>Diubah</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storageTableBody">
+                            <tr><td colspan="7" style="text-align:center;">Memuat data Storage...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </main>
