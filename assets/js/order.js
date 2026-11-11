@@ -399,70 +399,99 @@ const templateBlueprints = {
 // =========================================================================
 // 3. FUNGSI MENAMPILKAN FORM SESUAI PILIHAN
 // =========================================================================
-function renderFormSesuaiTemplate() {
+async function isTemplatePublished(slug) {
+  if (!slug) return false;
+
+  const { data, error } = await supabaseClient
+    .from('templates')
+    .select('slug')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Gagal memeriksa registry template:', error);
+    return false;
+  }
+
+  return data?.slug === slug;
+}
+
+async function renderFormSesuaiTemplate() {
   const urlParams = new URLSearchParams(window.location.search);
   const templateDipilih = normalizeTemplateSlug(urlParams.get('template'));
   const wadah = document.getElementById("wadahFormDinamis");
 
-  if (templateDipilih && templateBlueprints[templateDipilih]) {
-    wadah.innerHTML = templateBlueprints[templateDipilih];
+  if (!wadah) return;
 
-    const selectMusik = document.getElementById("selectMusik");
-    const wrapperCustom = document.getElementById("wrapperCustomMusik");
-    const btnPreview = document.getElementById("btnPreviewMusik");
-    const audioPreview = document.getElementById("audioPreview");
+  if (!templateDipilih || !templateBlueprints[templateDipilih]) {
+    wadah.innerHTML = `<div class="form-card"><h3 style="color:red; text-align:center;">Silakan pilih template dari Katalog terlebih dahulu!</h3></div>`;
+    return;
+  }
 
-    if (selectMusik) {
-      selectMusik.addEventListener("change", (e) => {
-        if (audioPreview) {
-          audioPreview.pause();
-          if (btnPreview) btnPreview.textContent = "▶️";
+  wadah.innerHTML = `<div class="form-card"><h3 style="text-align:center;">Memeriksa ketersediaan template... ⏳</h3></div>`;
+
+  const published = await isTemplatePublished(templateDipilih);
+
+  if (!published) {
+    wadah.innerHTML = `<div class="form-card"><h3 style="color:red; text-align:center;">Template ini sedang tidak tersedia untuk dipesan.</h3><p style="text-align:center; color:#666; margin-top:8px;">Silakan kembali ke katalog dan pilih template yang sedang Published.</p></div>`;
+    return;
+  }
+
+  wadah.innerHTML = templateBlueprints[templateDipilih];
+
+  const selectMusik = document.getElementById("selectMusik");
+  const wrapperCustom = document.getElementById("wrapperCustomMusik");
+  const btnPreview = document.getElementById("btnPreviewMusik");
+  const audioPreview = document.getElementById("audioPreview");
+
+  if (selectMusik) {
+    selectMusik.addEventListener("change", (e) => {
+      if (audioPreview) {
+        audioPreview.pause();
+        if (btnPreview) btnPreview.textContent = "▶️";
+      }
+      if (e.target.value === "custom") {
+        if(wrapperCustom) wrapperCustom.style.display = "block";
+        if (btnPreview) btnPreview.style.display = "none";
+      } else {
+        if(wrapperCustom) wrapperCustom.style.display = "none";
+        if (btnPreview) btnPreview.style.display = "flex";
+      }
+    });
+  }
+
+  if (btnPreview && audioPreview && selectMusik) {
+    btnPreview.addEventListener("click", () => {
+      if (selectMusik.value === "custom" || selectMusik.value.includes("MASUKKAN_LINK")) {
+        alert("Link lagu belum dimasukkan di kode.");
+        return;
+      }
+
+      if (audioPreview.paused) {
+        if (audioPreview.src !== selectMusik.value) {
+          audioPreview.src = selectMusik.value;
         }
-        if (e.target.value === "custom") {
-          if(wrapperCustom) wrapperCustom.style.display = "block";
-          if (btnPreview) btnPreview.style.display = "none";
-        } else {
-          if(wrapperCustom) wrapperCustom.style.display = "none";
-          if (btnPreview) btnPreview.style.display = "flex";
-        }
-      });
-    }
-
-    if (btnPreview && audioPreview && selectMusik) {
-      btnPreview.addEventListener("click", () => {
-        if (selectMusik.value === "custom" || selectMusik.value.includes("MASUKKAN_LINK")) {
-           alert("Link lagu belum dimasukkan di kode.");
-           return;
-        }
-
-        if (audioPreview.paused) {
-          if (audioPreview.src !== selectMusik.value) {
-            audioPreview.src = selectMusik.value;
-          }
-          btnPreview.textContent = "⏳"; 
-          audioPreview.play().then(() => {
-            btnPreview.textContent = "⏸️"; 
-          }).catch(err => {
-            btnPreview.textContent = "▶️";
-            alert("Lagu gagal diputar.");
-          });
-        } else {
-          audioPreview.pause();
+        btnPreview.textContent = "⏳";
+        audioPreview.play().then(() => {
+          btnPreview.textContent = "⏸️";
+        }).catch(() => {
           btnPreview.textContent = "▶️";
-        }
-      });
-      
-      audioPreview.addEventListener("ended", () => {
-         btnPreview.textContent = "▶️";
-      });
-    }
-  } else {
-    if(wadah) wadah.innerHTML = `<div class="form-card"><h3 style="color:red; text-align:center;">Silakan pilih template dari Katalog terlebih dahulu!</h3></div>`;
+          alert("Lagu gagal diputar.");
+        });
+      } else {
+        audioPreview.pause();
+        btnPreview.textContent = "▶️";
+      }
+    });
+
+    audioPreview.addEventListener("ended", () => {
+      btnPreview.textContent = "▶️";
+    });
   }
 }
 
 // Jalankan saat web dibuka
-renderFormSesuaiTemplate();
+void renderFormSesuaiTemplate();
 
 // =========================================================================
 // 4. PROSES SUBMIT KE SUPABASE

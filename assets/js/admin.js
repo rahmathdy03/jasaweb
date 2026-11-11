@@ -41,6 +41,7 @@ async function checkLoginStatus() {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminLayout").style.display = "flex";
         fetchPesanan();
+        fetchTemplates();
         startDashboardAutoRefresh();
         return;
     }
@@ -88,6 +89,7 @@ async function handleLogin(e) {
     btnLogin.textContent = "Masuk Dashboard";
     btnLogin.disabled = false;
     fetchPesanan();
+    fetchTemplates();
     startDashboardAutoRefresh();
 }
 
@@ -173,6 +175,33 @@ const adminOrderState = {
 const adminDashboardState = {
     templateCount: null,
     templateCountPromise: null
+};
+
+const TEMPLATE_SELECT_COLUMNS = [
+    'slug',
+    'name',
+    'collection',
+    'category_label',
+    'secondary_label',
+    'description',
+    'thumbnail_url',
+    'folder',
+    'preview_id',
+    'demo_hint',
+    'status',
+    'featured',
+    'sort_order',
+    'source_ready',
+    'handler_key',
+    'min_photos',
+    'max_photos',
+    'created_at',
+    'updated_at'
+].join(',');
+
+const adminTemplateState = {
+    templates: [],
+    editingSlug: null
 };
 
 let confirmResolver = null;
@@ -1030,42 +1059,20 @@ async function loadTemplateCount({ force = false } = {}) {
     }
 
     adminDashboardState.templateCountPromise = (async () => {
-        const response = await fetch('/index.html', {
-            cache: 'no-store',
-            headers: { Accept: 'text/html' }
-        });
+        const { count, error } = await supabaseClient
+            .from('templates')
+            .select('slug', { count: 'exact', head: true })
+            .eq('status', 'published');
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (error) throw error;
 
-        const html = await response.text();
-        const documentCopy = new DOMParser().parseFromString(html, 'text/html');
-        const orderLinks = documentCopy.querySelectorAll(
-            '#templateGrid a.btn-order[href^="order.html?template="]'
-        );
-        const templateSlugs = new Set(
-            Array.from(orderLinks)
-                .map(link => {
-                    const href = link.getAttribute('href') || '';
-                    const query = href.includes('?') ? href.split('?')[1] : '';
-                    return new URLSearchParams(query).get('template') || '';
-                })
-                .map(value => value.trim())
-                .filter(Boolean)
-        );
-        const count = templateSlugs.size;
-
-        if (count <= 0) {
-            throw new Error('Katalog template tidak ditemukan.');
-        }
-
-        adminDashboardState.templateCount = count;
-        renderTemplateCount(count);
-        return count;
+        const value = Number(count || 0);
+        adminDashboardState.templateCount = value;
+        renderTemplateCount(value);
+        return value;
     })()
         .catch(error => {
-            console.warn('Gagal menghitung katalog template:', error);
+            console.warn('Gagal menghitung template published:', error);
             renderTemplateCount(null);
             return null;
         })
@@ -1074,6 +1081,401 @@ async function loadTemplateCount({ force = false } = {}) {
         });
 
     return adminDashboardState.templateCountPromise;
+}
+
+
+// =========================================================================
+// 5. TEMPLATE REGISTRY / CRUD
+// =========================================================================
+
+function appendTemplateTableMessage(message, { isError = false } = {}) {
+    const tbody = document.getElementById('templatesTableBody');
+    if (!tbody) return;
+
+    clearElement(tbody);
+
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 7;
+    cell.className = 'template-empty';
+    cell.textContent = message;
+
+    if (isError) cell.style.color = 'var(--danger)';
+
+    row.appendChild(cell);
+    tbody.appendChild(row);
+}
+
+function createTemplateStatusBadge(status) {
+    const normalized = String(status || 'draft').toLowerCase();
+    const badge = document.createElement('span');
+
+    badge.className = 'badge';
+    if (normalized === 'published') {
+        badge.classList.add('badge-active');
+        badge.textContent = 'Published';
+    } else if (normalized === 'unpublished') {
+        badge.classList.add('badge-rejected');
+        badge.textContent = 'Unpublished';
+    } else {
+        badge.classList.add('badge-pending');
+        badge.textContent = 'Draft';
+    }
+
+    return badge;
+}
+
+function templatePreviewUrl(item) {
+    if (!item?.source_ready || !item?.preview_id) return '#';
+
+    const folder = encodeURIComponent(String(item.folder || 'pasangan'));
+    const slug = encodeURIComponent(String(item.slug || ''));
+    const previewId = encodeURIComponent(String(item.preview_id || ''));
+
+    return `/templates/${folder}/${slug}/index.html?id=${previewId}`;
+}
+
+function renderTemplates(data) {
+    const tbody = document.getElementById('templatesTableBody');
+    const count = document.getElementById('templateResultCount');
+    if (!tbody) return;
+
+    clearElement(tbody);
+
+    if (count) count.textContent = `${data.length} template`;
+
+    if (!data.length) {
+        appendTemplateTableMessage('Belum ada template di registry.');
+        return;
+    }
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+
+        const previewCell = document.createElement('td');
+        const image = document.createElement('img');
+        image.className = 'template-thumb';
+        image.src = String(item.thumbnail_url || '');
+        image.alt = `Preview ${item.name || item.slug || 'template'}`;
+        image.loading = 'lazy';
+        previewCell.appendChild(image);
+
+        const nameCell = document.createElement('td');
+        const name = document.createElement('div');
+        name.className = 'template-title';
+        name.textContent = String(item.name || '-');
+        const slug = document.createElement('div');
+        slug.className = 'template-slug';
+        slug.textContent = String(item.slug || '-');
+        nameCell.append(name, slug);
+
+        const categoryCell = document.createElement('td');
+        categoryCell.textContent = [item.category_label, item.secondary_label]
+            .map(cleanOptionalValue)
+            .filter(Boolean)
+            .join(' · ') || '-';
+
+        const statusCell = document.createElement('td');
+        statusCell.appendChild(createTemplateStatusBadge(item.status));
+
+        const sourceCell = document.createElement('td');
+        const source = document.createElement('span');
+        source.className = `template-source${item.source_ready ? '' : ' not-ready'}`;
+        source.textContent = item.source_ready ? '✓ Source ready' : 'Draft metadata';
+        sourceCell.appendChild(source);
+
+        const sortCell = document.createElement('td');
+        sortCell.textContent = String(item.sort_order ?? 100);
+
+        const actionCell = document.createElement('td');
+        actionCell.className = 'template-actions';
+
+        actionCell.appendChild(
+            createActionButton(
+                'btn-edit',
+                'Edit metadata template',
+                '✏️ Edit',
+                () => openTemplateModal(item)
+            )
+        );
+
+        if (item.source_ready && item.preview_id) {
+            const previewLink = document.createElement('a');
+            previewLink.href = templatePreviewUrl(item);
+            previewLink.target = '_blank';
+            previewLink.rel = 'noopener noreferrer';
+            previewLink.className = 'btn-sm btn-primary';
+            previewLink.textContent = '↗ Preview';
+            actionCell.appendChild(previewLink);
+        }
+
+        if (item.source_ready) {
+            const nextStatus = item.status === 'published' ? 'unpublished' : 'published';
+            const label = item.status === 'published' ? '⏸ Unpublish' : '🚀 Publish';
+            const className = item.status === 'published' ? 'btn-pause' : 'btn-acc';
+
+            actionCell.appendChild(
+                createActionButton(
+                    className,
+                    label,
+                    label,
+                    event => quickTemplateStatus(item, nextStatus, event.currentTarget)
+                )
+            );
+        }
+
+        if (!item.source_ready) {
+            actionCell.appendChild(
+                createActionButton(
+                    'btn-del',
+                    'Hapus draft template',
+                    '🗑️',
+                    event => deleteTemplate(item, event.currentTarget)
+                )
+            );
+        }
+
+        row.append(
+            previewCell,
+            nameCell,
+            categoryCell,
+            statusCell,
+            sourceCell,
+            sortCell,
+            actionCell
+        );
+        tbody.appendChild(row);
+    });
+}
+
+async function fetchTemplates() {
+    appendTemplateTableMessage('Memuat template...');
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('templates')
+            .select(TEMPLATE_SELECT_COLUMNS)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        adminTemplateState.templates = Array.isArray(data) ? data : [];
+        renderTemplates(adminTemplateState.templates);
+
+        const publishedCount = adminTemplateState.templates.filter(
+            item => item.status === 'published'
+        ).length;
+
+        adminDashboardState.templateCount = publishedCount;
+        renderTemplateCount(publishedCount);
+    } catch (error) {
+        console.error(error);
+        appendTemplateTableMessage(
+            `Gagal memuat template: ${error.message}`,
+            { isError: true }
+        );
+        showToast('Katalog template gagal dimuat.', 'error');
+    }
+}
+
+function openTemplateModal(item = null) {
+    const modal = document.getElementById('modal-template');
+    const form = document.getElementById('templateForm');
+    if (!modal || !form) return;
+
+    adminTemplateState.editingSlug = item?.slug || null;
+    form.reset();
+
+    const editing = Boolean(item);
+    document.getElementById('templateModalTitle').textContent = editing
+        ? 'Edit Template'
+        : 'Tambah Template';
+    document.getElementById('templateModalSubtitle').textContent = editing
+        ? 'Perubahan metadata dan status publikasi akan mengikuti registry template.'
+        : 'Template baru otomatis disimpan sebagai Draft sampai source code-nya siap.';
+
+    const slugInput = document.getElementById('templateSlug');
+    slugInput.value = item?.slug || '';
+    slugInput.disabled = editing;
+
+    document.getElementById('templateName').value = item?.name || '';
+    document.getElementById('templateCollection').value = item?.collection || 'pasangan';
+    document.getElementById('templateCategory').value = item?.category_label || '';
+    document.getElementById('templateSecondaryLabel').value = item?.secondary_label || '';
+    document.getElementById('templateSortOrder').value = String(item?.sort_order ?? 100);
+    document.getElementById('templateDescription').value = item?.description || '';
+    document.getElementById('templateThumbnail').value = item?.thumbnail_url || '';
+    document.getElementById('templateFolder').value = item?.folder || 'pasangan';
+    document.getElementById('templatePreviewId').value = item?.preview_id || '';
+    document.getElementById('templateDemoHint').value = item?.demo_hint || '';
+    document.getElementById('templateFeatured').checked = Boolean(item?.featured);
+
+    const statusSelect = document.getElementById('templateStatus');
+    const statusHelp = document.getElementById('templateStatusHelp');
+    statusSelect.value = item?.status || 'draft';
+    statusSelect.disabled = !editing;
+    statusHelp.textContent = !editing
+        ? 'Template baru selalu dibuat sebagai Draft.'
+        : item?.source_ready
+            ? 'Source siap: template ini boleh Published atau Unpublished.'
+            : 'Belum source-ready: template harus tetap Draft/Unpublished.';
+
+    const folderInput = document.getElementById('templateFolder');
+    folderInput.disabled = Boolean(item?.source_ready);
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeTemplateModal() {
+    const modal = document.getElementById('modal-template');
+    const form = document.getElementById('templateForm');
+
+    if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (form) form.reset();
+    adminTemplateState.editingSlug = null;
+}
+
+function templateFormPayload() {
+    const editingSlug = adminTemplateState.editingSlug;
+    return {
+        slug: editingSlug || document.getElementById('templateSlug').value.trim().toLowerCase(),
+        name: document.getElementById('templateName').value.trim(),
+        collection: document.getElementById('templateCollection').value.trim().toLowerCase(),
+        category_label: document.getElementById('templateCategory').value.trim(),
+        secondary_label: document.getElementById('templateSecondaryLabel').value.trim(),
+        sort_order: Number(document.getElementById('templateSortOrder').value || 100),
+        description: document.getElementById('templateDescription').value.trim(),
+        thumbnail_url: document.getElementById('templateThumbnail').value.trim(),
+        folder: document.getElementById('templateFolder').value.trim().toLowerCase(),
+        preview_id: document.getElementById('templatePreviewId').value.trim().toLowerCase(),
+        demo_hint: document.getElementById('templateDemoHint').value.trim(),
+        status: document.getElementById('templateStatus').value,
+        featured: document.getElementById('templateFeatured').checked
+    };
+}
+
+function fullTemplateMutationPayload(item, status = item.status) {
+    return {
+        slug: item.slug,
+        name: item.name,
+        collection: item.collection,
+        category_label: item.category_label,
+        secondary_label: item.secondary_label || '',
+        description: item.description,
+        thumbnail_url: item.thumbnail_url,
+        folder: item.folder,
+        preview_id: item.preview_id || '',
+        demo_hint: item.demo_hint || '',
+        status,
+        featured: Boolean(item.featured),
+        sort_order: Number(item.sort_order ?? 100)
+    };
+}
+
+async function invokeTemplateMutation(action, template) {
+    const { data, error } = await supabaseClient.functions.invoke(
+        'admin-template-mutate',
+        { body: { action, template } }
+    );
+
+    if (error) {
+        throw new Error(await readFunctionError(error, 'Perubahan template gagal.'));
+    }
+
+    if (!data?.success) {
+        throw new Error(data?.error || 'Perubahan template gagal.');
+    }
+
+    return data;
+}
+
+async function saveTemplate(event) {
+    event.preventDefault();
+
+    const button = document.getElementById('saveTemplateButton');
+    const action = adminTemplateState.editingSlug ? 'update' : 'create';
+    const payload = templateFormPayload();
+
+    setButtonBusy(button, true, 'Menyimpan...');
+
+    try {
+        await invokeTemplateMutation(action, payload);
+        closeTemplateModal();
+        showToast(
+            action === 'create'
+                ? 'Template baru disimpan sebagai Draft.'
+                : 'Template berhasil diperbarui.',
+            'success'
+        );
+        await fetchTemplates();
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
+}
+
+async function quickTemplateStatus(item, nextStatus, button) {
+    const publishing = nextStatus === 'published';
+    const confirmed = await requestConfirmation({
+        title: publishing ? 'Publish Template?' : 'Unpublish Template?',
+        message: publishing
+            ? `Template ${item.name} akan muncul di katalog dan bisa dipesan.`
+            : `Template ${item.name} akan hilang dari katalog baru. Order lama tetap aman dan link aktif tetap berjalan.`,
+        confirmText: publishing ? 'Publish' : 'Unpublish',
+        danger: !publishing
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, publishing ? 'Publishing...' : 'Menyimpan...');
+
+    try {
+        await invokeTemplateMutation(
+            'update',
+            fullTemplateMutationPayload(item, nextStatus)
+        );
+        showToast(
+            publishing
+                ? `${item.name} sudah Published.`
+                : `${item.name} sudah Unpublished.`,
+            publishing ? 'success' : 'warning'
+        );
+        await fetchTemplates();
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
+}
+
+async function deleteTemplate(item, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Hapus Draft Template?',
+        message: `Template ${item.name} akan dihapus dari registry. Tindakan ini hanya diizinkan untuk draft yang belum source-ready dan belum pernah dipakai order.`,
+        confirmText: 'Hapus Draft',
+        danger: true
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Menghapus...');
+
+    try {
+        await invokeTemplateMutation('delete', { slug: item.slug });
+        showToast(`${item.name} berhasil dihapus dari registry.`, 'warning');
+        await fetchTemplates();
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
 }
 
 
@@ -1089,6 +1491,11 @@ const closeOrderDetailButton = document.getElementById('closeOrderDetail');
 const closeOrderDetailFooterButton = document.getElementById('closeOrderDetailFooter');
 const cancelConfirmButton = document.getElementById('cancelConfirmAction');
 const confirmActionButton = document.getElementById('confirmActionButton');
+const addTemplateButton = document.getElementById('addTemplateButton');
+const refreshTemplatesButton = document.getElementById('refreshTemplatesButton');
+const templateForm = document.getElementById('templateForm');
+const closeTemplateModalButton = document.getElementById('closeTemplateModal');
+const cancelTemplateButton = document.getElementById('cancelTemplateButton');
 
 if (orderSearchInput) {
     orderSearchInput.addEventListener('input', event => {
@@ -1133,10 +1540,35 @@ if (confirmActionButton) {
     confirmActionButton.addEventListener('click', () => closeConfirmation(true));
 }
 
+if (addTemplateButton) {
+    addTemplateButton.addEventListener('click', () => openTemplateModal());
+}
+
+if (refreshTemplatesButton) {
+    refreshTemplatesButton.addEventListener('click', fetchTemplates);
+}
+
+if (templateForm) {
+    templateForm.addEventListener('submit', saveTemplate);
+}
+
+if (closeTemplateModalButton) {
+    closeTemplateModalButton.addEventListener('click', closeTemplateModal);
+}
+
+if (cancelTemplateButton) {
+    cancelTemplateButton.addEventListener('click', closeTemplateModal);
+}
+
+document.getElementById('modal-template')?.addEventListener('click', event => {
+    if (event.target.id === 'modal-template') closeTemplateModal();
+});
+
 document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
 
     closeOrderDetail();
+    closeTemplateModal();
     closeConfirmation(false);
 });
 
