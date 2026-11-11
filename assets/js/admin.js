@@ -401,7 +401,11 @@ function openOrderDetail(item) {
     appendDetail(body, 'Pesan Penutup', item.pesan_penutup, { full: true });
     appendDetail(body, 'Musik', cleanOptionalValue(item.link_musik) ? 'Tautan musik tersedia' : 'Tidak ada musik');
 
-    websiteLink.href = buildGiftUrl(item.template, item.id_kado);
+    const detailStatus = normalizeStatus(item.status);
+    const canOpenWebsite = detailStatus === 'pending' || detailStatus === 'active';
+
+    websiteLink.href = canOpenWebsite ? buildGiftUrl(item.template, item.id_kado) : '#';
+    websiteLink.style.display = canOpenWebsite ? 'inline-flex' : 'none';
 
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
@@ -517,7 +521,7 @@ function renderTabelPesanan(data) {
         resultCount.textContent = `${data.length} pesanan ditampilkan`;
     }
 
-    if (visibleData.length === 0) {
+    if (data.length === 0) {
         appendTableMessage(tbody, 'Tidak ada pesanan yang cocok dengan filter.');
         return;
     }
@@ -559,15 +563,19 @@ function renderTabelPesanan(data) {
 
         appendOrderStatusActions(actionCell, item);
 
-        const viewLink = document.createElement('a');
-        viewLink.href = buildGiftUrl(item.template, item.id_kado);
-        viewLink.target = '_blank';
-        viewLink.rel = 'noopener noreferrer';
-        viewLink.className = 'btn-sm btn-primary';
-        viewLink.title = 'Buka website klien';
-        viewLink.textContent = '↗ Website';
+        const itemStatus = normalizeStatus(item.status);
 
-        actionCell.appendChild(viewLink);
+        if (itemStatus === 'pending' || itemStatus === 'active') {
+            const viewLink = document.createElement('a');
+            viewLink.href = buildGiftUrl(item.template, item.id_kado);
+            viewLink.target = '_blank';
+            viewLink.rel = 'noopener noreferrer';
+            viewLink.className = 'btn-sm btn-primary';
+            viewLink.title = 'Buka website klien';
+            viewLink.textContent = '↗ Website';
+
+            actionCell.appendChild(viewLink);
+        }
         row.append(idCell, clientCell, templateCell, statusCell, dateCell, actionCell);
         tbody.appendChild(row);
     });
@@ -580,7 +588,7 @@ function renderRecentOrders(data) {
 
     clearElement(recentTable);
 
-    if (data.length === 0) {
+    if (visibleData.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
         cell.colSpan = 4;
