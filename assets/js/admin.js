@@ -1041,8 +1041,20 @@ async function loadTemplateCount({ force = false } = {}) {
 
         const html = await response.text();
         const documentCopy = new DOMParser().parseFromString(html, 'text/html');
-        const templateCards = documentCopy.querySelectorAll('#templateGrid [data-card]');
-        const count = templateCards.length;
+        const orderLinks = documentCopy.querySelectorAll(
+            '#templateGrid a.btn-order[href^="order.html?template="]'
+        );
+        const templateSlugs = new Set(
+            Array.from(orderLinks)
+                .map(link => {
+                    const href = link.getAttribute('href') || '';
+                    const query = href.includes('?') ? href.split('?')[1] : '';
+                    return new URLSearchParams(query).get('template') || '';
+                })
+                .map(value => value.trim())
+                .filter(Boolean)
+        );
+        const count = templateSlugs.size;
 
         if (count <= 0) {
             throw new Error('Katalog template tidak ditemukan.');
