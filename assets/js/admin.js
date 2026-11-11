@@ -189,7 +189,8 @@ const ORDER_STATUS_META = Object.freeze({
     pending: Object.freeze({ label: 'Pending', badgeClass: 'badge-pending' }),
     checking: Object.freeze({ label: 'Checking', badgeClass: 'badge-checking' }),
     active: Object.freeze({ label: 'Active', badgeClass: 'badge-active' }),
-    rejected: Object.freeze({ label: 'Rejected', badgeClass: 'badge-rejected' })
+    rejected: Object.freeze({ label: 'Rejected', badgeClass: 'badge-rejected' }),
+    archived: Object.freeze({ label: 'Archived', badgeClass: 'badge-archived' })
 });
 
 function getStatusMeta(status) {
@@ -451,6 +452,7 @@ function getFilteredOrders() {
     return adminOrderState.orders.filter(item => {
         const itemStatus = normalizeStatus(item.status);
 
+        if (status === 'all' && itemStatus === 'archived') return false;
         if (status !== 'all' && itemStatus !== status) return false;
         if (template !== 'all' && String(item.template || '') !== template) return false;
 
@@ -515,7 +517,7 @@ function renderTabelPesanan(data) {
         resultCount.textContent = `${data.length} pesanan ditampilkan`;
     }
 
-    if (data.length === 0) {
+    if (visibleData.length === 0) {
         appendTableMessage(tbody, 'Tidak ada pesanan yang cocok dengan filter.');
         return;
     }
@@ -566,15 +568,6 @@ function renderTabelPesanan(data) {
         viewLink.textContent = '↗ Website';
 
         actionCell.appendChild(viewLink);
-        actionCell.appendChild(
-            createActionButton(
-                'btn-del',
-                'Hapus permanen',
-                '🗑️',
-                event => hapusPesanan(item, event.currentTarget)
-            )
-        );
-
         row.append(idCell, clientCell, templateCell, statusCell, dateCell, actionCell);
         tbody.appendChild(row);
     });
@@ -582,6 +575,7 @@ function renderTabelPesanan(data) {
 
 function renderRecentOrders(data) {
     const recentTable = document.querySelector('#sec-dashboard table');
+    const visibleData = data.filter(item => normalizeStatus(item.status) !== 'archived');
     if (!recentTable) return;
 
     clearElement(recentTable);
@@ -597,7 +591,7 @@ function renderRecentOrders(data) {
         return;
     }
 
-    data.slice(0, 5).forEach(item => {
+    visibleData.slice(0, 5).forEach(item => {
         const row = document.createElement('tr');
 
         const idCell = document.createElement('td');
@@ -632,10 +626,7 @@ function appendOrderStatusActions(actionCell, item) {
                 event => changeOrderStatus(item, 'checking', event.currentTarget)
             )
         );
-        return;
-    }
-
-    if (status === 'checking') {
+    } else if (status === 'checking') {
         actionCell.appendChild(
             createActionButton(
                 'btn-acc',
@@ -652,10 +643,7 @@ function appendOrderStatusActions(actionCell, item) {
                 event => changeOrderStatus(item, 'rejected', event.currentTarget)
             )
         );
-        return;
-    }
-
-    if (status === 'rejected') {
+    } else if (status === 'rejected') {
         actionCell.appendChild(
             createActionButton(
                 'btn-check',
@@ -664,16 +652,42 @@ function appendOrderStatusActions(actionCell, item) {
                 event => changeOrderStatus(item, 'checking', event.currentTarget)
             )
         );
-        return;
-    }
-
-    if (status === 'active') {
+    } else if (status === 'active') {
         actionCell.appendChild(
             createActionButton(
                 'btn-pause',
                 'Nonaktifkan website dan kembalikan ke pending',
                 '⏸️ Nonaktifkan',
                 event => changeOrderStatus(item, 'pending', event.currentTarget)
+            )
+        );
+    }
+
+    if (status === 'archived') {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-restore',
+                'Pulihkan order ke Pending',
+                '♻️ Pulihkan',
+                event => restoreArchivedOrder(item, event.currentTarget)
+            )
+        );
+
+        actionCell.appendChild(
+            createActionButton(
+                'btn-del',
+                'Hapus permanen order dan file privatnya',
+                '🗑️ Permanen',
+                event => deleteArchivedOrder(item, event.currentTarget)
+            )
+        );
+    } else {
+        actionCell.appendChild(
+            createActionButton(
+                'btn-archive',
+                'Pindahkan order ke arsip',
+                '📦 Arsipkan',
+                event => archiveOrder(item, event.currentTarget)
             )
         );
     }
@@ -760,10 +774,101 @@ async function changeOrderStatus(item, nextStatus, button) {
     }
 }
 
-async function hapusPesanan(item, button) {
+async function archiveOrder(item, button) {
+    const currentStatus = normalizeStatus(item.status);
+
+    if (currentStatus === 'archived') return;
+
     const confirmed = await requestConfirmation({
-        title: 'Hapus Pesanan Permanen?',
-        message: `Pesanan ${item.id_kado} akan dihapus dari database. Tindakan ini tidak bisa dibatalkan.\n\nPengelolaan file Storage akan dibenahi pada tahap File & Media.`,
+        title: 'Arsipkan Pesanan?',
+        message: `Pesanan ${item.id_kado} akan dipindahkan ke arsip.\n\nWebsite pelanggan tidak akan bisa diakses selama order berada di arsip.`,
+        confirmText: 'Arsipkan Pesanan',
+        danger: true
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Mengarsipkan...');
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('pesanan')
+            .update({ status: 'archived' })
+            .eq('id', item.id)
+            .eq('status', currentStatus)
+            .select('id,status')
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data) {
+            throw new Error('Status pesanan sudah berubah. Refresh data lalu coba lagi.');
+        }
+
+        showToast(`Pesanan ${item.id_kado} dipindahkan ke arsip.`, 'warning');
+        await fetchPesanan();
+
+    } catch (err) {
+        showToast(`Gagal mengarsipkan pesanan: ${err.message}`, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
+}
+
+async function restoreArchivedOrder(item, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Pulihkan Pesanan?',
+        message: `Pesanan ${item.id_kado} akan dipulihkan ke status Pending agar bisa diperiksa ulang sebelum diaktifkan.`,
+        confirmText: 'Pulihkan ke Pending'
+    });
+
+    if (!confirmed) return;
+
+    setButtonBusy(button, true, 'Memulihkan...');
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('pesanan')
+            .update({ status: 'pending' })
+            .eq('id', item.id)
+            .eq('status', 'archived')
+            .select('id,status')
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data) {
+            throw new Error('Pesanan sudah tidak berada di arsip. Refresh data lalu coba lagi.');
+        }
+
+        showToast(`Pesanan ${item.id_kado} dipulihkan ke Pending.`, 'success');
+        await fetchPesanan();
+
+    } catch (err) {
+        showToast(`Gagal memulihkan pesanan: ${err.message}`, 'error');
+    } finally {
+        setButtonBusy(button, false);
+    }
+}
+
+async function readFunctionError(error, fallback) {
+    try {
+        const context = error?.context;
+        if (context && typeof context.clone === 'function') {
+            const payload = await context.clone().json();
+            if (payload?.error) return String(payload.error);
+        }
+    } catch (_) {
+        // Gunakan fallback bila response function tidak bisa dibaca.
+    }
+
+    return error?.message || fallback;
+}
+
+async function deleteArchivedOrder(item, button) {
+    const confirmed = await requestConfirmation({
+        title: 'Hapus Permanen?',
+        message: `Pesanan ${item.id_kado} akan dihapus permanen dari database.\n\nFile privat modern di folder order juga akan dibersihkan. Tindakan ini tidak bisa dibatalkan.`,
         confirmText: 'Hapus Permanen',
         danger: true
     });
@@ -773,27 +878,50 @@ async function hapusPesanan(item, button) {
     setButtonBusy(button, true, 'Menghapus...');
 
     try {
-        const { error } = await supabaseClient
-            .from('pesanan')
-            .delete()
-            .eq('id', item.id);
+        const { data, error } = await supabaseClient.functions.invoke(
+            'admin-delete-kado',
+            {
+                body: { id: item.id }
+            }
+        );
 
-        if (error) throw error;
+        if (error) {
+            throw new Error(await readFunctionError(error, 'Penghapusan permanen gagal.'));
+        }
 
-        showToast(`Pesanan ${item.id_kado} berhasil dihapus.`, 'warning');
+        if (!data?.success) {
+            throw new Error(data?.error || 'Penghapusan permanen gagal.');
+        }
+
+        const warnings = Array.isArray(data.warnings) ? data.warnings.filter(Boolean) : [];
+
+        if (warnings.length) {
+            showToast(
+                `Pesanan dihapus, tetapi ada catatan cleanup: ${warnings.join(' ')}`,
+                'warning'
+            );
+        } else {
+            const deletedFiles = Number(data.storage_deleted || 0);
+            showToast(
+                `Pesanan ${item.id_kado} dihapus permanen. ${deletedFiles} file privat dibersihkan.`,
+                'success'
+            );
+        }
+
         await fetchPesanan();
 
     } catch (err) {
-        showToast(`Gagal menghapus pesanan: ${err.message}`, 'error');
+        showToast(`Gagal menghapus permanen: ${err.message}`, 'error');
     } finally {
         setButtonBusy(button, false);
     }
 }
 
 function updateDashboardStats(data) {
-    const totalOrder = data.length;
-    const activeOrder = data.filter(item => normalizeStatus(item.status) === 'active').length;
-    const pendingOrder = data.filter(item => normalizeStatus(item.status) !== 'active').length;
+    const nonArchived = data.filter(item => normalizeStatus(item.status) !== 'archived');
+    const totalOrder = nonArchived.length;
+    const activeOrder = nonArchived.filter(item => normalizeStatus(item.status) === 'active').length;
+    const pendingOrder = nonArchived.filter(item => normalizeStatus(item.status) !== 'active').length;
 
     const statCards = document.querySelectorAll('.stat-card h3');
     if (statCards.length >= 3) {
