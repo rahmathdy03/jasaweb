@@ -8,8 +8,30 @@ const supabaseClient = window.KadoDigital.createSupabaseClient();
 // 2. SISTEM OTENTIKASI REAL (Login, Logout, Cek Sesi)
 // =========================================================================
 
+let dashboardRefreshTimer = null;
+
 function isAdminUser(user) {
     return user?.app_metadata?.role === 'admin';
+}
+
+function stopDashboardAutoRefresh() {
+    if (!dashboardRefreshTimer) return;
+
+    window.clearInterval(dashboardRefreshTimer);
+    dashboardRefreshTimer = null;
+}
+
+function startDashboardAutoRefresh() {
+    stopDashboardAutoRefresh();
+
+    dashboardRefreshTimer = window.setInterval(() => {
+        const layout = document.getElementById('adminLayout');
+        const adminVisible = layout && layout.style.display !== 'none';
+
+        if (document.visibilityState === 'visible' && adminVisible) {
+            fetchPesanan();
+        }
+    }, 60 * 1000);
 }
 
 async function checkLoginStatus() {
@@ -19,6 +41,7 @@ async function checkLoginStatus() {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("adminLayout").style.display = "flex";
         fetchPesanan();
+        startDashboardAutoRefresh();
         return;
     }
 
@@ -65,11 +88,13 @@ async function handleLogin(e) {
     btnLogin.textContent = "Masuk Dashboard";
     btnLogin.disabled = false;
     fetchPesanan();
+    startDashboardAutoRefresh();
 }
 
 async function handleLogout() {
     const { error } = await supabaseClient.auth.signOut();
     if (!error) {
+        stopDashboardAutoRefresh();
         document.getElementById("adminLayout").style.display = "none";
         document.getElementById("loginSection").style.display = "flex"; 
         document.getElementById("adminLoginForm").reset();
@@ -143,6 +168,11 @@ const adminOrderState = {
         status: 'all',
         template: 'all'
     }
+};
+
+const adminDashboardState = {
+    templateCount: null,
+    templateCountPromise: null
 };
 
 let confirmResolver = null;
@@ -479,7 +509,7 @@ function applyOrderFilters() {
     renderTabelPesanan(getFilteredOrders());
 }
 
-async function fetchPesanan() {
+async function fetchPesanan({ refreshTemplateCount = false } = {}) {
     const tbody = document.getElementById('ordersTableBody');
     const refreshButton = document.getElementById('refreshOrdersBtn');
 
@@ -499,6 +529,7 @@ async function fetchPesanan() {
         applyOrderFilters();
         renderRecentOrders(adminOrderState.orders);
         updateDashboardStats(adminOrderState.orders);
+        void loadTemplateCount({ force: refreshTemplateCount });
 
     } catch (err) {
         console.error(err);
@@ -925,18 +956,124 @@ async function deleteArchivedOrder(item, button) {
     }
 }
 
+function getJakartaDateKey(value = new Date()) {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(date);
+
+    const values = Object.fromEntries(
+        parts
+            .filter(part => part.type !== 'literal')
+            .map(part => [part.type, part.value])
+    );
+
+    if (!values.year || !values.month || !values.day) return '';
+    return `${values.year}-${values.month}-${values.day}`;
+}
+
+function setDashboardStat(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = String(value);
+}
+
 function updateDashboardStats(data) {
     const nonArchived = data.filter(item => normalizeStatus(item.status) !== 'archived');
-    const totalOrder = nonArchived.length;
-    const activeOrder = nonArchived.filter(item => normalizeStatus(item.status) === 'active').length;
-    const pendingOrder = nonArchived.filter(item => normalizeStatus(item.status) !== 'active').length;
+    const todayKey = getJakartaDateKey();
 
-    const statCards = document.querySelectorAll('.stat-card h3');
-    if (statCards.length >= 3) {
-        statCards[0].textContent = totalOrder;
-        statCards[1].textContent = pendingOrder;
-        statCards[2].textContent = activeOrder;
+    const totalOrder = nonArchived.length;
+    const needsAttention = nonArchived.filter(item => {
+        const status = normalizeStatus(item.status);
+        return status === 'pending' || status === 'checking';
+    }).length;
+    const activeOrder = nonArchived.filter(
+        item => normalizeStatus(item.status) === 'active'
+    ).length;
+    const ordersToday = nonArchived.filter(
+        item => getJakartaDateKey(item.created_at) === todayKey
+    ).length;
+    const rejectedOrder = nonArchived.filter(
+        item => normalizeStatus(item.status) === 'rejected'
+    ).length;
+    const archivedOrder = data.filter(
+        item => normalizeStatus(item.status) === 'archived'
+    ).length;
+
+    setDashboardStat('statTotalOrders', totalOrder);
+    setDashboardStat('statNeedsAttention', needsAttention);
+    setDashboardStat('statActiveOrders', activeOrder);
+    setDashboardStat('statOrdersToday', ordersToday);
+    setDashboardStat('statRejectedOrders', rejectedOrder);
+    setDashboardStat('statArchivedOrders', archivedOrder);
+}
+
+function renderTemplateCount(value) {
+    setDashboardStat(
+        'statTemplateCount',
+        Number.isInteger(value) && value >= 0 ? value : '—'
+    );
+}
+
+async function loadTemplateCount({ force = false } = {}) {
+    if (!force && Number.isInteger(adminDashboardState.templateCount)) {
+        renderTemplateCount(adminDashboardState.templateCount);
+        return adminDashboardState.templateCount;
     }
+
+    if (adminDashboardState.templateCountPromise) {
+        return adminDashboardState.templateCountPromise;
+    }
+
+    adminDashboardState.templateCountPromise = (async () => {
+        const response = await fetch('/index.html', {
+            cache: 'no-store',
+            headers: { Accept: 'text/html' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const html = await response.text();
+        const documentCopy = new DOMParser().parseFromString(html, 'text/html');
+        const orderLinks = documentCopy.querySelectorAll(
+            '#templateGrid a.btn-order[href^="order.html?template="]'
+        );
+        const templateSlugs = new Set(
+            Array.from(orderLinks)
+                .map(link => {
+                    const href = link.getAttribute('href') || '';
+                    const query = href.includes('?') ? href.split('?')[1] : '';
+                    return new URLSearchParams(query).get('template') || '';
+                })
+                .map(value => value.trim())
+                .filter(Boolean)
+        );
+        const count = templateSlugs.size;
+
+        if (count <= 0) {
+            throw new Error('Katalog template tidak ditemukan.');
+        }
+
+        adminDashboardState.templateCount = count;
+        renderTemplateCount(count);
+        return count;
+    })()
+        .catch(error => {
+            console.warn('Gagal menghitung katalog template:', error);
+            renderTemplateCount(null);
+            return null;
+        })
+        .finally(() => {
+            adminDashboardState.templateCountPromise = null;
+        });
+
+    return adminDashboardState.templateCountPromise;
 }
 
 
@@ -975,7 +1112,9 @@ if (templateFilter) {
 }
 
 if (refreshOrdersButton) {
-    refreshOrdersButton.addEventListener('click', fetchPesanan);
+    refreshOrdersButton.addEventListener('click', () => {
+        fetchPesanan({ refreshTemplateCount: true });
+    });
 }
 
 if (closeOrderDetailButton) {

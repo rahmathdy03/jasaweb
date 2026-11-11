@@ -87,6 +87,32 @@
         .stat-card.warning { border-color: var(--warning); }
         .stat-card p { color: var(--text-gray); font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; }
         .stat-card h3 { font-size: 2rem; color: var(--text-dark); }
+        .stat-card.info { border-color: #60a5fa; }
+        .dashboard-status-strip {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: -10px 0 30px;
+        }
+        .dashboard-status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            background: var(--bg-white);
+            border: 1px solid #edf0f2;
+            border-radius: 12px;
+            color: var(--text-gray);
+            font-size: .84rem;
+            font-weight: 600;
+        }
+        .dashboard-status-item strong {
+            min-width: 34px;
+            text-align: center;
+            color: var(--text-dark);
+            font-size: 1.05rem;
+        }
 
         /* =========================================================================
            TABLES & SECTIONS
@@ -300,6 +326,7 @@
         }
 
         @media (max-width: 900px) {
+            .dashboard-status-strip { grid-template-columns: 1fr; }
             .order-toolbar { grid-template-columns: 1fr 1fr; }
             .order-toolbar .btn-primary { width: 100%; }
             .detail-grid { grid-template-columns: 1fr; }
@@ -349,28 +376,43 @@
             <section id="sec-dashboard" class="admin-section active">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <p>Total Order Masuk</p>
-                        <h3>1,204</h3>
+                        <p>Total Pesanan</p>
+                        <h3 id="statTotalOrders">0</h3>
                     </div>
                     <div class="stat-card warning">
                         <p>Perlu Diproses</p>
-                        <h3>12</h3>
+                        <h3 id="statNeedsAttention">0</h3>
                     </div>
                     <div class="stat-card success">
                         <p>Order Aktif</p>
-                        <h3>1,192</h3>
+                        <h3 id="statActiveOrders">0</h3>
+                    </div>
+                    <div class="stat-card info">
+                        <p>Order Hari Ini</p>
+                        <h3 id="statOrdersToday">0</h3>
                     </div>
                     <div class="stat-card">
                         <p>Total Template</p>
-                        <h3>8</h3>
+                        <h3 id="statTemplateCount">—</h3>
                     </div>
                 </div>
+
+                <div class="dashboard-status-strip" aria-label="Status tambahan pesanan">
+                    <div class="dashboard-status-item">
+                        <span>Ditolak / perlu bukti ulang</span>
+                        <strong id="statRejectedOrders">0</strong>
+                    </div>
+                    <div class="dashboard-status-item">
+                        <span>Tersimpan di arsip</span>
+                        <strong id="statArchivedOrders">0</strong>
+                    </div>
+                </div>
+
                 <div class="card-table">
                     <h3>Aktivitas Terbaru</h3>
-                    <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 5px;">5 Pesanan terakhir yang masuk.</p>
+                    <p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 5px;">5 pesanan non-arsip terakhir yang masuk.</p>
                     <table style="margin-top: 15px;">
-                        <tr><td>#KD-992</td><td>Angga & Dinda</td><td>Our Story</td><td>Baru saja</td></tr>
-                        <tr><td>#KD-991</td><td>Budi & Sari</td><td>DeepTalk</td><td>2 jam lalu</td></tr>
+                        <tr><td colspan="4" style="text-align:center;">Memuat aktivitas...</td></tr>
                     </table>
                 </div>
             </section>
